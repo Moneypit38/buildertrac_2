@@ -35,21 +35,23 @@ export default function CreateTaskDialog({ open, onClose, projectId, task }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div><Label>Title *</Label><Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Pour concrete - Level 4" /></div>
           <div><Label>Description</Label><Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Additional details..." rows={2} /></div>
-          <div className="grid grid-cols-2 gap-3">
-            <div><Label>Priority</Label>
-              <ResponsiveSelect
-                value={form.priority}
-                onValueChange={v => setForm(f => ({ ...f, priority: v }))}
-                placeholder="Priority"
-                options={[{ value: "high", label: "High" }, { value: "medium", label: "Medium" }, { value: "low", label: "Low" }]}
-              /></div>
-            <div><Label>Section</Label>
-              <ResponsiveSelect
-                value={form.section}
-                onValueChange={v => setForm(f => ({ ...f, section: v }))}
-                placeholder="Section"
-                options={[{ value: "today", label: "Today" }, { value: "upcoming", label: "Upcoming" }, { value: "later", label: "Later" }]}
-              /></div>
+          <div>
+            <Label>Section</Label>
+            <ResponsiveSelect
+              value={form.section}
+              onValueChange={v => setForm(f => ({ ...f, section: v }))}
+              placeholder="Section"
+              options={[{ value: "today", label: "📋 Today" }, { value: "upcoming", label: "📅 Upcoming" }, { value: "later", label: "⏰ Later" }]}
+            />
+          </div>
+          <div>
+            <Label>Priority</Label>
+            <ResponsiveSelect
+              value={form.priority}
+              onValueChange={v => setForm(f => ({ ...f, priority: v }))}
+              placeholder="Priority"
+              options={[{ value: "high", label: "High" }, { value: "medium", label: "Medium" }, { value: "low", label: "Low" }]}
+            />
           </div>
           <div><Label>Due Date</Label><Input type="date" value={form.due_date} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} /></div>
           <div><Label>Assigned To</Label><Input value={form.assigned_to} onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))} placeholder="Name" /></div>
