@@ -11,8 +11,9 @@ import UploadPhotoDialog from "../components/UploadPhotoDialog";
 import CreateProjectDialog from "../components/CreateProjectDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, MapPin, ClipboardList, FileText, Camera, Pencil, DollarSign, Users } from "lucide-react";
+import { ArrowLeft, Plus, MapPin, ClipboardList, FileText, Camera, Pencil, DollarSign, Users, MessageSquare } from "lucide-react";
 import ProjectMembersTab from "../components/ProjectMembersTab";
+import NotesTab from "../components/NotesTab";
 import SubtaskList from "../components/SubtaskList";
 
 export default function ProjectDetail() {
@@ -84,6 +85,7 @@ export default function ProjectDetail() {
           <TabsTrigger value="docs" className="flex-1 gap-1"><FileText className="w-4 h-4" /> Docs ({docs.length})</TabsTrigger>
           <TabsTrigger value="photos" className="flex-1 gap-1"><Camera className="w-4 h-4" /> Photos ({photos.length})</TabsTrigger>
           {isAdmin && <TabsTrigger value="team" className="flex-1 gap-1"><Users className="w-4 h-4" /> Team</TabsTrigger>}
+          <TabsTrigger value="notes" className="flex-1 gap-1"><MessageSquare className="w-4 h-4" /> Notes</TabsTrigger>
         </TabsList>
 
         {!isClient && (
@@ -134,6 +136,10 @@ export default function ProjectDetail() {
           <ProjectMembersTab projectId={projectId} />
         </TabsContent>
         )}
+
+        <TabsContent value="notes" className="mt-4">
+          <NotesTab projectId={projectId} />
+        </TabsContent>
       </Tabs>
 
       {showTaskDialog && <CreateTaskDialog open={showTaskDialog} onClose={() => setShowTaskDialog(false)} projectId={projectId} task={editTask} />}
