@@ -1,0 +1,23 @@
+{
+  "name": "SitePhoto",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "photo_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "project_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "project_id"
+  ]
+}

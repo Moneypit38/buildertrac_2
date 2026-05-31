@@ -5,8 +5,18 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import ScrollToTop from './components/ScrollToTop';
-// Add page imports here
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { Navigate } from 'react-router-dom';
+import Layout from './components/Layout';
+import Dashboard from './pages/Dashboard';
+import Projects from './pages/Projects';
+import ProjectDetail from './pages/ProjectDetail';
+import Documents from './pages/Documents';
+import Photos from './pages/Photos';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -34,7 +44,19 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      {/* Add your page Route elements here */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/project/:projectId" element={<ProjectDetail />} />
+          <Route path="/documents" element={<Documents />} />
+          <Route path="/photos" element={<Photos />} />
+        </Route>
+      </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
@@ -47,7 +69,7 @@ function App() {
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
-          <ScrollToTop />
+
           <AuthenticatedApp />
         </Router>
         <Toaster />

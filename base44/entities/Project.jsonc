@@ -1,0 +1,40 @@
+{
+  "name": "Project",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "portfolio": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Planning",
+        "In Progress",
+        "On Hold",
+        "Completed"
+      ],
+      "default": "Planning"
+    },
+    "budget_total": {
+      "type": "number",
+      "default": 0
+    },
+    "budget_spent": {
+      "type": "number",
+      "default": 0
+    },
+    "image": {
+      "type": "string",
+      "format": "uri"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

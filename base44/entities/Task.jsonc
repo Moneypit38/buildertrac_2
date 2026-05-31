@@ -1,0 +1,48 @@
+{
+  "name": "Task",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "section": {
+      "type": "string",
+      "enum": [
+        "today",
+        "upcoming",
+        "later"
+      ],
+      "default": "today"
+    },
+    "completed": {
+      "type": "boolean",
+      "default": false
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "assigned_to": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "project_id"
+  ]
+}
