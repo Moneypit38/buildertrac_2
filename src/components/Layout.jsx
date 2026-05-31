@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, FolderKanban, FileText, Camera, Bell, LogOut } from "lucide-react";
+import { LayoutDashboard, FolderKanban, FileText, Camera, Layers, LogOut } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -7,6 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 const navItems = [
   { path: "/", icon: LayoutDashboard, label: "Home" },
+  { path: "/portfolios", icon: Layers, label: "Portfolios" },
   { path: "/projects", icon: FolderKanban, label: "Projects" },
   { path: "/documents", icon: FileText, label: "Docs" },
   { path: "/photos", icon: Camera, label: "Photos" },

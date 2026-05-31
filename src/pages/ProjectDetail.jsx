@@ -11,7 +11,9 @@ import UploadPhotoDialog from "../components/UploadPhotoDialog";
 import CreateProjectDialog from "../components/CreateProjectDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, MapPin, ClipboardList, FileText, Camera, Pencil, DollarSign } from "lucide-react";
+import { ArrowLeft, Plus, MapPin, ClipboardList, FileText, Camera, Pencil, DollarSign, Users } from "lucide-react";
+import ProjectMembersTab from "../components/ProjectMembersTab";
+import SubtaskList from "../components/SubtaskList";
 
 export default function ProjectDetail() {
   const { projectId } = useParams();
@@ -19,6 +21,10 @@ export default function ProjectDetail() {
   const { data: tasks = [] } = useQuery({ queryKey: ["tasks", projectId], queryFn: () => base44.entities.Task.filter({ project_id: projectId }) });
   const { data: docs = [] } = useQuery({ queryKey: ["documents", projectId], queryFn: () => base44.entities.Document.filter({ project_id: projectId }) });
   const { data: photos = [] } = useQuery({ queryKey: ["photos", projectId], queryFn: () => base44.entities.SitePhoto.filter({ project_id: projectId }) });
+  const { data: currentUser } = useQuery({ queryKey: ["me"], queryFn: () => base44.auth.me() });
+  const { data: myMembership = [] } = useQuery({ queryKey: ["membership", projectId], queryFn: () => base44.entities.ProjectMember.filter({ project_id: projectId }), enabled: !!currentUser });
+  const myRole = myMembership.find(m => m.user_email === currentUser?.email)?.role;
+  const isClient = myRole === "client";
 
   const [showTaskDialog, setShowTaskDialog] = useState(false);
   const [editTask, setEditTask] = useState(null);
@@ -27,11 +33,14 @@ export default function ProjectDetail() {
   const [showPhotoDialog, setShowPhotoDialog] = useState(false);
   const [editPhoto, setEditPhoto] = useState(null);
   const [showEditProject, setShowEditProject] = useState(false);
+  const [expandedTasks, setExpandedTasks] = useState({});
+  const toggleExpand = (id) => setExpandedTasks(p => ({ ...p, [id]: !p[id] }));
 
   if (isLoading) return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   if (!project) return <div className="p-4 text-center text-muted-foreground">Project not found</div>;
 
-  const tasksBySection = { today: tasks.filter(t => t.section === "today"), upcoming: tasks.filter(t => t.section === "upcoming"), later: tasks.filter(t => t.section === "later") };
+  const rootTasks = tasks.filter(t => !t.parent_task_id);
+  const tasksBySection = { today: rootTasks.filter(t => t.section === "today"), upcoming: rootTasks.filter(t => t.section === "upcoming"), later: rootTasks.filter(t => t.section === "later") };
   const budgetPct = project.budget_total > 0 ? Math.min(100, ((project.budget_spent || 0) / project.budget_total) * 100) : 0;
 
   return (
@@ -68,11 +77,13 @@ export default function ProjectDetail() {
       {/* Tabs */}
       <Tabs defaultValue="tasks">
         <TabsList className="w-full bg-card border border-border">
-          <TabsTrigger value="tasks" className="flex-1 gap-1"><ClipboardList className="w-4 h-4" /> Tasks ({tasks.length})</TabsTrigger>
+          {!isClient && <TabsTrigger value="tasks" className="flex-1 gap-1"><ClipboardList className="w-4 h-4" /> Tasks ({rootTasks.length})</TabsTrigger>}
           <TabsTrigger value="docs" className="flex-1 gap-1"><FileText className="w-4 h-4" /> Docs ({docs.length})</TabsTrigger>
           <TabsTrigger value="photos" className="flex-1 gap-1"><Camera className="w-4 h-4" /> Photos ({photos.length})</TabsTrigger>
+          {!isClient && <TabsTrigger value="team" className="flex-1 gap-1"><Users className="w-4 h-4" /> Team</TabsTrigger>}
         </TabsList>
 
+        {!isClient && (
         <TabsContent value="tasks" className="space-y-4 mt-4">
           <Button size="sm" onClick={() => { setEditTask(null); setShowTaskDialog(true); }}><Plus className="w-4 h-4 mr-1" /> Add Task</Button>
           {["today", "upcoming", "later"].map(section => (
@@ -83,11 +94,19 @@ export default function ProjectDetail() {
               {tasksBySection[section].length === 0 ? (
                 <p className="text-xs text-muted-foreground pl-2 mb-3">No tasks</p>
               ) : (
-                <div className="space-y-2 mb-4">{tasksBySection[section].map(t => <TaskItem key={t.id} task={t} />)}</div>
+                <div className="space-y-2 mb-4">
+                  {tasksBySection[section].map(t => (
+                    <div key={t.id}>
+                      <TaskItem task={t} onExpand={() => toggleExpand(t.id)} expanded={!!expandedTasks[t.id]} />
+                      {expandedTasks[t.id] && <SubtaskList parentTaskId={t.id} projectId={projectId} />}
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           ))}
         </TabsContent>
+        )}
 
         <TabsContent value="docs" className="space-y-3 mt-4">
           <Button size="sm" onClick={() => { setEditDoc(null); setShowDocDialog(true); }}><Plus className="w-4 h-4 mr-1" /> Upload Document</Button>
@@ -106,6 +125,12 @@ export default function ProjectDetail() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{photos.map(p => <PhotoCard key={p.id} photo={p} />)}</div>
           )}
         </TabsContent>
+
+        {!isClient && (
+        <TabsContent value="team" className="mt-4">
+          <ProjectMembersTab projectId={projectId} />
+        </TabsContent>
+        )}
       </Tabs>
 
       {showTaskDialog && <CreateTaskDialog open={showTaskDialog} onClose={() => setShowTaskDialog(false)} projectId={projectId} task={editTask} />}

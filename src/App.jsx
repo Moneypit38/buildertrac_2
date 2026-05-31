@@ -10,6 +10,7 @@ import { Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import useTaskReminders from './hooks/useTaskReminders';
 import Dashboard from './pages/Dashboard';
+import Portfolios from './pages/Portfolios';
 import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
 import Documents from './pages/Documents';
@@ -54,6 +55,7 @@ const AuthenticatedApp = () => {
         <Route element={<Layout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/projects" element={<Projects />} />
+          <Route path="/portfolios" element={<Portfolios />} />
           <Route path="/project/:projectId" element={<ProjectDetail />} />
           <Route path="/documents" element={<Documents />} />
           <Route path="/photos" element={<Photos />} />

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -16,6 +16,7 @@ export default function CreateProjectDialog({ open, onClose, project }) {
   } : { name: "", address: "", portfolio: "", status: "Planning", budget_total: 0, budget_spent: 0 });
 
   const qc = useQueryClient();
+  const { data: portfolios = [] } = useQuery({ queryKey: ["portfolios"], queryFn: () => base44.entities.Portfolio.list() });
   const mutation = useMutation({
     mutationFn: (data) => isEdit ? base44.entities.Project.update(project.id, data) : base44.entities.Project.create(data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["projects"] }); toast.success(isEdit ? "Project updated" : "Project created!"); onClose(); },
@@ -35,7 +36,15 @@ export default function CreateProjectDialog({ open, onClose, project }) {
           <div><Label>Project Name *</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Downtown Tower" /></div>
           <div><Label>Address</Label><Input value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} placeholder="123 Main St, Los Angeles, CA" /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>Portfolio</Label><Input value={form.portfolio} onChange={e => setForm(f => ({ ...f, portfolio: e.target.value }))} placeholder="West Coast Residential" /></div>
+            <div><Label>Portfolio</Label>
+              <Select value={form.portfolio || "__none__"} onValueChange={v => setForm(f => ({ ...f, portfolio: v === "__none__" ? "" : v }))}>
+                <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">None</SelectItem>
+                  {portfolios.map(p => <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
             <div><Label>Status</Label>
               <Select value={form.status} onValueChange={v => setForm(f => ({ ...f, status: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>

@@ -54,6 +54,9 @@
     "reminder_sent": {
       "type": "boolean",
       "default": false
+    },
+    "parent_task_id": {
+      "type": "string"
     }
   },
   "required": [
