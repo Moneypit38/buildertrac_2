@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Layers, FolderKanban, Trash2, Pencil, UserPlus } from "lucide-react";
+import { Plus, Layers, FolderKanban, Trash2, Pencil, UserPlus, Users } from "lucide-react";
 import PortfolioIcon, { PORTFOLIO_ICONS, PORTFOLIO_COLORS, getColor, getIconComponent } from "../components/PortfolioIcon";
 import { useClientAccess } from "../hooks/useClientAccess";
 import { Link } from "react-router-dom";
@@ -169,23 +169,21 @@ export default function Portfolios() {
                     {!isClientOnly && (
                       <div className="flex items-center gap-1 shrink-0">
                         {/* Invite Client */}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="gap-1.5 text-xs h-8"
+                        <button
                           onClick={() => setInvitePortfolio({ name: pf.name, projects: pfProjects })}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
+                          title="Invite Client"
                         >
-                          <UserPlus className="w-3.5 h-3.5" /> Invite Client
-                        </Button>
+                          <UserPlus className="w-3.5 h-3.5" />
+                        </button>
                         {/* Manage Team */}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="gap-1.5 text-xs h-8"
+                        <button
                           onClick={() => setTeamPortfolio(pf)}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
+                          title="Manage Team"
                         >
-                          <UserPlus className="w-3.5 h-3.5" /> Manage Team
-                        </Button>
+                          <Users className="w-3.5 h-3.5" />
+                        </button>
 
                         {/* Edit */}
                         <button
