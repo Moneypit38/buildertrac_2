@@ -44,6 +44,11 @@ export default function ProjectMembersTab({ projectId }) {
     },
   });
 
+  const updateRole = useMutation({
+    mutationFn: ({ id, role }) => base44.entities.ProjectMember.update(id, { role }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["members", projectId] }); toast.success("Role updated"); },
+  });
+
   const removeMember = useMutation({
     mutationFn: (id) => base44.entities.ProjectMember.delete(id),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["members", projectId] }); toast.success("Member removed"); },
@@ -106,9 +111,16 @@ export default function ProjectMembersTab({ projectId }) {
                 <p className="text-sm font-medium truncate">{m.user_name || m.user_email}</p>
                 {m.user_name && <p className="text-xs text-muted-foreground truncate">{m.user_email}</p>}
               </div>
-              <Badge variant="outline" className={`text-[10px] shrink-0 ${roleStyles[m.role]}`}>
-                {roleLabels[m.role]}
-              </Badge>
+              <Select value={m.role} onValueChange={role => updateRole.mutate({ id: m.id, role })}>
+                <SelectTrigger className={`h-7 text-[11px] w-28 border ${roleStyles[m.role]}`}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="team_member">Team Member</SelectItem>
+                  <SelectItem value="client">Client</SelectItem>
+                </SelectContent>
+              </Select>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>

@@ -1,0 +1,29 @@
+{
+  "name": "PortfolioMember",
+  "type": "object",
+  "properties": {
+    "portfolio_id": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "member",
+        "viewer"
+      ],
+      "default": "member"
+    }
+  },
+  "required": [
+    "portfolio_id",
+    "user_email",
+    "role"
+  ]
+}

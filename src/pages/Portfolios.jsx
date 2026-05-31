@@ -16,6 +16,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
 import InviteToPortfolioDialog from "../components/InviteToPortfolioDialog";
+import PortfolioMembersDialog from "../components/PortfolioMembersDialog";
 
 // ── Create / Edit Portfolio Dialog ──────────────────────────────────────────
 function PortfolioFormDialog({ open, onClose, portfolio }) {
@@ -92,7 +93,8 @@ export default function Portfolios() {
 
   const [showCreate, setShowCreate] = useState(false);
   const [editPortfolio, setEditPortfolio] = useState(null);
-  const [invitePortfolio, setInvitePortfolio] = useState(null); // { name, projects }
+  const [invitePortfolio, setInvitePortfolio] = useState(null);
+  const [teamPortfolio, setTeamPortfolio] = useState(null);
 
   const visibleProjects = allowedProjectIds
     ? projects.filter(p => allowedProjectIds.includes(p.id))
@@ -166,14 +168,14 @@ export default function Portfolios() {
                     {/* Action buttons */}
                     {!isClientOnly && (
                       <div className="flex items-center gap-1 shrink-0">
-                        {/* Invite Client */}
+                        {/* Manage Team */}
                         <Button
                           size="sm"
                           variant="outline"
                           className="gap-1.5 text-xs h-8"
-                          onClick={() => setInvitePortfolio({ name: pf.name, projects: pfProjects })}
+                          onClick={() => setTeamPortfolio(pf)}
                         >
-                          <UserPlus className="w-3.5 h-3.5" /> Invite Client
+                          <UserPlus className="w-3.5 h-3.5" /> Manage Team
                         </Button>
 
                         {/* Edit */}
@@ -254,6 +256,13 @@ export default function Portfolios() {
       <PortfolioFormDialog open={showCreate} onClose={() => setShowCreate(false)} />
       {editPortfolio && (
         <PortfolioFormDialog open={!!editPortfolio} onClose={() => setEditPortfolio(null)} portfolio={editPortfolio} />
+      )}
+      {teamPortfolio && (
+        <PortfolioMembersDialog
+          open={!!teamPortfolio}
+          onClose={() => setTeamPortfolio(null)}
+          portfolio={teamPortfolio}
+        />
       )}
       {invitePortfolio && (
         <InviteToPortfolioDialog
