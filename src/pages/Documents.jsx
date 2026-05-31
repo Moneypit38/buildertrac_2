@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useClientAccess } from "../hooks/useClientAccess";
 import { base44 } from "@/api/base44Client";
 import DocumentCard from "../components/DocumentCard";
 import { FileText } from "lucide-react";
@@ -9,10 +10,12 @@ const categories = ["All", "Plans", "RFI", "Change Order", "Report", "Contract"]
 export default function Documents() {
   const { data: docs = [], isLoading } = useQuery({ queryKey: ["documents"], queryFn: () => base44.entities.Document.list() });
   const { data: projects = [] } = useQuery({ queryKey: ["projects"], queryFn: () => base44.entities.Project.list() });
+  const { allowedProjectIds } = useClientAccess();
   const [filter, setFilter] = useState("All");
 
   const projectMap = Object.fromEntries(projects.map(p => [p.id, p.name]));
-  const enriched = docs.map(d => ({ ...d, _projectName: projectMap[d.project_id] || "—" }));
+  const visibleDocs = allowedProjectIds ? docs.filter(d => allowedProjectIds.includes(d.project_id)) : docs;
+  const enriched = visibleDocs.map(d => ({ ...d, _projectName: projectMap[d.project_id] || "—" }));
   const filtered = filter === "All" ? enriched : enriched.filter(d => d.category === filter);
 
   if (isLoading) return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;

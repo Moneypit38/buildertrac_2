@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Layers, FolderKanban, Trash2 } from "lucide-react";
+import { useClientAccess } from "../hooks/useClientAccess";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
@@ -38,7 +39,12 @@ function CreatePortfolioDialog({ open, onClose }) {
 export default function Portfolios() {
   const { data: portfolios = [], isLoading } = useQuery({ queryKey: ["portfolios"], queryFn: () => base44.entities.Portfolio.list() });
   const { data: projects = [] } = useQuery({ queryKey: ["projects"], queryFn: () => base44.entities.Project.list() });
+  const { isClientOnly, allowedProjectIds } = useClientAccess();
   const [showCreate, setShowCreate] = useState(false);
+
+  const visibleProjects = allowedProjectIds
+    ? projects.filter(p => allowedProjectIds.includes(p.id))
+    : projects;
   const qc = useQueryClient();
 
   const deletePortfolio = useMutation({
@@ -48,14 +54,14 @@ export default function Portfolios() {
 
   if (isLoading) return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
-  const projectsByPortfolio = (portfolioName) => projects.filter(p => p.portfolio === portfolioName);
-  const unassigned = projects.filter(p => !p.portfolio);
+  const projectsByPortfolio = (portfolioName) => visibleProjects.filter(p => p.portfolio === portfolioName);
+  const unassigned = visibleProjects.filter(p => !p.portfolio);
 
   return (
     <div className="p-4 max-w-2xl mx-auto space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold font-display flex items-center gap-2"><Layers className="w-5 h-5 text-primary" /> Portfolios</h1>
-        <Button size="sm" onClick={() => setShowCreate(true)}><Plus className="w-4 h-4 mr-1" /> New Portfolio</Button>
+        {!isClientOnly && <Button size="sm" onClick={() => setShowCreate(true)}><Plus className="w-4 h-4 mr-1" /> New Portfolio</Button>}
       </div>
 
       {portfolios.length === 0 && unassigned.length === 0 ? (
