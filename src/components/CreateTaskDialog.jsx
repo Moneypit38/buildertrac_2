@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import ResponsiveSelect from "@/components/ResponsiveSelect";
 import { Textarea } from "@/components/ui/textarea";
 
 export default function CreateTaskDialog({ open, onClose, projectId, task }) {
@@ -37,15 +37,19 @@ export default function CreateTaskDialog({ open, onClose, projectId, task }) {
           <div><Label>Description</Label><Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Additional details..." rows={2} /></div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Priority</Label>
-              <Select value={form.priority} onValueChange={v => setForm(f => ({ ...f, priority: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="high">High</SelectItem><SelectItem value="medium">Medium</SelectItem><SelectItem value="low">Low</SelectItem></SelectContent>
-              </Select></div>
-             <div><Label>Section</Label>
-              <Select value={form.section} onValueChange={v => setForm(f => ({ ...f, section: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="today">Today</SelectItem><SelectItem value="upcoming">Upcoming</SelectItem><SelectItem value="later">Later</SelectItem></SelectContent>
-              </Select></div>
+              <ResponsiveSelect
+                value={form.priority}
+                onValueChange={v => setForm(f => ({ ...f, priority: v }))}
+                placeholder="Priority"
+                options={[{ value: "high", label: "High" }, { value: "medium", label: "Medium" }, { value: "low", label: "Low" }]}
+              /></div>
+            <div><Label>Section</Label>
+              <ResponsiveSelect
+                value={form.section}
+                onValueChange={v => setForm(f => ({ ...f, section: v }))}
+                placeholder="Section"
+                options={[{ value: "today", label: "Today" }, { value: "upcoming", label: "Upcoming" }, { value: "later", label: "Later" }]}
+              /></div>
           </div>
           <div><Label>Due Date</Label><Input type="date" value={form.due_date} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} /></div>
           <div><Label>Assigned To</Label><Input value={form.assigned_to} onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))} placeholder="Name" /></div>

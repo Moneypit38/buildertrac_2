@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import { useQuery } from "@tanstack/react-query";
 import { useClientAccess } from "../hooks/useClientAccess";
 import { base44 } from "@/api/base44Client";
@@ -6,10 +7,13 @@ import ProjectCard from "../components/ProjectCard";
 import CreateProjectDialog from "../components/CreateProjectDialog";
 import { Button } from "@/components/ui/button";
 import { Plus, FolderKanban } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Projects() {
   const { data: projects = [], isLoading } = useQuery({ queryKey: ["projects"], queryFn: () => base44.entities.Project.list() });
   const { isClientOnly, allowedProjectIds } = useClientAccess();
+  const qc = useQueryClient();
+  const { refreshing, touchHandlers } = usePullToRefresh(() => qc.invalidateQueries({ queryKey: ["projects"] }));
   const [showCreate, setShowCreate] = useState(false);
   const [filter, setFilter] = useState("All");
 
@@ -23,7 +27,10 @@ export default function Projects() {
   if (isLoading) return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
   return (
-    <div className="p-4 max-w-2xl mx-auto space-y-4">
+    <div className="p-4 max-w-2xl mx-auto space-y-4" {...touchHandlers}>
+      {refreshing && (
+        <div className="flex justify-center"><div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
+      )}
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold font-display">Projects</h1>
         {!isClientOnly && <Button size="sm" onClick={() => setShowCreate(true)}><Plus className="w-4 h-4 mr-1" /> New Project</Button>}

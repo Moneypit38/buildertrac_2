@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import ResponsiveSelect from "@/components/ResponsiveSelect";
 
 export default function CreateProjectDialog({ open, onClose, project }) {
   const isEdit = !!project;
@@ -19,7 +19,16 @@ export default function CreateProjectDialog({ open, onClose, project }) {
   const { data: portfolios = [] } = useQuery({ queryKey: ["portfolios"], queryFn: () => base44.entities.Portfolio.list() });
   const mutation = useMutation({
     mutationFn: (data) => isEdit ? base44.entities.Project.update(project.id, data) : base44.entities.Project.create(data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["projects"] }); toast.success(isEdit ? "Project updated" : "Project created!"); onClose(); },
+    onMutate: async (data) => {
+      if (isEdit) return;
+      await qc.cancelQueries({ queryKey: ["projects"] });
+      const prev = qc.getQueryData(["projects"]);
+      qc.setQueryData(["projects"], (old = []) => [...old, { ...data, id: `temp-${Date.now()}`, created_date: new Date().toISOString() }]);
+      return { prev };
+    },
+    onError: (_, __, ctx) => { if (ctx?.prev) qc.setQueryData(["projects"], ctx.prev); },
+    onSettled: () => { qc.invalidateQueries({ queryKey: ["projects"] }); },
+    onSuccess: () => { toast.success(isEdit ? "Project updated" : "Project created!"); onClose(); },
   });
 
   const handleSubmit = (e) => {
@@ -37,19 +46,21 @@ export default function CreateProjectDialog({ open, onClose, project }) {
           <div><Label>Address</Label><Input value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} placeholder="123 Main St, Los Angeles, CA" /></div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Portfolio</Label>
-              <Select value={form.portfolio || "__none__"} onValueChange={v => setForm(f => ({ ...f, portfolio: v === "__none__" ? "" : v }))}>
-                <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">None</SelectItem>
-                  {portfolios.map(p => <SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <ResponsiveSelect
+                value={form.portfolio || "__none__"}
+                onValueChange={v => setForm(f => ({ ...f, portfolio: v === "__none__" ? "" : v }))}
+                placeholder="None"
+                options={[{ value: "__none__", label: "None" }, ...portfolios.map(p => ({ value: p.name, label: p.name }))]}
+              />
             </div>
             <div><Label>Status</Label>
-              <Select value={form.status} onValueChange={v => setForm(f => ({ ...f, status: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{["Planning", "In Progress", "On Hold", "Completed"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-              </Select></div>
+              <ResponsiveSelect
+                value={form.status}
+                onValueChange={v => setForm(f => ({ ...f, status: v }))}
+                placeholder="Status"
+                options={["Planning", "In Progress", "On Hold", "Completed"].map(s => ({ value: s, label: s }))}
+              />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Total Budget ($)</Label><Input type="number" min={0} value={form.budget_total} onChange={e => setForm(f => ({ ...f, budget_total: Number(e.target.value) }))} /></div>

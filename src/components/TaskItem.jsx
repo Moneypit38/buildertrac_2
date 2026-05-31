@@ -26,7 +26,17 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
   const qc = useQueryClient();
   const toggle = useMutation({
     mutationFn: () => base44.entities.Task.update(task.id, { completed: !task.completed }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["tasks"] }); toast.success(task.completed ? "Task reopened" : "Task completed!"); },
+    onMutate: async () => {
+      await qc.cancelQueries({ queryKey: ["tasks"] });
+      const prev = qc.getQueryData(["tasks"]);
+      qc.setQueryData(["tasks"], (old = []) =>
+        old.map(t => t.id === task.id ? { ...t, completed: !task.completed } : t)
+      );
+      return { prev };
+    },
+    onError: (_, __, ctx) => { if (ctx?.prev) qc.setQueryData(["tasks"], ctx.prev); },
+    onSettled: () => { qc.invalidateQueries({ queryKey: ["tasks"] }); },
+    onSuccess: () => { toast.success(task.completed ? "Task reopened" : "Task completed!"); },
   });
   const remove = useMutation({
     mutationFn: () => base44.entities.Task.delete(task.id),

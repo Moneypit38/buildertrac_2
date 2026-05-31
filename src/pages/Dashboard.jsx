@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useClientAccess } from "../hooks/useClientAccess";
 import StatCards from "../components/StatCards";
@@ -6,11 +6,14 @@ import ProjectCard from "../components/ProjectCard";
 import { HardHat, Layers } from "lucide-react";
 import PortfolioIcon, { getColor } from "../components/PortfolioIcon";
 import { Link } from "react-router-dom";
+import { usePullToRefresh } from "../hooks/usePullToRefresh";
 
 const HERO_IMG = "https://media.base44.com/images/public/6a1c6a3340e642df44a0130d/c09df7200_generated_image.png";
 
 export default function Dashboard() {
   const { allowedProjectIds, isLoading: accessLoading } = useClientAccess();
+  const qc = useQueryClient();
+  const { refreshing, touchHandlers } = usePullToRefresh(() => qc.invalidateQueries());
   const { data: projects = [] } = useQuery({ queryKey: ["projects"], queryFn: () => base44.entities.Project.list() });
   const { data: portfolios = [] } = useQuery({ queryKey: ["portfolios"], queryFn: () => base44.entities.Portfolio.list() });
   const { data: tasks = [] } = useQuery({ queryKey: ["tasks"], queryFn: () => base44.entities.Task.list() });
@@ -36,7 +39,10 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="p-4 max-w-2xl mx-auto space-y-6">
+    <div className="p-4 max-w-2xl mx-auto space-y-6" {...touchHandlers}>
+      {refreshing && (
+        <div className="flex justify-center pt-2"><div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
+      )}
       {/* Hero */}
       <div className="relative rounded-2xl overflow-hidden h-40">
         <img src={HERO_IMG} alt="Construction" className="w-full h-full object-cover" />
