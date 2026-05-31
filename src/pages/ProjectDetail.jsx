@@ -44,7 +44,12 @@ export default function ProjectDetail() {
   if (!project) return <div className="p-4 text-center text-muted-foreground">Project not found</div>;
 
   const rootTasks = tasks.filter(t => !t.parent_task_id);
-  const tasksBySection = { today: rootTasks.filter(t => t.section === "today"), upcoming: rootTasks.filter(t => t.section === "upcoming"), later: rootTasks.filter(t => t.section === "later") };
+  const getSection = (t) => t.section || "today";
+  const tasksBySection = {
+    today: rootTasks.filter(t => getSection(t) === "today"),
+    upcoming: rootTasks.filter(t => getSection(t) === "upcoming"),
+    later: rootTasks.filter(t => getSection(t) === "later"),
+  };
   const budgetPct = project.budget_total > 0 ? Math.min(100, ((project.budget_spent || 0) / project.budget_total) * 100) : 0;
 
   return (
