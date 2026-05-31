@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Layers, FolderKanban, Trash2, Pencil, UserPlus } from "lucide-react";
+import PortfolioIcon, { PORTFOLIO_ICONS, PORTFOLIO_COLORS, getColor, getIconComponent } from "../components/PortfolioIcon";
 import { useClientAccess } from "../hooks/useClientAccess";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -19,7 +20,7 @@ import InviteToPortfolioDialog from "../components/InviteToPortfolioDialog";
 // ── Create / Edit Portfolio Dialog ──────────────────────────────────────────
 function PortfolioFormDialog({ open, onClose, portfolio }) {
   const isEdit = !!portfolio;
-  const [form, setForm] = useState({ name: portfolio?.name || "", description: portfolio?.description || "" });
+  const [form, setForm] = useState({ name: portfolio?.name || "", description: portfolio?.description || "", icon: portfolio?.icon || "Layers", color: portfolio?.color || "orange" });
   const qc = useQueryClient();
 
   const mutation = useMutation({
@@ -50,6 +51,29 @@ function PortfolioFormDialog({ open, onClose, portfolio }) {
         >
           <div><Label>Name *</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="West Coast Residential" /></div>
           <div><Label>Description</Label><Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} placeholder="Optional description..." /></div>
+          <div>
+            <Label>Color</Label>
+            <div className="flex gap-2 flex-wrap mt-1">
+              {PORTFOLIO_COLORS.map(c => (
+                <button key={c.name} type="button" onClick={() => setForm(f => ({ ...f, color: c.name }))}
+                  className={`w-7 h-7 rounded-full ${c.solid} transition-all ${form.color === c.name ? "ring-2 ring-offset-2 ring-offset-background ring-foreground scale-110" : "opacity-60 hover:opacity-100"}`} />
+              ))}
+            </div>
+          </div>
+          <div>
+            <Label>Icon</Label>
+            <div className="flex gap-2 flex-wrap mt-1">
+              {PORTFOLIO_ICONS.map(({ name, Icon }) => {
+                const colorDef = getColor(form.color);
+                return (
+                  <button key={name} type="button" onClick={() => setForm(f => ({ ...f, icon: name }))}
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border ${form.icon === name ? `${colorDef.bg} ${colorDef.text} border-current` : "border-border text-muted-foreground hover:text-foreground hover:bg-accent"}`}>
+                    <Icon className="w-4 h-4" />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           <Button type="submit" className="w-full" disabled={mutation.isPending}>
             {mutation.isPending ? (isEdit ? "Saving..." : "Creating...") : (isEdit ? "Save Changes" : "Create Portfolio")}
           </Button>
@@ -122,11 +146,13 @@ export default function Portfolios() {
           {visiblePortfolios.map(pf => {
             const pfProjects = projectsByPortfolio(pf.name);
             return (
-              <div key={pf.id} className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+              <div key={pf.id} className="bg-card border border-border rounded-xl overflow-hidden shadow-sm" style={{borderTopColor: getColor(pf.color).name}}>
                 {/* Portfolio Header */}
                 <div className="px-5 pt-5 pb-4 border-b border-border bg-gradient-to-r from-primary/10 to-transparent">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <PortfolioIcon icon={pf.icon} color={pf.color} size="sm" />
+                      <div className="flex-1 min-w-0">
                       <h2 className="text-lg font-bold text-foreground leading-tight">{pf.name}</h2>
                       {pf.description && (
                         <p className="text-sm text-muted-foreground mt-1">{pf.description}</p>
@@ -134,6 +160,7 @@ export default function Portfolios() {
                       <p className="text-xs text-muted-foreground mt-1.5">
                         {pfProjects.length} project{pfProjects.length !== 1 ? "s" : ""}
                       </p>
+                    </div>
                     </div>
 
                     {/* Action buttons */}

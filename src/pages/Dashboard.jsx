@@ -3,7 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { useClientAccess } from "../hooks/useClientAccess";
 import StatCards from "../components/StatCards";
 import ProjectCard from "../components/ProjectCard";
-import { HardHat, Layers, FolderKanban } from "lucide-react";
+import { HardHat, Layers } from "lucide-react";
+import PortfolioIcon, { getColor } from "../components/PortfolioIcon";
 import { Link } from "react-router-dom";
 
 const HERO_IMG = "https://media.base44.com/images/public/6a1c6a3340e642df44a0130d/c09df7200_generated_image.png";
@@ -61,25 +62,21 @@ export default function Dashboard() {
           <h2 className="text-primary font-bold text-sm uppercase tracking-wider mb-3 flex items-center gap-2">
             <Layers className="w-4 h-4" /> Portfolios
           </h2>
-          <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
             {visiblePortfolios.map(pf => {
               const pfProjects = visibleProjects.filter(p => p.portfolio === pf.name);
+              const colorDef = getColor(pf.color);
               return (
                 <Link
                   key={pf.id}
                   to="/portfolios"
-                  className="flex items-center gap-3 px-4 py-3 bg-card border border-border rounded-xl hover:border-primary/40 hover:bg-accent/30 transition-all group"
+                  className={`flex flex-col gap-2 p-3 bg-card border border-border rounded-xl hover:border-primary/40 transition-all`}
                 >
-                  <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
-                    <Layers className="w-4 h-4 text-primary" />
+                  <PortfolioIcon icon={pf.icon} color={pf.color} size="sm" />
+                  <div className="min-w-0">
+                    <p className={`font-semibold text-sm truncate ${colorDef.text}`}>{pf.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{pfProjects.length} project{pfProjects.length !== 1 ? "s" : ""}</p>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-foreground truncate">{pf.name}</p>
-                    {pf.description && <p className="text-xs text-muted-foreground truncate">{pf.description}</p>}
-                  </div>
-                  <span className="text-xs text-muted-foreground shrink-0">
-                    {pfProjects.length} project{pfProjects.length !== 1 ? "s" : ""}
-                  </span>
                 </Link>
               );
             })}

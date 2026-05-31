@@ -7,6 +7,14 @@
     },
     "description": {
       "type": "string"
+    },
+    "icon": {
+      "type": "string",
+      "default": "Layers"
+    },
+    "color": {
+      "type": "string",
+      "default": "orange"
     }
   },
   "required": [
