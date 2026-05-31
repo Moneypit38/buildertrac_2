@@ -29,10 +29,10 @@ export default function Dashboard() {
       </div>
 
       <StatCards stats={[
-        { value: activeTasks, label: "Active Tasks" },
-        { value: docs.length, label: "Documents" },
-        { value: photos.length, label: "Site Photos" },
-        { value: projects.length, label: "Projects" },
+        { value: activeTasks, label: "Active Tasks", href: "/projects" },
+        { value: docs.length, label: "Documents", href: "/documents" },
+        { value: photos.length, label: "Site Photos", href: "/photos" },
+        { value: projects.length, label: "Projects", href: "/projects" },
       ]} />
 
       <div>
