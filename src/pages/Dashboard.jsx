@@ -8,7 +8,7 @@ import PortfolioIcon, { getColor } from "../components/PortfolioIcon";
 import { Link } from "react-router-dom";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 
-const HERO_IMG = "https://media.base44.com/images/public/6a1c6a3340e642df44a0130d/c979cb0cc_IMG_2880.png";
+
 
 export default function Dashboard() {
   const { allowedProjectIds, isLoading: accessLoading } = useClientAccess();
@@ -44,14 +44,13 @@ export default function Dashboard() {
         <div className="flex justify-center pt-2"><div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
       )}
       {/* Hero */}
-      <div className="relative rounded-2xl overflow-hidden h-40">
-        <img src={HERO_IMG} alt="Construction" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-        <div className="absolute bottom-4 left-4 right-4">
-          <h1 className="text-2xl font-extrabold font-display text-white flex items-center gap-2">
+      <div className="flex items-center gap-4 pt-2">
+        <img src="https://media.base44.com/images/public/6a1c6a3340e642df44a0130d/c979cb0cc_IMG_2880.png" alt="BuilderTrac Logo" className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
+        <div>
+          <h1 className="text-2xl font-extrabold font-display flex items-center gap-2">
             <HardHat className="w-6 h-6 text-primary" /> Your Site Overview
           </h1>
-          <p className="text-sm text-white/70 mt-0.5">Everything at a glance</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Everything at a glance</p>
         </div>
       </div>
 
