@@ -44,12 +44,6 @@ export default function ProjectDetail() {
   if (!project) return <div className="p-4 text-center text-muted-foreground">Project not found</div>;
 
   const rootTasks = tasks.filter(t => !t.parent_task_id);
-  const getSection = (t) => t.section || "today";
-  const tasksBySection = {
-    today: rootTasks.filter(t => getSection(t) === "today"),
-    upcoming: rootTasks.filter(t => getSection(t) === "upcoming"),
-    later: rootTasks.filter(t => getSection(t) === "later"),
-  };
   const budgetPct = project.budget_total > 0 ? Math.min(100, ((project.budget_spent || 0) / project.budget_total) * 100) : 0;
 
   return (
@@ -84,7 +78,7 @@ export default function ProjectDetail() {
       {/* Tabs */}
       <Tabs defaultValue={isClient ? "docs" : "tasks"}>
         <TabsList className="w-full bg-card border border-border p-0.5 flex">
-          {!isClient && <TabsTrigger value="tasks" className="flex-1 gap-1 text-xs px-1 py-1"><ClipboardList className="w-3 h-3" /><span className="hidden sm:inline">Tasks</span><span className="sm:hidden">{rootTasks.length}</span></TabsTrigger>}
+          {!isClient && <TabsTrigger value="tasks" className="flex-1 gap-1 text-xs px-1 py-1"><ClipboardList className="w-3 h-3" /><span>Tasks</span></TabsTrigger>}
           <TabsTrigger value="docs" className="flex-1 gap-1 text-xs px-1 py-1"><FileText className="w-3 h-3" /><span>Docs</span></TabsTrigger>
           <TabsTrigger value="photos" className="flex-1 gap-1 text-xs px-1 py-1"><Camera className="w-3 h-3" /><span>Photos</span></TabsTrigger>
           {isAdmin && <TabsTrigger value="team" className="flex-1 gap-1 text-xs px-1 py-1"><Users className="w-3 h-3" /><span>Team</span></TabsTrigger>}
@@ -94,25 +88,18 @@ export default function ProjectDetail() {
         {!isClient && (
         <TabsContent value="tasks" className="space-y-4 mt-4">
           <Button size="sm" onClick={() => { setEditTask(null); setShowTaskDialog(true); }}><Plus className="w-4 h-4 mr-1" /> Add Task</Button>
-          {["today", "upcoming", "later"].map(section => (
-            <div key={section}>
-              <h3 className="text-primary font-bold text-xs uppercase tracking-wider mb-2">
-                {section === "today" ? "📋 Today" : section === "upcoming" ? "📅 Upcoming" : "⏰ Later"}
-              </h3>
-              {tasksBySection[section].length === 0 ? (
-                <p className="text-xs text-muted-foreground pl-2 mb-3">No tasks</p>
-              ) : (
-                <div className="space-y-2 mb-4">
-                  {tasksBySection[section].map(t => (
-                    <div key={t.id}>
-                      <TaskItem task={t} onExpand={() => toggleExpand(t.id)} expanded={!!expandedTasks[t.id]} onEdit={() => { setEditTask(t); setShowTaskDialog(true); }} />
-                      {expandedTasks[t.id] && <SubtaskList parentTaskId={t.id} projectId={projectId} />}
-                    </div>
-                  ))}
+          {rootTasks.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No tasks yet. Add your first task above.</p>
+          ) : (
+            <div className="space-y-2">
+              {rootTasks.map(t => (
+                <div key={t.id}>
+                  <TaskItem task={t} onExpand={() => toggleExpand(t.id)} expanded={!!expandedTasks[t.id]} onEdit={() => { setEditTask(t); setShowTaskDialog(true); }} />
+                  {expandedTasks[t.id] && <SubtaskList parentTaskId={t.id} projectId={projectId} />}
                 </div>
-              )}
+              ))}
             </div>
-          ))}
+          )}
         </TabsContent>
         )}
 

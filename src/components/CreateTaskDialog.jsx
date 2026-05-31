@@ -13,8 +13,8 @@ export default function CreateTaskDialog({ open, onClose, projectId, task }) {
   const isEdit = !!task;
   const [form, setForm] = useState(task ? {
     title: task.title || "", description: task.description || "", priority: task.priority || "medium",
-    status: task.status || "Not Started", due_date: task.due_date || "", section: task.section || "today", assigned_to: task.assigned_to || "",
-  } : { title: "", description: "", priority: "medium", status: "Not Started", due_date: "", section: "today", assigned_to: "" });
+    status: task.status || "Not Started", due_date: task.due_date || "", assigned_to: task.assigned_to || "",
+  } : { title: "", description: "", priority: "medium", status: "Not Started", due_date: "", assigned_to: "" });
 
   const qc = useQueryClient();
   const mutation = useMutation({
@@ -35,15 +35,7 @@ export default function CreateTaskDialog({ open, onClose, projectId, task }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div><Label>Title *</Label><Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Pour concrete - Level 4" /></div>
           <div><Label>Description</Label><Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Additional details..." rows={2} /></div>
-          <div>
-            <Label>Section</Label>
-            <ResponsiveSelect
-              value={form.section}
-              onValueChange={v => setForm(f => ({ ...f, section: v }))}
-              placeholder="Section"
-              options={[{ value: "today", label: "📋 Today" }, { value: "upcoming", label: "📅 Upcoming" }, { value: "later", label: "⏰ Later" }]}
-            />
-          </div>
+
           <div>
             <Label>Priority</Label>
             <ResponsiveSelect
