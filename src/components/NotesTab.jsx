@@ -1,18 +1,20 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Trash2, MessageSquare } from "lucide-react";
+import { Send, MessageSquare, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export default function NotesTab({ projectId }) {
   const qc = useQueryClient();
   const [draft, setDraft] = useState("");
+  const bottomRef = useRef(null);
 
   const { data: notes = [], isLoading } = useQuery({
     queryKey: ["notes", projectId],
-    queryFn: () => base44.entities.Note.filter({ project_id: projectId }, "-created_date"),
+    queryFn: () => base44.entities.Note.filter({ project_id: projectId }, "created_date"),
   });
 
   const { data: currentUser } = useQuery({
@@ -39,72 +41,111 @@ export default function NotesTab({ projectId }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["notes", projectId] }),
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!draft.trim()) return;
+  // Scroll to bottom when messages load or new one added
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [notes]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      submit();
+    }
+  };
+
+  const submit = () => {
+    if (!draft.trim() || addNote.isPending) return;
     addNote.mutate(draft.trim());
   };
 
   return (
-    <div className="space-y-4">
-      {/* Compose */}
-      <form onSubmit={handleSubmit} className="space-y-2">
+    <div className="flex flex-col rounded-xl border border-border bg-card overflow-hidden" style={{ height: "60vh", minHeight: "400px" }}>
+      {/* Messages area */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : notes.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-center py-8">
+            <MessageSquare className="w-10 h-10 text-muted-foreground mb-3" />
+            <p className="text-sm font-medium text-muted-foreground">No messages yet</p>
+            <p className="text-xs text-muted-foreground mt-1">Start the conversation below</p>
+          </div>
+        ) : (
+          <>
+            {notes.map((note) => {
+              const isMe = note.author_email === currentUser?.email;
+              const initials = (note.author_name || note.author_email || "?")[0].toUpperCase();
+              return (
+                <div key={note.id} className={cn("flex gap-2 group", isMe ? "flex-row-reverse" : "flex-row")}>
+                  {/* Avatar */}
+                  <div className={cn(
+                    "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-1",
+                    isMe ? "bg-primary text-primary-foreground" : "bg-accent text-foreground"
+                  )}>
+                    {initials}
+                  </div>
+
+                  {/* Bubble */}
+                  <div className={cn("flex flex-col max-w-[75%]", isMe ? "items-end" : "items-start")}>
+                    {/* Name + time */}
+                    <div className={cn("flex items-center gap-1.5 mb-1 text-xs text-muted-foreground", isMe ? "flex-row-reverse" : "flex-row")}>
+                      <span className="font-medium text-foreground">{note.author_name || note.author_email}</span>
+                      <span>·</span>
+                      <span>{formatDistanceToNow(new Date(note.created_date), { addSuffix: true })}</span>
+                    </div>
+
+                    <div className="flex items-end gap-1">
+                      {/* Delete button for own messages or admin */}
+                      {(isMe || currentUser?.role === "admin") && (
+                        <button
+                          onClick={() => deleteNote.mutate(note.id)}
+                          className={cn(
+                            "opacity-0 group-hover:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-destructive",
+                            isMe ? "order-first" : "order-last"
+                          )}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      <div className={cn(
+                        "rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words",
+                        isMe
+                          ? "bg-primary text-primary-foreground rounded-tr-sm"
+                          : "bg-accent text-foreground rounded-tl-sm"
+                      )}>
+                        {note.content}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            <div ref={bottomRef} />
+          </>
+        )}
+      </div>
+
+      {/* Compose bar */}
+      <div className="border-t border-border p-3 bg-background flex gap-2 items-end">
         <Textarea
-          placeholder="Add a note or comment…"
+          placeholder="Type a message… (Enter to send, Shift+Enter for new line)"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          rows={3}
-          className="resize-none"
+          onKeyDown={handleKeyDown}
+          rows={1}
+          className="flex-1 resize-none min-h-[40px] max-h-[120px] py-2 text-sm"
         />
         <Button
-          type="submit"
-          size="sm"
+          size="icon"
+          onClick={submit}
           disabled={!draft.trim() || addNote.isPending}
+          className="shrink-0 h-10 w-10"
         >
-          {addNote.isPending ? "Posting…" : "Post Note"}
+          <Send className="w-4 h-4" />
         </Button>
-      </form>
-
-      {/* List */}
-      {isLoading ? (
-        <div className="flex justify-center py-8">
-          <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
-      ) : notes.length === 0 ? (
-        <div className="bg-card border border-border rounded-xl p-8 text-center">
-          <MessageSquare className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">No notes yet. Be the first to leave a comment.</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {notes.map((note) => (
-            <div key={note.id} className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <div className="w-7 h-7 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold shrink-0">
-                      {(note.author_name || note.author_email || "?")[0].toUpperCase()}
-                    </div>
-                    <span className="text-sm font-semibold truncate">{note.author_name || note.author_email}</span>
-                    <span className="text-xs text-muted-foreground shrink-0">
-                      {formatDistanceToNow(new Date(note.created_date), { addSuffix: true })}
-                    </span>
-                  </div>
-                  <p className="text-sm text-foreground whitespace-pre-wrap pl-9">{note.content}</p>
-                </div>
-                {note.author_email === currentUser?.email || currentUser?.role === "admin" ? (
-                  <button
-                    onClick={() => deleteNote.mutate(note.id)}
-                    className="text-muted-foreground hover:text-destructive transition-colors shrink-0 p-1"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                ) : null}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      </div>
     </div>
   );
 }

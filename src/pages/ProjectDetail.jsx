@@ -49,9 +49,7 @@ export default function ProjectDetail() {
 
   return (
     <div className="p-4 max-w-2xl mx-auto space-y-4">
-      <Link to="/projects" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors">
-        <ArrowLeft className="w-4 h-4" /> Back to Projects
-      </Link>
+
 
       {/* Header */}
       <div className="bg-card border border-border rounded-xl p-4">
@@ -80,12 +78,12 @@ export default function ProjectDetail() {
 
       {/* Tabs */}
       <Tabs defaultValue={isClient ? "docs" : "tasks"}>
-        <TabsList className="w-full bg-card border border-border">
-          {!isClient && <TabsTrigger value="tasks" className="flex-1 gap-1"><ClipboardList className="w-4 h-4" /> Tasks ({rootTasks.length})</TabsTrigger>}
-          <TabsTrigger value="docs" className="flex-1 gap-1"><FileText className="w-4 h-4" /> Docs ({docs.length})</TabsTrigger>
-          <TabsTrigger value="photos" className="flex-1 gap-1"><Camera className="w-4 h-4" /> Photos ({photos.length})</TabsTrigger>
-          {isAdmin && <TabsTrigger value="team" className="flex-1 gap-1"><Users className="w-4 h-4" /> Team</TabsTrigger>}
-          <TabsTrigger value="notes" className="flex-1 gap-1"><MessageSquare className="w-4 h-4" /> Notes</TabsTrigger>
+        <TabsList className="w-full bg-card border border-border overflow-x-auto flex-nowrap scrollbar-hide">
+          {!isClient && <TabsTrigger value="tasks" className="flex-1 gap-1 text-xs"><ClipboardList className="w-3.5 h-3.5" /> Tasks ({rootTasks.length})</TabsTrigger>}
+          <TabsTrigger value="docs" className="flex-1 gap-1 text-xs"><FileText className="w-3.5 h-3.5" /> Docs ({docs.length})</TabsTrigger>
+          <TabsTrigger value="photos" className="flex-1 gap-1 text-xs"><Camera className="w-3.5 h-3.5" /> Photos ({photos.length})</TabsTrigger>
+          {isAdmin && <TabsTrigger value="team" className="flex-1 gap-1 text-xs"><Users className="w-3.5 h-3.5" /> Team</TabsTrigger>}
+          <TabsTrigger value="notes" className="flex-1 gap-1 text-xs"><MessageSquare className="w-3.5 h-3.5" /> Notes</TabsTrigger>
         </TabsList>
 
         {!isClient && (
