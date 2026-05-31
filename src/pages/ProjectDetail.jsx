@@ -83,12 +83,12 @@ export default function ProjectDetail() {
 
       {/* Tabs */}
       <Tabs defaultValue={isClient ? "docs" : "tasks"}>
-        <TabsList className="w-full bg-card border border-border p-1 overflow-x-auto flex-nowrap flex gap-1 justify-start">
-          {!isClient && <TabsTrigger value="tasks" className="shrink-0 gap-1 text-xs px-2.5"><ClipboardList className="w-3.5 h-3.5" /> Tasks ({rootTasks.length})</TabsTrigger>}
-          <TabsTrigger value="docs" className="shrink-0 gap-1 text-xs px-2.5"><FileText className="w-3.5 h-3.5" /> Docs ({docs.length})</TabsTrigger>
-          <TabsTrigger value="photos" className="shrink-0 gap-1 text-xs px-2.5"><Camera className="w-3.5 h-3.5" /> Photos ({photos.length})</TabsTrigger>
-          {isAdmin && <TabsTrigger value="team" className="shrink-0 gap-1 text-xs px-2.5"><Users className="w-3.5 h-3.5" /> Team</TabsTrigger>}
-          <TabsTrigger value="notes" className="shrink-0 gap-1 text-xs px-2.5"><MessageSquare className="w-3.5 h-3.5" /> Notes</TabsTrigger>
+        <TabsList className="w-full bg-card border border-border p-0.5 flex">
+          {!isClient && <TabsTrigger value="tasks" className="flex-1 gap-1 text-xs px-1 py-1"><ClipboardList className="w-3 h-3" /><span className="hidden sm:inline">Tasks</span><span className="sm:hidden">{rootTasks.length}</span></TabsTrigger>}
+          <TabsTrigger value="docs" className="flex-1 gap-1 text-xs px-1 py-1"><FileText className="w-3 h-3" /><span>Docs</span></TabsTrigger>
+          <TabsTrigger value="photos" className="flex-1 gap-1 text-xs px-1 py-1"><Camera className="w-3 h-3" /><span>Photos</span></TabsTrigger>
+          {isAdmin && <TabsTrigger value="team" className="flex-1 gap-1 text-xs px-1 py-1"><Users className="w-3 h-3" /><span>Team</span></TabsTrigger>}
+          <TabsTrigger value="notes" className="flex-1 gap-1 text-xs px-1 py-1"><MessageSquare className="w-3 h-3" /><span>Notes</span></TabsTrigger>
         </TabsList>
 
         {!isClient && (
