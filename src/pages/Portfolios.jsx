@@ -88,6 +88,11 @@ export default function Portfolios() {
   const projectsByPortfolio = (portfolioName) => visibleProjects.filter(p => p.portfolio === portfolioName);
   const unassigned = visibleProjects.filter(p => !p.portfolio);
 
+  // For clients, only show portfolios that contain at least one of their allowed projects
+  const visiblePortfolios = isClientOnly
+    ? portfolios.filter(pf => projectsByPortfolio(pf.name).length > 0)
+    : portfolios;
+
   const statusStyle = (status) => {
     if (status === "In Progress") return "bg-blue-500/15 text-blue-400";
     if (status === "Completed") return "bg-green-500/15 text-green-400";
@@ -114,7 +119,7 @@ export default function Portfolios() {
         </div>
       ) : (
         <div className="space-y-4">
-          {portfolios.map(pf => {
+          {visiblePortfolios.map(pf => {
             const pfProjects = projectsByPortfolio(pf.name);
             return (
               <div key={pf.id} className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">

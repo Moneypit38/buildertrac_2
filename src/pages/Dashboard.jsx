@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useClientAccess } from "../hooks/useClientAccess";
 import StatCards from "../components/StatCards";
 import ProjectCard from "../components/ProjectCard";
 import { HardHat } from "lucide-react";
@@ -7,12 +8,24 @@ import { HardHat } from "lucide-react";
 const HERO_IMG = "https://media.base44.com/images/public/6a1c6a3340e642df44a0130d/c09df7200_generated_image.png";
 
 export default function Dashboard() {
+  const { allowedProjectIds, isLoading: accessLoading } = useClientAccess();
   const { data: projects = [] } = useQuery({ queryKey: ["projects"], queryFn: () => base44.entities.Project.list() });
   const { data: tasks = [] } = useQuery({ queryKey: ["tasks"], queryFn: () => base44.entities.Task.list() });
   const { data: docs = [] } = useQuery({ queryKey: ["documents"], queryFn: () => base44.entities.Document.list() });
   const { data: photos = [] } = useQuery({ queryKey: ["photos"], queryFn: () => base44.entities.SitePhoto.list() });
 
-  const activeTasks = tasks.filter(t => !t.completed).length;
+  const visibleProjects = allowedProjectIds ? projects.filter(p => allowedProjectIds.includes(p.id)) : projects;
+  const visibleTasks = allowedProjectIds ? tasks.filter(t => allowedProjectIds.includes(t.project_id)) : tasks;
+  const visibleDocs = allowedProjectIds ? docs.filter(d => allowedProjectIds.includes(d.project_id)) : docs;
+  const visiblePhotos = allowedProjectIds ? photos.filter(ph => allowedProjectIds.includes(ph.project_id)) : photos;
+
+  const activeTasks = visibleTasks.filter(t => !t.completed).length;
+
+  if (accessLoading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
 
   return (
     <div className="p-4 max-w-2xl mx-auto space-y-6">
@@ -30,21 +43,21 @@ export default function Dashboard() {
 
       <StatCards stats={[
         { value: activeTasks, label: "Active Tasks", href: "/projects" },
-        { value: docs.length, label: "Documents", href: "/documents" },
-        { value: photos.length, label: "Site Photos", href: "/photos" },
-        { value: projects.length, label: "Projects", href: "/projects" },
+        { value: visibleDocs.length, label: "Documents", href: "/documents" },
+        { value: visiblePhotos.length, label: "Site Photos", href: "/photos" },
+        { value: visibleProjects.length, label: "Projects", href: "/projects" },
       ]} />
 
       <div>
         <h2 className="text-primary font-bold text-sm uppercase tracking-wider mb-3">Your Projects</h2>
-        {projects.length === 0 ? (
+        {visibleProjects.length === 0 ? (
           <div className="bg-card border border-border rounded-xl p-8 text-center">
             <HardHat className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
             <p className="text-muted-foreground">No projects yet. Head to Projects to break ground.</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {projects.map(p => <ProjectCard key={p.id} project={p} />)}
+            {visibleProjects.map(p => <ProjectCard key={p.id} project={p} />)}
           </div>
         )}
       </div>
