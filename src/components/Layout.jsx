@@ -1,5 +1,6 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, FolderKanban, FileText, Camera, Layers, LogOut } from "lucide-react";
+import { LayoutDashboard, FolderKanban, FileText, Camera, Layers, LogOut, Sun, Moon } from "lucide-react";
+import { useTheme } from 'next-themes';
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -17,6 +18,7 @@ export default function Layout() {
   const location = useLocation();
   const { data: user } = useQuery({ queryKey: ["me"], queryFn: () => base44.auth.me() });
   const initials = user?.full_name?.split(" ").map(n => n[0]).join("").toUpperCase() || "U";
+  const { theme, setTheme } = useTheme();
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -25,6 +27,13 @@ export default function Layout() {
           BuilderTrac
         </Link>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            title="Toggle theme"
+          >
+            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center">
