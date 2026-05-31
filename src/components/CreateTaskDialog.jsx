@@ -47,10 +47,8 @@ export default function CreateTaskDialog({ open, onClose, projectId, task }) {
                 <SelectContent><SelectItem value="today">Today</SelectItem><SelectItem value="upcoming">Upcoming</SelectItem><SelectItem value="later">Later</SelectItem></SelectContent>
               </Select></div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div><Label>Due Date</Label><Input type="date" value={form.due_date} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} /></div>
-            <div><Label>Assigned To</Label><Input value={form.assigned_to} onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))} placeholder="Name" /></div>
-          </div>
+          <div><Label>Due Date</Label><Input type="date" value={form.due_date} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} /></div>
+          <div><Label>Assigned To</Label><Input value={form.assigned_to} onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))} placeholder="Name" /></div>
           <Button type="submit" className="w-full" disabled={mutation.isPending}>{mutation.isPending ? "Saving..." : isEdit ? "Save Changes" : "Create Task"}</Button>
         </form>
       </DialogContent>
