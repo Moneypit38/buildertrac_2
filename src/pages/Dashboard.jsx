@@ -3,13 +3,15 @@ import { base44 } from "@/api/base44Client";
 import { useClientAccess } from "../hooks/useClientAccess";
 import StatCards from "../components/StatCards";
 import ProjectCard from "../components/ProjectCard";
-import { HardHat } from "lucide-react";
+import { HardHat, Layers, FolderKanban } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const HERO_IMG = "https://media.base44.com/images/public/6a1c6a3340e642df44a0130d/c09df7200_generated_image.png";
 
 export default function Dashboard() {
   const { allowedProjectIds, isLoading: accessLoading } = useClientAccess();
   const { data: projects = [] } = useQuery({ queryKey: ["projects"], queryFn: () => base44.entities.Project.list() });
+  const { data: portfolios = [] } = useQuery({ queryKey: ["portfolios"], queryFn: () => base44.entities.Portfolio.list() });
   const { data: tasks = [] } = useQuery({ queryKey: ["tasks"], queryFn: () => base44.entities.Task.list() });
   const { data: docs = [] } = useQuery({ queryKey: ["documents"], queryFn: () => base44.entities.Document.list() });
   const { data: photos = [] } = useQuery({ queryKey: ["photos"], queryFn: () => base44.entities.SitePhoto.list() });
@@ -20,6 +22,11 @@ export default function Dashboard() {
   const visiblePhotos = allowedProjectIds ? photos.filter(ph => allowedProjectIds.includes(ph.project_id)) : photos;
 
   const activeTasks = visibleTasks.filter(t => !t.completed).length;
+
+  // Only show portfolios that have at least one visible project
+  const visiblePortfolios = portfolios.filter(pf =>
+    visibleProjects.some(p => p.portfolio === pf.name)
+  );
 
   if (accessLoading) return (
     <div className="flex items-center justify-center h-64">
@@ -48,6 +55,39 @@ export default function Dashboard() {
         { value: visibleProjects.length, label: "Projects", href: "/projects" },
       ]} />
 
+      {/* Portfolios */}
+      {visiblePortfolios.length > 0 && (
+        <div>
+          <h2 className="text-primary font-bold text-sm uppercase tracking-wider mb-3 flex items-center gap-2">
+            <Layers className="w-4 h-4" /> Portfolios
+          </h2>
+          <div className="space-y-2">
+            {visiblePortfolios.map(pf => {
+              const pfProjects = visibleProjects.filter(p => p.portfolio === pf.name);
+              return (
+                <Link
+                  key={pf.id}
+                  to="/portfolios"
+                  className="flex items-center gap-3 px-4 py-3 bg-card border border-border rounded-xl hover:border-primary/40 hover:bg-accent/30 transition-all group"
+                >
+                  <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
+                    <Layers className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-foreground truncate">{pf.name}</p>
+                    {pf.description && <p className="text-xs text-muted-foreground truncate">{pf.description}</p>}
+                  </div>
+                  <span className="text-xs text-muted-foreground shrink-0">
+                    {pfProjects.length} project{pfProjects.length !== 1 ? "s" : ""}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Projects */}
       <div>
         <h2 className="text-primary font-bold text-sm uppercase tracking-wider mb-3">Your Projects</h2>
         {visibleProjects.length === 0 ? (
