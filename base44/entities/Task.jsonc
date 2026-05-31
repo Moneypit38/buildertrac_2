@@ -39,6 +39,10 @@
     },
     "assigned_to": {
       "type": "string"
+    },
+    "reminder_sent": {
+      "type": "boolean",
+      "default": false
     }
   },
   "required": [
