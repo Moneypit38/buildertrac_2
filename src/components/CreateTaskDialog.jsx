@@ -13,8 +13,8 @@ export default function CreateTaskDialog({ open, onClose, projectId, task }) {
   const isEdit = !!task;
   const [form, setForm] = useState(task ? {
     title: task.title || "", description: task.description || "", priority: task.priority || "medium",
-    due_date: task.due_date || "", section: task.section || "today", assigned_to: task.assigned_to || "",
-  } : { title: "", description: "", priority: "medium", due_date: "", section: "today", assigned_to: "" });
+    status: task.status || "Not Started", due_date: task.due_date || "", section: task.section || "today", assigned_to: task.assigned_to || "",
+  } : { title: "", description: "", priority: "medium", status: "Not Started", due_date: "", section: "today", assigned_to: "" });
 
   const qc = useQueryClient();
   const mutation = useMutation({
@@ -41,7 +41,7 @@ export default function CreateTaskDialog({ open, onClose, projectId, task }) {
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent><SelectItem value="high">High</SelectItem><SelectItem value="medium">Medium</SelectItem><SelectItem value="low">Low</SelectItem></SelectContent>
               </Select></div>
-            <div><Label>Section</Label>
+             <div><Label>Section</Label>
               <Select value={form.section} onValueChange={v => setForm(f => ({ ...f, section: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent><SelectItem value="today">Today</SelectItem><SelectItem value="upcoming">Upcoming</SelectItem><SelectItem value="later">Later</SelectItem></SelectContent>

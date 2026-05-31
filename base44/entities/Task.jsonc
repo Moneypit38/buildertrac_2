@@ -17,6 +17,17 @@
       ],
       "default": "medium"
     },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Not Started",
+        "In Progress",
+        "Pending Approval",
+        "Blocked",
+        "Done"
+      ],
+      "default": "Not Started"
+    },
     "due_date": {
       "type": "string",
       "format": "date"

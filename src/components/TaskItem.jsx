@@ -14,6 +14,14 @@ const priorityStyles = {
   low: "bg-green-500/15 text-green-400 border-green-500/30",
 };
 
+const statusStyles = {
+  "Not Started": "bg-muted text-muted-foreground border-border",
+  "In Progress": "bg-blue-500/15 text-blue-400 border-blue-500/30",
+  "Pending Approval": "bg-purple-500/15 text-purple-400 border-purple-500/30",
+  "Blocked": "bg-red-500/15 text-red-400 border-red-500/30",
+  "Done": "bg-green-500/15 text-green-400 border-green-500/30",
+};
+
 export default function TaskItem({ task }) {
   const qc = useQueryClient();
   const toggle = useMutation({
@@ -40,6 +48,11 @@ export default function TaskItem({ task }) {
         )}
       </div>
       {task.assigned_to && <span className="text-[10px] text-muted-foreground hidden sm:block">{task.assigned_to}</span>}
+      {task.status && task.status !== "Not Started" && (
+        <Badge variant="outline" className={`text-[10px] shrink-0 hidden md:inline-flex ${statusStyles[task.status] || ""}`}>
+          {task.status}
+        </Badge>
+      )}
       <Badge variant="outline" className={`text-[10px] shrink-0 ${priorityStyles[task.priority] || priorityStyles.medium}`}>
         {(task.priority || "medium").toUpperCase()}
       </Badge>
