@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Layers, FolderKanban, Trash2 } from "lucide-react";
+import { Plus, Layers, FolderKanban, Trash2, Pencil, UserPlus } from "lucide-react";
 import { useClientAccess } from "../hooks/useClientAccess";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
@@ -14,54 +14,97 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
+import InviteToPortfolioDialog from "../components/InviteToPortfolioDialog";
 
-function CreatePortfolioDialog({ open, onClose }) {
-  const [form, setForm] = useState({ name: "", description: "" });
+// ── Create / Edit Portfolio Dialog ──────────────────────────────────────────
+function PortfolioFormDialog({ open, onClose, portfolio }) {
+  const isEdit = !!portfolio;
+  const [form, setForm] = useState({ name: portfolio?.name || "", description: portfolio?.description || "" });
   const qc = useQueryClient();
+
   const mutation = useMutation({
-    mutationFn: (data) => base44.entities.Portfolio.create(data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["portfolios"] }); toast.success("Portfolio created!"); onClose(); setForm({ name: "", description: "" }); },
+    mutationFn: (data) =>
+      isEdit
+        ? base44.entities.Portfolio.update(portfolio.id, data)
+        : base44.entities.Portfolio.create(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["portfolios"] });
+      toast.success(isEdit ? "Portfolio updated!" : "Portfolio created!");
+      onClose();
+    },
   });
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-sm">
-        <DialogHeader><DialogTitle className="text-primary">New Portfolio</DialogTitle></DialogHeader>
-        <form onSubmit={e => { e.preventDefault(); if (!form.name.trim()) return toast.error("Name required"); mutation.mutate(form); }} className="space-y-4">
+        <DialogHeader>
+          <DialogTitle className="text-primary">{isEdit ? "Edit Portfolio" : "New Portfolio"}</DialogTitle>
+        </DialogHeader>
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            if (!form.name.trim()) return toast.error("Name required");
+            mutation.mutate(form);
+          }}
+          className="space-y-4"
+        >
           <div><Label>Name *</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="West Coast Residential" /></div>
           <div><Label>Description</Label><Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} placeholder="Optional description..." /></div>
-          <Button type="submit" className="w-full" disabled={mutation.isPending}>{mutation.isPending ? "Creating..." : "Create Portfolio"}</Button>
+          <Button type="submit" className="w-full" disabled={mutation.isPending}>
+            {mutation.isPending ? (isEdit ? "Saving..." : "Creating...") : (isEdit ? "Save Changes" : "Create Portfolio")}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>
   );
 }
 
+// ── Main Page ───────────────────────────────────────────────────────────────
 export default function Portfolios() {
   const { data: portfolios = [], isLoading } = useQuery({ queryKey: ["portfolios"], queryFn: () => base44.entities.Portfolio.list() });
   const { data: projects = [] } = useQuery({ queryKey: ["projects"], queryFn: () => base44.entities.Project.list() });
   const { isClientOnly, allowedProjectIds } = useClientAccess();
+  const qc = useQueryClient();
+
   const [showCreate, setShowCreate] = useState(false);
+  const [editPortfolio, setEditPortfolio] = useState(null);
+  const [invitePortfolio, setInvitePortfolio] = useState(null); // { name, projects }
 
   const visibleProjects = allowedProjectIds
     ? projects.filter(p => allowedProjectIds.includes(p.id))
     : projects;
-  const qc = useQueryClient();
 
   const deletePortfolio = useMutation({
     mutationFn: (id) => base44.entities.Portfolio.delete(id),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["portfolios"] }); toast.success("Portfolio deleted"); },
   });
 
-  if (isLoading) return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
+  if (isLoading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
 
   const projectsByPortfolio = (portfolioName) => visibleProjects.filter(p => p.portfolio === portfolioName);
   const unassigned = visibleProjects.filter(p => !p.portfolio);
 
+  const statusStyle = (status) => {
+    if (status === "In Progress") return "bg-blue-500/15 text-blue-400";
+    if (status === "Completed") return "bg-green-500/15 text-green-400";
+    return "bg-muted text-muted-foreground";
+  };
+
   return (
-    <div className="p-4 max-w-2xl mx-auto space-y-4">
+    <div className="p-4 max-w-2xl mx-auto space-y-5">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold font-display flex items-center gap-2"><Layers className="w-5 h-5 text-primary" /> Portfolios</h1>
-        {!isClientOnly && <Button size="sm" onClick={() => setShowCreate(true)}><Plus className="w-4 h-4 mr-1" /> New Portfolio</Button>}
+        <h1 className="text-xl font-bold font-display flex items-center gap-2">
+          <Layers className="w-5 h-5 text-primary" /> Portfolios
+        </h1>
+        {!isClientOnly && (
+          <Button size="sm" onClick={() => setShowCreate(true)}>
+            <Plus className="w-4 h-4 mr-1" /> New Portfolio
+          </Button>
+        )}
       </div>
 
       {portfolios.length === 0 && unassigned.length === 0 ? (
@@ -70,45 +113,90 @@ export default function Portfolios() {
           <p className="text-muted-foreground">No portfolios yet. Group your projects into portfolios.</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {portfolios.map(pf => {
             const pfProjects = projectsByPortfolio(pf.name);
             return (
-              <div key={pf.id} className="bg-card border border-border rounded-xl p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h2 className="font-bold text-foreground">{pf.name}</h2>
-                    {pf.description && <p className="text-xs text-muted-foreground mt-0.5">{pf.description}</p>}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground bg-accent px-2 py-1 rounded-full">{pfProjects.length} project{pfProjects.length !== 1 ? "s" : ""}</span>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader><AlertDialogTitle>Delete portfolio?</AlertDialogTitle><AlertDialogDescription>This only deletes the portfolio label, not the projects inside it.</AlertDialogDescription></AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => deletePortfolio.mutate(pf.id)} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+              <div key={pf.id} className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+                {/* Portfolio Header */}
+                <div className="px-5 pt-5 pb-4 border-b border-border bg-gradient-to-r from-primary/10 to-transparent">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-lg font-bold text-foreground leading-tight">{pf.name}</h2>
+                      {pf.description && (
+                        <p className="text-sm text-muted-foreground mt-1">{pf.description}</p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-1.5">
+                        {pfProjects.length} project{pfProjects.length !== 1 ? "s" : ""}
+                      </p>
+                    </div>
+
+                    {/* Action buttons */}
+                    {!isClientOnly && (
+                      <div className="flex items-center gap-1 shrink-0">
+                        {/* Invite Client */}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1.5 text-xs h-8"
+                          onClick={() => setInvitePortfolio({ name: pf.name, projects: pfProjects })}
+                        >
+                          <UserPlus className="w-3.5 h-3.5" /> Invite Client
+                        </Button>
+
+                        {/* Edit */}
+                        <button
+                          onClick={() => setEditPortfolio(pf)}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
+                          title="Edit portfolio"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+
+                        {/* Delete */}
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <button className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-accent transition-colors" title="Delete portfolio">
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete portfolio?</AlertDialogTitle>
+                              <AlertDialogDescription>This only removes the portfolio label — the projects inside won't be deleted.</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => deletePortfolio.mutate(pf.id)} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    )}
                   </div>
                 </div>
-                {pfProjects.length === 0 ? (
-                  <p className="text-xs text-muted-foreground pl-1">No projects in this portfolio yet.</p>
-                ) : (
-                  <div className="space-y-1.5">
-                    {pfProjects.map(p => (
-                      <Link key={p.id} to={`/project/${p.id}`} className="flex items-center gap-2 px-3 py-2 bg-background border border-border rounded-lg hover:border-primary/40 transition-colors text-sm">
-                        <FolderKanban className="w-3.5 h-3.5 text-primary shrink-0" />
-                        <span className="font-medium">{p.name}</span>
-                        <span className={`ml-auto text-[10px] px-2 py-0.5 rounded-full font-medium ${p.status === "In Progress" ? "bg-blue-500/15 text-blue-400" : p.status === "Completed" ? "bg-green-500/15 text-green-400" : "bg-muted text-muted-foreground"}`}>{p.status}</span>
-                      </Link>
-                    ))}
-                  </div>
-                )}
+
+                {/* Projects list */}
+                <div className="p-4">
+                  {pfProjects.length === 0 ? (
+                    <p className="text-xs text-muted-foreground text-center py-3">No projects in this portfolio yet.</p>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {pfProjects.map(p => (
+                        <Link
+                          key={p.id}
+                          to={`/project/${p.id}`}
+                          className="flex items-center gap-2.5 px-3 py-2.5 bg-background border border-border rounded-lg hover:border-primary/40 hover:bg-accent/30 transition-all text-sm group"
+                        >
+                          <FolderKanban className="w-4 h-4 text-primary shrink-0" />
+                          <span className="font-medium flex-1 truncate">{p.name}</span>
+                          {p.address && <span className="text-[11px] text-muted-foreground hidden sm:block truncate max-w-[140px]">{p.address}</span>}
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0 ${statusStyle(p.status)}`}>{p.status}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             );
           })}
@@ -120,8 +208,8 @@ export default function Portfolios() {
                 {unassigned.map(p => (
                   <Link key={p.id} to={`/project/${p.id}`} className="flex items-center gap-2 px-3 py-2 bg-background border border-border rounded-lg hover:border-primary/40 transition-colors text-sm">
                     <FolderKanban className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                    <span className="font-medium">{p.name}</span>
-                    <span className={`ml-auto text-[10px] px-2 py-0.5 rounded-full font-medium ${p.status === "In Progress" ? "bg-blue-500/15 text-blue-400" : p.status === "Completed" ? "bg-green-500/15 text-green-400" : "bg-muted text-muted-foreground"}`}>{p.status}</span>
+                    <span className="font-medium flex-1 truncate">{p.name}</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusStyle(p.status)}`}>{p.status}</span>
                   </Link>
                 ))}
               </div>
@@ -130,7 +218,19 @@ export default function Portfolios() {
         </div>
       )}
 
-      <CreatePortfolioDialog open={showCreate} onClose={() => setShowCreate(false)} />
+      {/* Dialogs */}
+      <PortfolioFormDialog open={showCreate} onClose={() => setShowCreate(false)} />
+      {editPortfolio && (
+        <PortfolioFormDialog open={!!editPortfolio} onClose={() => setEditPortfolio(null)} portfolio={editPortfolio} />
+      )}
+      {invitePortfolio && (
+        <InviteToPortfolioDialog
+          open={!!invitePortfolio}
+          onClose={() => setInvitePortfolio(null)}
+          portfolioName={invitePortfolio.name}
+          projects={invitePortfolio.projects}
+        />
+      )}
     </div>
   );
 }
