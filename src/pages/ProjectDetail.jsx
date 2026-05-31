@@ -78,7 +78,7 @@ export default function ProjectDetail() {
 
       {/* Tabs */}
       <Tabs defaultValue={isClient ? "docs" : "tasks"}>
-        <TabsList className="w-full bg-card border border-border overflow-x-auto flex-nowrap scrollbar-hide">
+        <TabsList className="w-full bg-card border border-border p-1 flex gap-0.5">
           {!isClient && <TabsTrigger value="tasks" className="flex-1 gap-1 text-xs"><ClipboardList className="w-3.5 h-3.5" /> Tasks ({rootTasks.length})</TabsTrigger>}
           <TabsTrigger value="docs" className="flex-1 gap-1 text-xs"><FileText className="w-3.5 h-3.5" /> Docs ({docs.length})</TabsTrigger>
           <TabsTrigger value="photos" className="flex-1 gap-1 text-xs"><Camera className="w-3.5 h-3.5" /> Photos ({photos.length})</TabsTrigger>
