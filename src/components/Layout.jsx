@@ -22,7 +22,7 @@ export default function Layout() {
     <div className="min-h-screen bg-background flex flex-col">
       <header className="sticky top-0 z-50 bg-card border-b-2 border-primary px-4 py-3 flex items-center justify-between">
         <Link to="/" className="font-display text-xl font-extrabold text-primary tracking-tight">
-          BuildTrac <span className="text-[10px] font-medium text-muted-foreground ml-1 tracking-widest uppercase">.com</span>
+          BuildTrac
         </Link>
         <div className="flex items-center gap-3">
           <DropdownMenu>
