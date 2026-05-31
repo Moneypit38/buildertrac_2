@@ -8,7 +8,7 @@ import PortfolioIcon, { getColor } from "../components/PortfolioIcon";
 import { Link } from "react-router-dom";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 
-const HERO_IMG = "https://media.base44.com/images/public/6a1c6a3340e642df44a0130d/bc992e9e7_generated_image.png";
+const HERO_IMG = "https://media.base44.com/images/public/6a1c6a3340e642df44a0130d/f96eac568_generated_image.png";
 
 export default function Dashboard() {
   const { allowedProjectIds, isLoading: accessLoading } = useClientAccess();
