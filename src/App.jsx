@@ -10,12 +10,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import { Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import useTaskReminders from './hooks/useTaskReminders';
-import Dashboard from './pages/Dashboard';
-import Portfolios from './pages/Portfolios';
-import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
-import Documents from './pages/Documents';
-import Photos from './pages/Photos';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
@@ -54,12 +49,14 @@ const AuthenticatedApp = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<Layout />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/portfolios" element={<Portfolios />} />
+          {/* Tab routes: Layout renders these components directly for state preservation */}
+          <Route path="/" element={<></>} />
+          <Route path="/projects" element={<></>} />
+          <Route path="/portfolios" element={<></>} />
+          <Route path="/documents" element={<></>} />
+          <Route path="/photos" element={<></>} />
+          {/* Child routes rendered via Outlet */}
           <Route path="/project/:projectId" element={<ProjectDetail />} />
-          <Route path="/documents" element={<Documents />} />
-          <Route path="/photos" element={<Photos />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
