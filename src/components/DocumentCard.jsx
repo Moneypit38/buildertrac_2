@@ -8,7 +8,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
 
-export default function DocumentCard({ doc, showProject }) {
+export default function DocumentCard({ doc, showProject, canDelete = true }) {
   const qc = useQueryClient();
   const remove = useMutation({
     mutationFn: () => base44.entities.Document.delete(doc.id),
@@ -37,6 +37,7 @@ export default function DocumentCard({ doc, showProject }) {
               <Download className="w-4 h-4" />
             </a>
           )}
+          {canDelete && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <button className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all p-1"><Trash2 className="w-3.5 h-3.5" /></button>
@@ -48,6 +49,7 @@ export default function DocumentCard({ doc, showProject }) {
               <AlertDialogAction onClick={() => remove.mutate()} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction></AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+          )}
         </div>
       </div>
     </div>

@@ -24,7 +24,10 @@ export default function ProjectDetail() {
   const { data: currentUser } = useQuery({ queryKey: ["me"], queryFn: () => base44.auth.me() });
   const { data: myMembership = [] } = useQuery({ queryKey: ["membership", projectId], queryFn: () => base44.entities.ProjectMember.filter({ project_id: projectId }), enabled: !!currentUser });
   const myRole = myMembership.find(m => m.user_email === currentUser?.email)?.role;
+  const isAdmin = myRole === "admin" || currentUser?.role === "admin";
+  const isTeamMember = myRole === "team_member";
   const isClient = myRole === "client";
+  const canDelete = !isClient; // clients can upload/download but not delete
 
   const [showTaskDialog, setShowTaskDialog] = useState(false);
   const [editTask, setEditTask] = useState(null);
@@ -57,9 +60,9 @@ export default function ProjectDetail() {
             {project.address && <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1"><MapPin className="w-3.5 h-3.5" /> {project.address}</p>}
             {project.portfolio && <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">{project.portfolio}</p>}
           </div>
-          <Button variant="ghost" size="icon" onClick={() => setShowEditProject(true)}><Pencil className="w-4 h-4" /></Button>
+          {isAdmin && <Button variant="ghost" size="icon" onClick={() => setShowEditProject(true)}><Pencil className="w-4 h-4" /></Button>}
         </div>
-        {project.budget_total > 0 && (
+        {project.budget_total > 0 && !isClient && (
           <div className="mt-3 pt-3 border-t border-border">
             <div className="flex items-center gap-2 text-sm mb-1.5">
               <DollarSign className="w-4 h-4 text-primary" />
@@ -75,12 +78,12 @@ export default function ProjectDetail() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="tasks">
+      <Tabs defaultValue={isClient ? "docs" : "tasks"}>
         <TabsList className="w-full bg-card border border-border">
           {!isClient && <TabsTrigger value="tasks" className="flex-1 gap-1"><ClipboardList className="w-4 h-4" /> Tasks ({rootTasks.length})</TabsTrigger>}
           <TabsTrigger value="docs" className="flex-1 gap-1"><FileText className="w-4 h-4" /> Docs ({docs.length})</TabsTrigger>
           <TabsTrigger value="photos" className="flex-1 gap-1"><Camera className="w-4 h-4" /> Photos ({photos.length})</TabsTrigger>
-          {!isClient && <TabsTrigger value="team" className="flex-1 gap-1"><Users className="w-4 h-4" /> Team</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="team" className="flex-1 gap-1"><Users className="w-4 h-4" /> Team</TabsTrigger>}
         </TabsList>
 
         {!isClient && (
@@ -113,7 +116,7 @@ export default function ProjectDetail() {
           {docs.length === 0 ? (
             <div className="bg-card border border-border rounded-xl p-8 text-center"><FileText className="w-8 h-8 text-muted-foreground mx-auto mb-2" /><p className="text-sm text-muted-foreground">No documents yet. Upload your first blueprint.</p></div>
           ) : (
-            <div className="space-y-2">{docs.map(d => <DocumentCard key={d.id} doc={d} />)}</div>
+            <div className="space-y-2">{docs.map(d => <DocumentCard key={d.id} doc={d} canDelete={canDelete} />)}</div>
           )}
         </TabsContent>
 
@@ -122,11 +125,11 @@ export default function ProjectDetail() {
           {photos.length === 0 ? (
             <div className="bg-card border border-border rounded-xl p-8 text-center"><Camera className="w-8 h-8 text-muted-foreground mx-auto mb-2" /><p className="text-sm text-muted-foreground">No site photos yet. Capture the progress.</p></div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{photos.map(p => <PhotoCard key={p.id} photo={p} />)}</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{photos.map(p => <PhotoCard key={p.id} photo={p} canDelete={canDelete} />)}</div>
           )}
         </TabsContent>
 
-        {!isClient && (
+        {isAdmin && (
         <TabsContent value="team" className="mt-4">
           <ProjectMembersTab projectId={projectId} />
         </TabsContent>

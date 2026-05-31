@@ -7,7 +7,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
 
-export default function PhotoCard({ photo }) {
+export default function PhotoCard({ photo, canDelete = true }) {
   const qc = useQueryClient();
   const remove = useMutation({
     mutationFn: () => base44.entities.SitePhoto.delete(photo.id),
@@ -26,6 +26,7 @@ export default function PhotoCard({ photo }) {
         <div className="absolute bottom-2 left-3 right-3">
           <p className="font-semibold text-sm text-white drop-shadow-lg">{photo.title}</p>
         </div>
+        {canDelete && (
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <button className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-black/50 backdrop-blur rounded-lg p-1.5 text-white hover:text-destructive transition-all">
@@ -39,6 +40,7 @@ export default function PhotoCard({ photo }) {
             <AlertDialogAction onClick={() => remove.mutate()} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction></AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+        )}
       </div>
       {photo.description && <p className="text-xs text-muted-foreground px-3 pt-2 line-clamp-2">{photo.description}</p>}
       <div className="px-3 py-2 text-[11px] text-muted-foreground flex items-center gap-3">
