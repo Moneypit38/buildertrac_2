@@ -168,6 +168,15 @@ export default function Portfolios() {
                     {/* Action buttons */}
                     {!isClientOnly && (
                       <div className="flex items-center gap-1 shrink-0">
+                        {/* Invite Client */}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1.5 text-xs h-8"
+                          onClick={() => setInvitePortfolio({ name: pf.name, projects: pfProjects })}
+                        >
+                          <UserPlus className="w-3.5 h-3.5" /> Invite Client
+                        </Button>
                         {/* Manage Team */}
                         <Button
                           size="sm"
