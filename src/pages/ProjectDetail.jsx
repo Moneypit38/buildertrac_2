@@ -97,7 +97,7 @@ export default function ProjectDetail() {
                 <div className="space-y-2 mb-4">
                   {tasksBySection[section].map(t => (
                     <div key={t.id}>
-                      <TaskItem task={t} onExpand={() => toggleExpand(t.id)} expanded={!!expandedTasks[t.id]} />
+                      <TaskItem task={t} onExpand={() => toggleExpand(t.id)} expanded={!!expandedTasks[t.id]} onEdit={() => { setEditTask(t); setShowTaskDialog(true); }} />
                       {expandedTasks[t.id] && <SubtaskList parentTaskId={t.id} projectId={projectId} />}
                     </div>
                   ))}

@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Calendar, Trash2, ChevronDown } from "lucide-react";
+import { Calendar, Trash2, ChevronDown, Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
@@ -22,7 +22,7 @@ const statusStyles = {
   "Done": "bg-green-500/15 text-green-400 border-green-500/30",
 };
 
-export default function TaskItem({ task, onExpand, expanded }) {
+export default function TaskItem({ task, onExpand, expanded, onEdit }) {
   const qc = useQueryClient();
   const toggle = useMutation({
     mutationFn: () => base44.entities.Task.update(task.id, { completed: !task.completed }),
@@ -48,6 +48,9 @@ export default function TaskItem({ task, onExpand, expanded }) {
         )}
       </div>
       {task.assigned_to && <span className="text-[10px] text-muted-foreground hidden sm:block">{task.assigned_to}</span>}
+      {onEdit && (
+        <button onClick={onEdit} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary transition-all"><Pencil className="w-3.5 h-3.5" /></button>
+      )}
       {onExpand && (
         <button onClick={onExpand} className={`text-muted-foreground hover:text-primary transition-all ${expanded ? "rotate-180" : ""}`}><ChevronDown className="w-3.5 h-3.5" /></button>
       )}
