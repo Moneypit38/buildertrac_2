@@ -15,6 +15,18 @@
     "color": {
       "type": "string",
       "default": "orange"
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "contact_email": {
+      "type": "string"
+    },
+    "contact_phone": {
+      "type": "string"
+    },
+    "business_address": {
+      "type": "string"
     }
   },
   "required": [

@@ -22,7 +22,7 @@ import PortfolioMembersDialog from "../components/PortfolioMembersDialog";
 // ── Create / Edit Portfolio Dialog ──────────────────────────────────────────
 function PortfolioFormDialog({ open, onClose, portfolio }) {
   const isEdit = !!portfolio;
-  const [form, setForm] = useState({ name: portfolio?.name || "", description: portfolio?.description || "", icon: portfolio?.icon || "Layers", color: portfolio?.color || "orange" });
+  const [form, setForm] = useState({ name: portfolio?.name || "", description: portfolio?.description || "", icon: portfolio?.icon || "Layers", color: portfolio?.color || "orange", contact_name: portfolio?.contact_name || "", contact_email: portfolio?.contact_email || "", contact_phone: portfolio?.contact_phone || "", business_address: portfolio?.business_address || "" });
   const qc = useQueryClient();
 
   const mutation = useMutation({
@@ -53,6 +53,15 @@ function PortfolioFormDialog({ open, onClose, portfolio }) {
         >
           <div><Label>Name *</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="West Coast Residential" /></div>
           <div><Label>Description</Label><Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} placeholder="Optional description..." /></div>
+          <div className="border-t border-border pt-3">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Contact Information</p>
+            <div className="space-y-3">
+              <div><Label>Contact Name</Label><Input value={form.contact_name} onChange={e => setForm(f => ({ ...f, contact_name: e.target.value }))} placeholder="Jane Smith" /></div>
+              <div><Label>Business Address</Label><Input value={form.business_address} onChange={e => setForm(f => ({ ...f, business_address: e.target.value }))} placeholder="123 Main St, Los Angeles, CA" /></div>
+              <div><Label>Email</Label><Input type="email" value={form.contact_email} onChange={e => setForm(f => ({ ...f, contact_email: e.target.value }))} placeholder="jane@company.com" /></div>
+              <div><Label>Phone</Label><Input type="tel" value={form.contact_phone} onChange={e => setForm(f => ({ ...f, contact_phone: e.target.value }))} placeholder="(555) 123-4567" /></div>
+            </div>
+          </div>
           <div>
             <Label>Color</Label>
             <div className="flex gap-2 flex-wrap mt-1">
