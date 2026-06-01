@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import ResponsiveSelect from "../components/ResponsiveSelect";
 import { Textarea } from "@/components/ui/textarea";
 
 export default function UploadDocDialog({ open, onClose, projectId, doc }) {
@@ -48,10 +48,11 @@ export default function UploadDocDialog({ open, onClose, projectId, doc }) {
           <div><Label>Document Name *</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Structural Plans - Level 4" /></div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label>Category</Label>
-              <Select value={form.category} onValueChange={v => setForm(f => ({ ...f, category: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{["Plans", "RFI", "Change Order", "Report", "Contract"].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-              </Select></div>
+              <ResponsiveSelect
+                value={form.category}
+                onValueChange={v => setForm(f => ({ ...f, category: v }))}
+                options={["Plans", "RFI", "Change Order", "Report", "Contract"].map(c => ({ value: c, label: c }))}
+              /></div>
             <div><Label>Version</Label><Input type="number" min={1} value={form.version} onChange={e => setForm(f => ({ ...f, version: Number(e.target.value) }))} /></div>
           </div>
           <div><Label>Description</Label><Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Optional notes..." rows={2} /></div>

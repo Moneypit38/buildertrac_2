@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import ResponsiveSelect from "../components/ResponsiveSelect";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { UserPlus, Trash2, Users, Shield, Eye, Pencil } from "lucide-react";
@@ -123,14 +123,15 @@ export default function PortfolioMembersDialog({ open, onClose, portfolio }) {
               </div>
               <div>
                 <Label className="text-xs">Access Level</Label>
-                <Select value={form.role} onValueChange={v => setForm(f => ({ ...f, role: v }))}>
-                  <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="admin">Admin — manage portfolio &amp; team</SelectItem>
-                    <SelectItem value="member">Member — view &amp; edit all projects</SelectItem>
-                    <SelectItem value="viewer">Viewer — read-only access</SelectItem>
-                  </SelectContent>
-                </Select>
+                <ResponsiveSelect
+                  value={form.role}
+                  onValueChange={v => setForm(f => ({ ...f, role: v }))}
+                  options={[
+                    { value: "admin", label: "Admin — manage portfolio & team" },
+                    { value: "member", label: "Member — view & edit all projects" },
+                    { value: "viewer", label: "Viewer — read-only access" },
+                  ]}
+                />
               </div>
               <div className="flex gap-2">
                 <Button type="submit" size="sm" disabled={addMember.isPending}>{addMember.isPending ? "Inviting..." : "Send Invite"}</Button>
@@ -159,16 +160,16 @@ export default function PortfolioMembersDialog({ open, onClose, portfolio }) {
                     <p className="text-sm font-medium truncate">{m.user_name || m.user_email}</p>
                     {m.user_name && <p className="text-xs text-muted-foreground truncate">{m.user_email}</p>}
                   </div>
-                  <Select value={m.role} onValueChange={role => updateRole.mutate({ id: m.id, role })}>
-                    <SelectTrigger className={`h-7 text-[11px] w-24 border ${info.style}`}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="member">Member</SelectItem>
-                      <SelectItem value="viewer">Viewer</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <ResponsiveSelect
+                    value={m.role}
+                    onValueChange={role => updateRole.mutate({ id: m.id, role })}
+                    options={[
+                      { value: "admin", label: "Admin" },
+                      { value: "member", label: "Member" },
+                      { value: "viewer", label: "Viewer" },
+                    ]}
+                    className={`h-8 text-xs w-24 border ${info.style}`}
+                  />
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>

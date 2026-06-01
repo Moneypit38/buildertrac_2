@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import ResponsiveSelect from "../components/ResponsiveSelect";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
@@ -79,14 +79,15 @@ export default function ProjectMembersTab({ projectId }) {
             <div><Label>Email *</Label><Input type="email" value={form.user_email} onChange={e => setForm(f => ({ ...f, user_email: e.target.value }))} placeholder="jane@example.com" /></div>
           </div>
           <div><Label>Role</Label>
-            <Select value={form.role} onValueChange={v => setForm(f => ({ ...f, role: v }))}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="team_member">Team Member — full project access</SelectItem>
-                <SelectItem value="client">Client — docs &amp; photos only</SelectItem>
-                <SelectItem value="admin">Admin — manage everything</SelectItem>
-              </SelectContent>
-            </Select>
+            <ResponsiveSelect
+              value={form.role}
+              onValueChange={v => setForm(f => ({ ...f, role: v }))}
+              options={[
+                { value: "team_member", label: "Team Member — full project access" },
+                { value: "client", label: "Client — docs & photos only" },
+                { value: "admin", label: "Admin — manage everything" },
+              ]}
+            />
           </div>
           <div className="flex gap-2">
             <Button type="submit" size="sm" disabled={addMember.isPending}>{addMember.isPending ? "Inviting..." : "Send Invite"}</Button>
@@ -111,16 +112,16 @@ export default function ProjectMembersTab({ projectId }) {
                 <p className="text-sm font-medium truncate">{m.user_name || m.user_email}</p>
                 {m.user_name && <p className="text-xs text-muted-foreground truncate">{m.user_email}</p>}
               </div>
-              <Select value={m.role} onValueChange={role => updateRole.mutate({ id: m.id, role })}>
-                <SelectTrigger className={`h-7 text-[11px] w-28 border ${roleStyles[m.role]}`}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="team_member">Team Member</SelectItem>
-                  <SelectItem value="client">Client</SelectItem>
-                </SelectContent>
-              </Select>
+              <ResponsiveSelect
+                value={m.role}
+                onValueChange={role => updateRole.mutate({ id: m.id, role })}
+                options={[
+                  { value: "admin", label: "Admin" },
+                  { value: "team_member", label: "Team Member" },
+                  { value: "client", label: "Client" },
+                ]}
+                className={`h-8 text-xs w-28 border ${roleStyles[m.role]}`}
+              />
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>

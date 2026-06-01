@@ -1,13 +1,16 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useClientAccess } from "../hooks/useClientAccess";
 import { base44 } from "@/api/base44Client";
 import DocumentCard from "../components/DocumentCard";
 import { FileText } from "lucide-react";
+import { usePullToRefresh } from "../hooks/usePullToRefresh";
 
 const categories = ["All", "Plans", "RFI", "Change Order", "Report", "Contract"];
 
 export default function Documents() {
+  const qc = useQueryClient();
+  const { refreshing, touchHandlers } = usePullToRefresh(() => qc.invalidateQueries());
   const { data: docs = [], isLoading } = useQuery({ queryKey: ["documents"], queryFn: () => base44.entities.Document.list() });
   const { data: projects = [] } = useQuery({ queryKey: ["projects"], queryFn: () => base44.entities.Project.list() });
   const { allowedProjectIds } = useClientAccess();
@@ -21,7 +24,10 @@ export default function Documents() {
   if (isLoading) return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
   return (
-    <div className="p-4 max-w-2xl mx-auto space-y-4">
+    <div className="p-4 max-w-2xl mx-auto space-y-4" {...touchHandlers}>
+      {refreshing && (
+        <div className="flex justify-center pt-2"><div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
+      )}
       <h1 className="text-xl font-bold font-display">All Documents</h1>
 
       <div className="flex gap-2 overflow-x-auto pb-1">
