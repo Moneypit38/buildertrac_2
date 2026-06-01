@@ -173,6 +173,14 @@ export default function Portfolios() {
                       <p className="text-xs text-muted-foreground mt-1.5">
                         {pfProjects.length} project{pfProjects.length !== 1 ? "s" : ""}
                       </p>
+                      {(pf.contact_name || pf.contact_email || pf.contact_phone || pf.business_address) && (
+                        <div className="mt-2 space-y-0.5">
+                          {pf.contact_name && <p className="text-xs text-foreground font-medium">{pf.contact_name}</p>}
+                          {pf.business_address && <p className="text-xs text-muted-foreground">{pf.business_address}</p>}
+                          {pf.contact_email && <p className="text-xs text-muted-foreground">{pf.contact_email}</p>}
+                          {pf.contact_phone && <p className="text-xs text-muted-foreground">{pf.contact_phone}</p>}
+                        </div>
+                      )}
                     </div>
                     </div>
 
