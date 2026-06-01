@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useClientAccess } from "../hooks/useClientAccess";
 import { base44 } from "@/api/base44Client";
 import ProjectCard from "../components/ProjectCard";
 import CreateProjectDialog from "../components/CreateProjectDialog";
 import { Button } from "@/components/ui/button";
 import { Plus, FolderKanban } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
+
 
 export default function Projects() {
   const { data: projects = [], isLoading } = useQuery({ queryKey: ["projects"], queryFn: () => base44.entities.Project.list() });
@@ -16,6 +16,10 @@ export default function Projects() {
   const { refreshing, touchHandlers } = usePullToRefresh(() => qc.invalidateQueries({ queryKey: ["projects"] }));
   const [showCreate, setShowCreate] = useState(false);
   const [filter, setFilter] = useState("All");
+  const deleteProject = useMutation({
+    mutationFn: (id) => base44.entities.Project.delete(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["projects"] }),
+  });
 
   const visibleProjects = allowedProjectIds
     ? projects.filter(p => allowedProjectIds.includes(p.id))
@@ -53,7 +57,7 @@ export default function Projects() {
           <p className="text-muted-foreground">No projects here yet. Create your first one.</p>
         </div>
       ) : (
-        <div className="space-y-3">{filtered.map(p => <ProjectCard key={p.id} project={p} />)}</div>
+        <div className="space-y-3">{filtered.map(p => <ProjectCard key={p.id} project={p} onDelete={!isClientOnly ? () => deleteProject.mutate(p.id) : undefined} />)}</div>
       )}
 
       <CreateProjectDialog open={showCreate} onClose={() => setShowCreate(false)} />

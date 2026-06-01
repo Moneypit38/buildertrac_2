@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { MapPin, ArrowRight } from "lucide-react";
+import { MapPin, ArrowRight, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const statusColors = {
   "Planning": "bg-blue-500/20 text-blue-400",
@@ -9,7 +10,7 @@ const statusColors = {
   "Completed": "bg-green-500/20 text-green-400",
 };
 
-export default function ProjectCard({ project }) {
+export default function ProjectCard({ project, onDelete }) {
   return (
     <Link to={`/project/${project.id}`}
       className="block bg-card border border-border rounded-xl p-4 hover:border-primary/50 transition-all duration-200 group">
@@ -30,7 +31,26 @@ export default function ProjectCard({ project }) {
             <p className="text-[11px] text-muted-foreground mt-1.5 uppercase tracking-wider">{project.portfolio}</p>
           )}
         </div>
-        <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0 mt-1" />
+        <div className="flex items-center gap-1 shrink-0">
+          {onDelete && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button onClick={e => e.preventDefault()} className="p-1 rounded text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete project?</AlertDialogTitle>
+                  <AlertDialogDescription>This will permanently delete "{project.name}" and cannot be undone.</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={onDelete} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+          <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors mt-1" />
+        </div>
       </div>
       {project.budget_total > 0 && (
         <div className="mt-3">
