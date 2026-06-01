@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import TaskItem from "../components/TaskItem";
 import DocumentCard from "../components/DocumentCard";
@@ -11,7 +11,10 @@ import UploadPhotoDialog from "../components/UploadPhotoDialog";
 import CreateProjectDialog from "../components/CreateProjectDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, MapPin, ClipboardList, FileText, Camera, Pencil, DollarSign, Users, MessageSquare } from "lucide-react";
+import { ArrowLeft, Plus, MapPin, ClipboardList, FileText, Camera, Pencil, DollarSign, Users, MessageSquare, Trash2 } from "lucide-react";
+
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 import ProjectMembersTab from "../components/ProjectMembersTab";
 import NotesTab from "../components/NotesTab";
 import SubtaskList from "../components/SubtaskList";
@@ -39,6 +42,12 @@ export default function ProjectDetail() {
   const [editPhoto, setEditPhoto] = useState(null);
   const [showEditProject, setShowEditProject] = useState(false);
   const [expandedTasks, setExpandedTasks] = useState({});
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const deleteProject = useMutation({
+    mutationFn: () => base44.entities.Project.delete(projectId),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["projects"] }); toast.success("Project deleted"); navigate("/"); },
+  });
   const toggleExpand = (id) => setExpandedTasks(p => ({ ...p, [id]: !p[id] }));
 
   if (isLoading) return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
@@ -59,7 +68,26 @@ export default function ProjectDetail() {
             {project.address && <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1"><MapPin className="w-3.5 h-3.5" /> {project.address}</p>}
             {project.portfolio && <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">{project.portfolio}</p>}
           </div>
-          {isAdmin && <Button variant="ghost" size="icon" onClick={() => setShowEditProject(true)}><Pencil className="w-4 h-4" /></Button>}
+          {isAdmin && (
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon" onClick={() => setShowEditProject(true)}><Pencil className="w-4 h-4" /></Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete project?</AlertDialogTitle>
+                    <AlertDialogDescription>This will permanently delete "{project.name}" and cannot be undone.</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => deleteProject.mutate()} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          )}
         </div>
         {project.budget_total > 0 && !isClient && (
           <div className="mt-3 pt-3 border-t border-border">
