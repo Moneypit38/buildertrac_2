@@ -27,10 +27,10 @@ export default function Dashboard() {
 
   const activeTasks = visibleTasks.filter(t => !t.completed).length;
 
-  // Only show portfolios that have at least one visible project
-  const visiblePortfolios = portfolios.filter(pf =>
-    visibleProjects.some(p => p.portfolio === pf.name)
-  );
+  // Clients only see portfolios with accessible projects; admins see all portfolios
+  const visiblePortfolios = allowedProjectIds
+    ? portfolios.filter(pf => visibleProjects.some(p => p.portfolio === pf.name))
+    : portfolios;
 
   if (accessLoading) return (
     <div className="flex items-center justify-center h-64">
