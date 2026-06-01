@@ -15,6 +15,7 @@ import { ArrowLeft, Plus, MapPin, ClipboardList, FileText, Camera, Pencil, Dolla
 import ProjectMembersTab from "../components/ProjectMembersTab";
 import NotesTab from "../components/NotesTab";
 import SubtaskList from "../components/SubtaskList";
+import AITaskGenerator from "../components/AITaskGenerator";
 
 export default function ProjectDetail() {
   const { projectId } = useParams();
@@ -87,7 +88,10 @@ export default function ProjectDetail() {
 
         {!isClient && (
         <TabsContent value="tasks" className="space-y-4 mt-4">
-          <Button size="sm" onClick={() => { setEditTask(null); setShowTaskDialog(true); }}><Plus className="w-4 h-4 mr-1" /> Add Task</Button>
+          <div className="flex gap-2">
+            <Button size="sm" onClick={() => { setEditTask(null); setShowTaskDialog(true); }}><Plus className="w-4 h-4 mr-1" /> Add Task</Button>
+          </div>
+          <AITaskGenerator projectId={projectId} projectName={project?.name} />
           {rootTasks.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-6">No tasks yet. Add your first task above.</p>
           ) : (
