@@ -16,6 +16,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
 import InviteToPortfolioDialog from "../components/InviteToPortfolioDialog";
+import CreateProjectDialog from "../components/CreateProjectDialog";
 import PortfolioMembersDialog from "../components/PortfolioMembersDialog";
 
 // ── Create / Edit Portfolio Dialog ──────────────────────────────────────────
@@ -93,6 +94,7 @@ export default function Portfolios() {
 
   const [showCreate, setShowCreate] = useState(false);
   const [editPortfolio, setEditPortfolio] = useState(null);
+  const [addProjectToPortfolio, setAddProjectToPortfolio] = useState(null);
   const [invitePortfolio, setInvitePortfolio] = useState(null);
   const [teamPortfolio, setTeamPortfolio] = useState(null);
 
@@ -218,7 +220,7 @@ export default function Portfolios() {
                 </div>
 
                 {/* Projects list */}
-                <div className="p-4">
+                <div className="p-4 space-y-3">
                   {pfProjects.length === 0 ? (
                     <p className="text-xs text-muted-foreground text-center py-3">No projects in this portfolio yet.</p>
                   ) : (
@@ -236,6 +238,14 @@ export default function Portfolios() {
                         </Link>
                       ))}
                     </div>
+                  )}
+                  {!isClientOnly && (
+                    <button
+                      onClick={() => setAddProjectToPortfolio(pf.name)}
+                      className="w-full flex items-center justify-center gap-1.5 py-2 text-xs text-muted-foreground hover:text-primary border border-dashed border-border hover:border-primary/40 rounded-lg transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Add Project
+                    </button>
                   )}
                 </div>
               </div>
@@ -261,6 +271,9 @@ export default function Portfolios() {
 
       {/* Dialogs */}
       <PortfolioFormDialog open={showCreate} onClose={() => setShowCreate(false)} />
+      {addProjectToPortfolio && (
+        <CreateProjectDialog open={!!addProjectToPortfolio} onClose={() => setAddProjectToPortfolio(null)} defaultPortfolio={addProjectToPortfolio} />
+      )}
       {editPortfolio && (
         <PortfolioFormDialog open={!!editPortfolio} onClose={() => setEditPortfolio(null)} portfolio={editPortfolio} />
       )}

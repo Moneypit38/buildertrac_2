@@ -8,12 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ResponsiveSelect from "@/components/ResponsiveSelect";
 
-export default function CreateProjectDialog({ open, onClose, project }) {
+export default function CreateProjectDialog({ open, onClose, project, defaultPortfolio }) {
   const isEdit = !!project;
   const [form, setForm] = useState(project ? {
     name: project.name || "", address: project.address || "", portfolio: project.portfolio || "",
     status: project.status || "Planning", budget_total: project.budget_total || 0, budget_spent: project.budget_spent || 0,
-  } : { name: "", address: "", portfolio: "", status: "Planning", budget_total: 0, budget_spent: 0 });
+  } : { name: "", address: "", portfolio: defaultPortfolio || "", status: "Planning", budget_total: 0, budget_spent: 0 });
 
   const qc = useQueryClient();
   const { data: portfolios = [] } = useQuery({ queryKey: ["portfolios"], queryFn: () => base44.entities.Portfolio.list() });
