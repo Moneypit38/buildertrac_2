@@ -83,7 +83,7 @@ export default function ProjectDetail() {
           <TabsTrigger value="docs" className="flex-1 gap-1 text-xs px-1 py-1"><FileText className="w-3 h-3" /><span>Docs</span></TabsTrigger>
           <TabsTrigger value="photos" className="flex-1 gap-1 text-xs px-1 py-1"><Camera className="w-3 h-3" /><span>Photos</span></TabsTrigger>
           {isAdmin && <TabsTrigger value="team" className="flex-1 gap-1 text-xs px-1 py-1"><Users className="w-3 h-3" /><span>Team</span></TabsTrigger>}
-          <TabsTrigger value="notes" className="flex-1 gap-1 text-xs px-1 py-1"><MessageSquare className="w-3 h-3" /><span>Notes</span></TabsTrigger>
+          <TabsTrigger value="notes" className="flex-1 gap-1 text-xs px-1 py-1"><MessageSquare className="w-3 h-3" /><span>Messages</span></TabsTrigger>
         </TabsList>
 
         {!isClient && (

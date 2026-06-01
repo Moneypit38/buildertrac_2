@@ -17,6 +17,20 @@ export default function NotesTab({ projectId }) {
     queryFn: () => base44.entities.Note.filter({ project_id: projectId }, "created_date"),
   });
 
+  // Real-time subscription
+  useEffect(() => {
+    const unsubscribe = base44.entities.Note.subscribe((event) => {
+      if (event.data?.project_id !== projectId) return;
+      qc.setQueryData(["notes", projectId], (old = []) => {
+        if (event.type === "create") return [...old, event.data];
+        if (event.type === "update") return old.map(n => n.id === event.id ? event.data : n);
+        if (event.type === "delete") return old.filter(n => n.id !== event.id);
+        return old;
+      });
+    });
+    return unsubscribe;
+  }, [projectId]);
+
   const { data: currentUser } = useQuery({
     queryKey: ["me"],
     queryFn: () => base44.auth.me(),
