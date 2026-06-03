@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Calendar, Trash2, ChevronDown, Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { isNew } from "../hooks/useLastViewed";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
@@ -24,6 +25,10 @@ const statusStyles = {
 
 export default function TaskItem({ task, onExpand, expanded, onEdit }) {
   const qc = useQueryClient();
+  const isNewTask = isNew(task.created_date, "tasks");
+  const todayStr = new Date().toISOString().split("T")[0];
+  const isOverdue = !task.completed && task.due_date && task.due_date <= todayStr;
+
   const toggle = useMutation({
     mutationFn: () => base44.entities.Task.update(task.id, { completed: !task.completed }),
     onMutate: async () => {
@@ -35,25 +40,30 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
       return { prev };
     },
     onError: (_, __, ctx) => { if (ctx?.prev) qc.setQueryData(["tasks"], ctx.prev); },
-    onSettled: () => { qc.invalidateQueries({ queryKey: ["tasks"] }); },
+    onSettled: () => { qc.invalidateQueries({ queryKey: ["tasks"], exact: false }); },
     onSuccess: () => { toast.success(task.completed ? "Task reopened" : "Task completed!"); },
   });
   const remove = useMutation({
     mutationFn: () => base44.entities.Task.delete(task.id),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["tasks"] }); toast.success("Task removed"); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["tasks"], exact: false }); toast.success("Task removed"); },
   });
 
   return (
-    <div className="bg-card border border-border rounded-xl p-3 flex items-center gap-3 group hover:border-primary/30 transition-all">
+    <div className={`bg-card border rounded-xl p-3 flex items-center gap-3 group hover:border-primary/30 transition-all ${isOverdue ? "border-orange-400/60" : "border-border"}`}>
       <button onClick={() => toggle.mutate()}
         className={`w-5 h-5 rounded-md border-2 shrink-0 transition-all duration-300 ${task.completed ? "bg-primary border-primary scale-110" : "border-muted-foreground/40 bg-background hover:border-primary/60"}`}>
         {task.completed && <svg className="w-full h-full text-primary-foreground" viewBox="0 0 16 16"><path d="M4 8l3 3 5-5" stroke="currentColor" strokeWidth="2" fill="none"/></svg>}
       </button>
       <div className="flex-1 min-w-0">
-        <p className={`text-sm font-medium truncate ${task.completed ? "line-through text-muted-foreground" : "text-foreground"}`}>{task.title}</p>
+        <div className="flex items-center gap-1.5">
+          <p className={`text-sm font-medium truncate ${task.completed ? "line-through text-muted-foreground" : "text-foreground"}`}>{task.title}</p>
+          {isNewTask && !task.completed && (
+            <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse shrink-0" title="New task" />
+          )}
+        </div>
         {task.due_date && (
-          <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
-            <Calendar className="w-3 h-3" /> {task.due_date}
+          <p className={`text-[11px] flex items-center gap-1 mt-0.5 ${isOverdue ? "text-orange-400 font-medium" : "text-muted-foreground"}`}>
+            <Calendar className="w-3 h-3" /> {task.due_date}{isOverdue ? " • Overdue" : ""}
           </p>
         )}
       </div>

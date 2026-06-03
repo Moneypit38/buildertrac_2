@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -19,6 +19,7 @@ import ProjectMembersTab from "../components/ProjectMembersTab";
 import NotesTab from "../components/NotesTab";
 import SubtaskList from "../components/SubtaskList";
 import AITaskGenerator from "../components/AITaskGenerator";
+import { markViewed } from "../hooks/useLastViewed";
 
 export default function ProjectDetail() {
   const { projectId } = useParams();
@@ -48,6 +49,11 @@ export default function ProjectDetail() {
     mutationFn: () => base44.entities.Project.delete(projectId),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["projects"] }); toast.success("Project deleted"); navigate("/"); },
   });
+
+  // Mark tasks as viewed when this project detail page loads
+  useEffect(() => {
+    markViewed("tasks");
+  }, [projectId]);
   const toggleExpand = (id) => setExpandedTasks(p => ({ ...p, [id]: !p[id] }));
 
   if (isLoading) return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;

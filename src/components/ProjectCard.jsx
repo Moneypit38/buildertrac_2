@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { MapPin, ArrowRight, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useQuery } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
 
 const statusColors = {
   "Planning": "bg-blue-500/20 text-blue-400",
@@ -11,9 +13,16 @@ const statusColors = {
 };
 
 export default function ProjectCard({ project, onDelete }) {
+  const { data: projectTasks = [] } = useQuery({
+    queryKey: ["tasks", project.id],
+    queryFn: () => base44.entities.Task.filter({ project_id: project.id }),
+  });
+  const todayStr = new Date().toISOString().split("T")[0];
+  const overdueCount = projectTasks.filter(t => !t.completed && t.due_date && t.due_date <= todayStr).length;
+
   return (
     <Link to={`/project/${project.id}`}
-      className="block bg-card border border-border rounded-xl p-4 hover:border-primary/50 transition-all duration-200 group">
+      className={`block bg-card border rounded-xl p-4 hover:border-primary/50 transition-all duration-200 group ${overdueCount > 0 ? "border-orange-400/60 border-t-2 border-t-orange-400" : "border-border"}`}>
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
@@ -21,6 +30,12 @@ export default function ProjectCard({ project, onDelete }) {
             <Badge variant="outline" className={`text-[10px] shrink-0 ${statusColors[project.status] || ""}`}>
               {project.status || "Planning"}
             </Badge>
+            {overdueCount > 0 && (
+              <span className="text-[10px] font-semibold text-orange-400 flex items-center gap-1 shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse inline-block" />
+                {overdueCount} overdue
+              </span>
+            )}
           </div>
           {project.address && (
             <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">

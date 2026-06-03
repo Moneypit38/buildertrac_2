@@ -8,6 +8,7 @@ const KEYS = {
   photos: "lastViewed_photos",
   projects: "lastViewed_projects",
   notes: "lastViewed_notes",
+  tasks: "lastViewed_tasks",
 };
 
 export function getLastViewed(section) {
