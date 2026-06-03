@@ -19,13 +19,35 @@ export default function Dashboard() {
   const { data: tasks = [] } = useQuery({ queryKey: ["tasks"], queryFn: () => base44.entities.Task.list() });
   const { data: docs = [] } = useQuery({ queryKey: ["documents"], queryFn: () => base44.entities.Document.list() });
   const { data: photos = [] } = useQuery({ queryKey: ["photos"], queryFn: () => base44.entities.SitePhoto.list() });
+  const { data: notes = [] } = useQuery({ queryKey: ["notes"], queryFn: () => base44.entities.Note.list() });
 
   const visibleProjects = allowedProjectIds ? projects.filter(p => allowedProjectIds.includes(p.id)) : projects;
   const visibleTasks = allowedProjectIds ? tasks.filter(t => allowedProjectIds.includes(t.project_id)) : tasks;
   const visibleDocs = allowedProjectIds ? docs.filter(d => allowedProjectIds.includes(d.project_id)) : docs;
   const visiblePhotos = allowedProjectIds ? photos.filter(ph => allowedProjectIds.includes(ph.project_id)) : photos;
 
-  const activeTasks = visibleTasks.filter(t => !t.completed).length;
+  const now = new Date();
+  const todayStr = now.toISOString().split("T")[0];
+  const cutoff72h = new Date(now.getTime() - 72 * 60 * 60 * 1000);
+
+  // Tasks overdue or due today (not completed)
+  const urgentTasks = visibleTasks.filter(t => {
+    if (t.completed) return false;
+    if (!t.due_date) return false;
+    return t.due_date <= todayStr;
+  }).length;
+
+  // Docs uploaded in last 72 hours
+  const newDocs = visibleDocs.filter(d => new Date(d.created_date) >= cutoff72h).length;
+
+  // Photos uploaded in last 72 hours
+  const newPhotos = visiblePhotos.filter(ph => new Date(ph.created_date) >= cutoff72h).length;
+
+  // Notes added in last 72 hours
+  const newNotes = (notes || []).filter(n => {
+    if (allowedProjectIds && !allowedProjectIds.includes(n.project_id)) return false;
+    return new Date(n.created_date) >= cutoff72h;
+  }).length;
 
   // Clients only see portfolios with accessible projects; admins see all portfolios
   const visiblePortfolios = allowedProjectIds
@@ -55,10 +77,10 @@ export default function Dashboard() {
       </div>
 
       <StatCards stats={[
-        { value: activeTasks, label: "Active Tasks", href: "/projects" },
-        { value: visibleDocs.length, label: "Documents", href: "/documents" },
-        { value: visiblePhotos.length, label: "Site Photos", href: "/photos" },
-        { value: visibleProjects.length, label: "Projects", href: "/projects" },
+        { value: urgentTasks, label: "Tasks Due / Overdue", href: "/projects" },
+        { value: newNotes, label: "New Messages", href: "/projects" },
+        { value: newDocs, label: "New Documents", href: "/documents" },
+        { value: newPhotos, label: "New Photos", href: "/photos" },
       ]} />
 
       {/* Portfolios */}
