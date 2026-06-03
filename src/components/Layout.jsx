@@ -71,8 +71,8 @@ export default function Layout() {
             <span className="text-sm">Back</span>
           </button>
         ) : (
-          <Link to="/" className="font-display text-xl font-extrabold text-primary tracking-tight min-h-[44px] flex items-center">
-            BuilderTrac
+          <Link to="/" className="font-display text-xl font-extrabold text-foreground tracking-tight min-h-[44px] flex items-center">
+            Builder<span className="text-amber-500">T</span>rac
           </Link>
         )}
 
