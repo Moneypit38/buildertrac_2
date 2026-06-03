@@ -72,7 +72,7 @@ export default function Layout() {
           </button>
         ) : (
           <Link to="/" className="font-display text-xl font-extrabold text-foreground tracking-tight min-h-[44px] flex items-center">
-            Builder<span className="text-yellow-400">T</span>rac
+            Builder<span style={{color: "#FABC3F"}}>T</span>rac
           </Link>
         )}
 
