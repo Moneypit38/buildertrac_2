@@ -55,7 +55,7 @@ export default function Layout() {
   const isChildRoute = !onTab; // e.g. /project/:id
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--background))', backgroundImage: 'url(https://media.base44.com/images/public/6a1c6a3340e642df44a0130d/3f4ac3bd2_generated_image.png)', backgroundSize: '400px 400px', backgroundRepeat: 'repeat' }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--background))', backgroundImage: 'url(https://media.base44.com/images/public/6a1c6a3340e642df44a0130d/cba7fcbba_generated_image.png)', backgroundSize: '400px 400px', backgroundRepeat: 'repeat' }}>
       {/* Header with safe-area top inset */}
       <header
         className="sticky top-0 z-50 bg-card border-b-2 border-primary px-4 flex items-center justify-between"
