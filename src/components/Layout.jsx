@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, FolderKanban, FileText, Camera, Layers, LogOut, Sun, Moon, Trash2, ChevronLeft } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -14,6 +14,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { motion, AnimatePresence } from "framer-motion";
+import { markViewed, isNew } from "../hooks/useLastViewed";
 
 // Tab page components — rendered persistently to preserve state
 import Dashboard from "../pages/Dashboard";
@@ -21,6 +22,13 @@ import Portfolios from "../pages/Portfolios";
 import Projects from "../pages/Projects";
 import Documents from "../pages/Documents";
 import Photos from "../pages/Photos";
+
+// Map nav paths to their "last viewed" section keys
+const NAV_SECTION_KEYS = {
+  "/documents": "docs",
+  "/photos": "photos",
+  "/projects": "notes", // notes/messages live inside projects
+};
 
 const navItems = [
   { path: "/", icon: LayoutDashboard, label: "Home", Component: Dashboard },
@@ -49,10 +57,32 @@ export default function Layout() {
   const initials = user?.full_name?.split(" ").map(n => n[0]).join("").toUpperCase() || "U";
   const { theme, setTheme } = useTheme();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [, forceUpdate] = useState(0);
 
   const onTab = isTabPath(location.pathname);
   const activeTab = getActiveTab(location.pathname);
-  const isChildRoute = !onTab; // e.g. /project/:id
+  const isChildRoute = !onTab;
+
+  // Fetch data needed for nav badge counts
+  const { data: docs = [] } = useQuery({ queryKey: ["documents"], queryFn: () => base44.entities.Document.list() });
+  const { data: photos = [] } = useQuery({ queryKey: ["photos"], queryFn: () => base44.entities.SitePhoto.list() });
+  const { data: notes = [] } = useQuery({ queryKey: ["notes"], queryFn: () => base44.entities.Note.list() });
+
+  // Mark section as viewed when user navigates to that tab, then re-render badges
+  useEffect(() => {
+    const sectionKey = NAV_SECTION_KEYS[activeTab];
+    if (sectionKey) {
+      markViewed(sectionKey);
+      forceUpdate(n => n + 1);
+    }
+  }, [activeTab]);
+
+  // Badge counts per nav path
+  const navBadges = {
+    "/documents": docs.filter(d => isNew(d.created_date, "docs")).length,
+    "/photos": photos.filter(ph => isNew(ph.created_date, "photos")).length,
+    "/projects": notes.filter(n => isNew(n.created_date, "notes")).length,
+  };
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--background))' }}>
@@ -149,13 +179,19 @@ export default function Layout() {
         <div className="max-w-lg mx-auto flex justify-around px-2">
           {navItems.map(({ path, icon: Icon, label }) => {
             const isActive = path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
+            const badgeCount = navBadges[path] || 0;
             return (
               <Link
                 key={path}
                 to={path}
-                className={`flex flex-col items-center gap-1 px-4 min-h-[44px] py-2 rounded-xl transition-all duration-200 ${isActive ? "text-primary bg-accent" : "text-muted-foreground hover:text-foreground"}`}
+                className={`flex flex-col items-center gap-1 px-4 min-h-[44px] py-2 rounded-xl transition-all duration-200 relative ${isActive ? "text-primary bg-accent" : "text-muted-foreground hover:text-foreground"}`}
               >
-                <Icon className="w-5 h-5" />
+                <span className="relative">
+                  <Icon className="w-5 h-5" />
+                  {badgeCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
+                  )}
+                </span>
                 <span className="text-[11px] font-medium">{label}</span>
               </Link>
             );

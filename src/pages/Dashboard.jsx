@@ -7,6 +7,7 @@ import { HardHat, Layers } from "lucide-react";
 import PortfolioIcon, { getColor } from "../components/PortfolioIcon";
 import { Link } from "react-router-dom";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
+import { isNew } from "../hooks/useLastViewed";
 
 
 
@@ -26,9 +27,7 @@ export default function Dashboard() {
   const visibleDocs = allowedProjectIds ? docs.filter(d => allowedProjectIds.includes(d.project_id)) : docs;
   const visiblePhotos = allowedProjectIds ? photos.filter(ph => allowedProjectIds.includes(ph.project_id)) : photos;
 
-  const now = new Date();
-  const todayStr = now.toISOString().split("T")[0];
-  const cutoff72h = new Date(now.getTime() - 72 * 60 * 60 * 1000);
+  const todayStr = new Date().toISOString().split("T")[0];
 
   // Tasks overdue or due today (not completed)
   const urgentTasks = visibleTasks.filter(t => {
@@ -37,16 +36,16 @@ export default function Dashboard() {
     return t.due_date <= todayStr;
   }).length;
 
-  // Docs uploaded in last 72 hours
-  const newDocs = visibleDocs.filter(d => new Date(d.created_date) >= cutoff72h).length;
+  // Docs uploaded in last 72h and not yet viewed
+  const newDocs = visibleDocs.filter(d => isNew(d.created_date, "docs")).length;
 
-  // Photos uploaded in last 72 hours
-  const newPhotos = visiblePhotos.filter(ph => new Date(ph.created_date) >= cutoff72h).length;
+  // Photos uploaded in last 72h and not yet viewed
+  const newPhotos = visiblePhotos.filter(ph => isNew(ph.created_date, "photos")).length;
 
-  // Notes added in last 72 hours
+  // Notes added in last 72h and not yet viewed
   const newNotes = (notes || []).filter(n => {
     if (allowedProjectIds && !allowedProjectIds.includes(n.project_id)) return false;
-    return new Date(n.created_date) >= cutoff72h;
+    return isNew(n.created_date, "notes");
   }).length;
 
   // Clients only see portfolios with accessible projects; admins see all portfolios
