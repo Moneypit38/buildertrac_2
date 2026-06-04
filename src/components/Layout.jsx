@@ -27,7 +27,6 @@ import Photos from "../pages/Photos";
 const NAV_SECTION_KEYS = {
   "/documents": "docs",
   "/photos": "photos",
-  "/projects": "notes", // notes/messages live inside projects
 };
 
 const navItems = [
@@ -66,7 +65,6 @@ export default function Layout() {
   // Fetch data needed for nav badge counts
   const { data: docs = [] } = useQuery({ queryKey: ["documents"], queryFn: () => base44.entities.Document.list() });
   const { data: photos = [] } = useQuery({ queryKey: ["photos"], queryFn: () => base44.entities.SitePhoto.list() });
-  const { data: notes = [] } = useQuery({ queryKey: ["notes"], queryFn: () => base44.entities.Note.list() });
 
   // Mark section as viewed when user navigates to that tab, then re-render badges
   useEffect(() => {
@@ -81,7 +79,6 @@ export default function Layout() {
   const navBadges = {
     "/documents": docs.filter(d => isNew(d.created_date, "docs")).length,
     "/photos": photos.filter(ph => isNew(ph.created_date, "photos")).length,
-    "/projects": notes.filter(n => isNew(n.created_date, "notes")).length,
   };
 
   return (
