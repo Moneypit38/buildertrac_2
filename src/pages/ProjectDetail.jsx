@@ -72,10 +72,7 @@ export default function ProjectDetail() {
     window.dispatchEvent(new Event("tasks-seen-updated"));
   };
 
-  // Also mark on initial load if tasks tab is default
-  useEffect(() => {
-    if (tasks.length > 0 && !isClient) markTasksViewed();
-  }, [tasks.length, projectId]);
+
   const toggleExpand = (id) => setExpandedTasks(p => ({ ...p, [id]: !p[id] }));
 
   if (isLoading) return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
