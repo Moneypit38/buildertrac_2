@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -34,6 +34,27 @@ export default function ProjectDetail() {
   const isTeamMember = myRole === "team_member";
   const isClient = myRole === "client";
   const canDelete = !isClient; // clients can upload/download but not delete
+
+  // Messages badge — track last viewed per project
+  const msgsKey = `lastViewed_msgs_${projectId}`;
+  const getLastViewedMsgs = () => { const v = localStorage.getItem(msgsKey); return v ? new Date(v) : null; };
+  const [msgsBadge, setMsgsBadge] = useState(false);
+
+  const { data: notes = [] } = useQuery({
+    queryKey: ["notes", projectId],
+    queryFn: () => base44.entities.Note.filter({ project_id: projectId }),
+  });
+
+  useEffect(() => {
+    const lastViewed = getLastViewedMsgs();
+    const hasNew = notes.some(n => !lastViewed || new Date(n.created_date) > lastViewed);
+    setMsgsBadge(hasNew);
+  }, [notes]);
+
+  const markMsgsViewed = useCallback(() => {
+    localStorage.setItem(msgsKey, new Date().toISOString());
+    setMsgsBadge(false);
+  }, [msgsKey]);
 
   const [showTaskDialog, setShowTaskDialog] = useState(false);
   const [editTask, setEditTask] = useState(null);
@@ -117,7 +138,13 @@ export default function ProjectDetail() {
           <TabsTrigger value="docs" className="flex-1 gap-1 text-xs px-1 py-1"><FileText className="w-3 h-3" /><span>Docs</span></TabsTrigger>
           <TabsTrigger value="photos" className="flex-1 gap-1 text-xs px-1 py-1"><Camera className="w-3 h-3" /><span>Photos</span></TabsTrigger>
           {isAdmin && <TabsTrigger value="team" className="flex-1 gap-1 text-xs px-1 py-1"><Users className="w-3 h-3" /><span>Team</span></TabsTrigger>}
-          <TabsTrigger value="notes" className="flex-1 gap-1 text-xs px-1 py-1"><MessageSquare className="w-3 h-3" /><span>Messages</span></TabsTrigger>
+          <TabsTrigger value="notes" className="flex-1 gap-1 text-xs px-1 py-1 relative" onClick={markMsgsViewed}>
+            <span className="relative">
+              <MessageSquare className="w-3 h-3" />
+              {msgsBadge && <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-orange-400 animate-pulse" />}
+            </span>
+            <span>Messages</span>
+          </TabsTrigger>
         </TabsList>
 
         {!isClient && (
