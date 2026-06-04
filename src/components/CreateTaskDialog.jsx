@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
@@ -11,10 +11,17 @@ import { Textarea } from "@/components/ui/textarea";
 
 export default function CreateTaskDialog({ open, onClose, projectId, task }) {
   const isEdit = !!task;
-  const [form, setForm] = useState(task ? {
+  const blankForm = { title: "", description: "", priority: "medium", status: "Not Started", due_date: "", assigned_to: "" };
+  const taskForm = task ? {
     title: task.title || "", description: task.description || "", priority: task.priority || "medium",
     status: task.status || "Not Started", due_date: task.due_date || "", assigned_to: task.assigned_to || "",
-  } : { title: "", description: "", priority: "medium", status: "Not Started", due_date: "", assigned_to: "" });
+  } : blankForm;
+  const [form, setForm] = useState(taskForm);
+
+  // Reset form whenever the dialog opens or the task changes
+  useEffect(() => {
+    if (open) setForm(taskForm);
+  }, [open, task?.id]);
 
   const qc = useQueryClient();
   const mutation = useMutation({
@@ -45,7 +52,7 @@ export default function CreateTaskDialog({ open, onClose, projectId, task }) {
               options={[{ value: "high", label: "High" }, { value: "medium", label: "Medium" }, { value: "low", label: "Low" }]}
             />
           </div>
-          <div><Label>Due Date</Label><Input type="date" value={form.due_date} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} /></div>
+          <div><Label>Due Date</Label><Input type="date" value={form.due_date} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} className="min-h-[44px]" /></div>
           <div><Label>Assigned To</Label><Input value={form.assigned_to} onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))} placeholder="Name" /></div>
           <Button type="submit" className="w-full" disabled={mutation.isPending}>{mutation.isPending ? "Saving..." : isEdit ? "Save Changes" : "Create Task"}</Button>
         </form>
