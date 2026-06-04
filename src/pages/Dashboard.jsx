@@ -47,7 +47,8 @@ export default function Dashboard() {
     const projectOverdue = visibleTasks.filter(t =>
       t.project_id === p.id && !t.completed && t.due_date && t.due_date <= todayStr
     );
-    if (seenIds === null) return count + projectOverdue.length; // never visited, all count
+    // null = never visited → all overdue tasks count
+    if (seenIds === null) return count + projectOverdue.length;
     return count + projectOverdue.filter(t => !seenIds.has(t.id)).length;
   }, 0);
 
