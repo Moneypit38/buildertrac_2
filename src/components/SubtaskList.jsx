@@ -32,29 +32,64 @@ export default function SubtaskList({ parentTaskId, projectId }) {
   };
 
   return (
-    <div className="mt-2 pl-4 border-l border-border space-y-1.5">
+    <div style={{ marginTop: 8, paddingLeft: 16, borderLeft: "1px solid hsl(var(--border))" }}>
       {subtasks.map(st => (
-        <div key={st.id} className="flex items-center gap-2 group">
-          <button onClick={() => toggleSubtask.mutate(st)}
-            className={`w-4 h-4 rounded border shrink-0 flex items-center justify-center transition-all ${st.completed ? "bg-primary border-primary" : "border-muted-foreground/40 hover:border-primary/60"}`}>
-            {st.completed && <Check className="w-2.5 h-2.5 text-primary-foreground" />}
-          </button>
-          <span className={`text-xs flex-1 ${st.completed ? "line-through text-muted-foreground" : "text-foreground"}`}>{st.title}</span>
+        <div key={st.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0" }}>
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => toggleSubtask.mutate(st)}
+            style={{
+              width: 22,
+              height: 22,
+              borderRadius: 4,
+              border: `2px solid ${st.completed ? "hsl(var(--primary))" : "hsl(var(--muted-foreground) / 0.4)"}`,
+              backgroundColor: st.completed ? "hsl(var(--primary))" : "transparent",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              flexShrink: 0,
+              WebkitTapHighlightColor: "transparent",
+              touchAction: "manipulation",
+            }}
+          >
+            {st.completed && <Check size={13} color="hsl(var(--primary-foreground))" strokeWidth={3} />}
+          </div>
+          <span style={{
+            fontSize: 13,
+            flex: 1,
+            color: st.completed ? "hsl(var(--muted-foreground))" : "hsl(var(--foreground))",
+            textDecoration: st.completed ? "line-through" : "none",
+          }}>
+            {st.title}
+          </span>
         </div>
       ))}
 
       {adding ? (
-        <form onSubmit={handleAdd} className="flex items-center gap-1">
-          <input autoFocus value={newTitle} onChange={e => setNewTitle(e.target.value)}
+        <form onSubmit={handleAdd} style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 0" }}>
+          <input
+            autoFocus
+            value={newTitle}
+            onChange={e => setNewTitle(e.target.value)}
             onBlur={() => { if (!newTitle.trim()) setAdding(false); }}
-            className="flex-1 text-xs bg-background border border-input rounded px-2 py-1 outline-none focus:border-primary"
-            placeholder="Subtask title..." />
-          <button type="submit" className="text-primary hover:text-primary/80"><Check className="w-3.5 h-3.5" /></button>
+            style={{ flex: 1, fontSize: 13, background: "hsl(var(--background))", border: "1px solid hsl(var(--input))", borderRadius: 6, padding: "4px 8px", outline: "none", color: "hsl(var(--foreground))" }}
+            placeholder="Subtask title..."
+          />
+          <button type="submit" style={{ color: "hsl(var(--primary))", cursor: "pointer", background: "none", border: "none", padding: 4 }}>
+            <Check size={14} />
+          </button>
         </form>
       ) : (
-        <button onClick={() => setAdding(true)} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors">
-          <Plus className="w-3 h-3" /> Add subtask
-        </button>
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setAdding(true)}
+          style={{ display: "flex", alignItems: "center", gap: 4, padding: "8px 0", fontSize: 12, color: "hsl(var(--muted-foreground))", cursor: "pointer", WebkitTapHighlightColor: "transparent", touchAction: "manipulation" }}
+        >
+          <Plus size={12} /> Add subtask
+        </div>
       )}
     </div>
   );

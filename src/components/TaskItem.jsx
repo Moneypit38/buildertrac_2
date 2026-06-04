@@ -11,9 +11,9 @@ import {
 const PRIORITIES = ["low", "medium", "high"];
 
 const priorityConfig = {
-  high:   { label: "HIGH", bg: "bg-red-500",    text: "text-white" },
-  medium: { label: "MED",  bg: "bg-yellow-500", text: "text-black" },
-  low:    { label: "LOW",  bg: "bg-green-500",  text: "text-white" },
+  high:   { label: "HIGH", bg: "#ef4444", text: "#fff" },
+  medium: { label: "MED",  bg: "#eab308", text: "#000" },
+  low:    { label: "LOW",  bg: "#22c55e", text: "#fff" },
 };
 
 export default function TaskItem({ task, onExpand, expanded, onEdit }) {
@@ -24,10 +24,7 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
   const currentPriority = task.priority || "medium";
   const pCfg = priorityConfig[currentPriority] || priorityConfig.medium;
 
-  // Invalidate both the global and per-project task caches
-  const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ["tasks"], exact: false });
-  };
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["tasks"], exact: false });
 
   const toggle = useMutation({
     mutationFn: () => base44.entities.Task.update(task.id, { completed: !task.completed }),
@@ -51,112 +48,157 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
   });
 
   return (
-    <div className={`bg-card border rounded-xl overflow-hidden ${isOverdue ? "border-orange-400/70" : "border-border"}`}>
-      <div className="flex items-stretch">
-
-        {/* ── Complete button: full-height, generous tap target ── */}
-        <button
-          type="button"
-          onPointerUp={(e) => { e.stopPropagation(); if (!toggle.isPending) toggle.mutate(); }}
-          className={`flex items-center justify-center w-16 shrink-0 transition-colors active:opacity-70 ${
-            task.completed ? "bg-primary" : "bg-card hover:bg-accent"
-          }`}
-          style={{ minHeight: 64, touchAction: "manipulation" }}
+    <div
+      style={{
+        backgroundColor: "hsl(var(--card))",
+        border: `1px solid ${isOverdue ? "rgb(251 146 60 / 0.7)" : "hsl(var(--border))"}`,
+        borderRadius: "0.75rem",
+        overflow: "hidden",
+        display: "flex",
+      }}
+    >
+      {/* ── Complete toggle — left strip ── */}
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => { if (!toggle.isPending) toggle.mutate(); }}
+        style={{
+          width: 64,
+          minHeight: 64,
+          flexShrink: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: task.completed ? "hsl(var(--primary))" : "transparent",
+          cursor: "pointer",
+          WebkitTapHighlightColor: "transparent",
+          touchAction: "manipulation",
+          userSelect: "none",
+        }}
+      >
+        <div
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: "50%",
+            border: `2px solid ${task.completed ? "hsl(var(--primary-foreground))" : isOverdue ? "rgb(251 146 60)" : "hsl(var(--muted-foreground) / 0.4)"}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: task.completed ? "hsl(var(--primary-foreground))" : "transparent",
+          }}
         >
-          <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
-            task.completed
-              ? "bg-primary-foreground border-primary-foreground"
-              : isOverdue
-                ? "border-orange-400"
-                : "border-muted-foreground/40"
-          }`}>
-            {task.completed && <Check className="w-5 h-5 text-primary" strokeWidth={3} />}
-            {toggle.isPending && (
-              <div className="w-3 h-3 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin" />
-            )}
-          </div>
-        </button>
+          {toggle.isPending ? (
+            <div style={{ width: 12, height: 12, border: "2px solid hsl(var(--muted-foreground))", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.6s linear infinite" }} />
+          ) : task.completed ? (
+            <Check size={18} color="hsl(var(--primary))" strokeWidth={3} />
+          ) : null}
+        </div>
+      </div>
 
-        {/* ── Task content ── */}
-        <div className="flex-1 min-w-0 px-3 py-3">
-          <div className="flex items-center gap-2">
-            <p className={`text-sm font-medium leading-snug ${task.completed ? "line-through text-muted-foreground" : "text-foreground"}`}>
-              {task.title}
-            </p>
-            {isNewTask && !task.completed && (
-              <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse shrink-0" />
-            )}
-          </div>
-          {task.due_date && (
-            <p className={`text-xs flex items-center gap-1 mt-1 ${isOverdue ? "text-orange-400 font-semibold" : "text-muted-foreground"}`}>
-              <Calendar className="w-3 h-3" />
+      {/* ── Task body ── */}
+      <div style={{ flex: 1, minWidth: 0, padding: "12px 8px 12px 0" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <p style={{
+            fontSize: 14,
+            fontWeight: 500,
+            lineHeight: 1.35,
+            color: task.completed ? "hsl(var(--muted-foreground))" : "hsl(var(--foreground))",
+            textDecoration: task.completed ? "line-through" : "none",
+            margin: 0,
+          }}>
+            {task.title}
+          </p>
+          {isNewTask && !task.completed && (
+            <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: "#f97316", flexShrink: 0, animation: "pulse 2s infinite" }} />
+          )}
+        </div>
+        {task.due_date && (
+          <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 4 }}>
+            <Calendar size={11} color={isOverdue ? "#fb923c" : "hsl(var(--muted-foreground))"} />
+            <span style={{ fontSize: 11, color: isOverdue ? "#fb923c" : "hsl(var(--muted-foreground))", fontWeight: isOverdue ? 600 : 400 }}>
               {task.due_date}{isOverdue ? " · Overdue" : ""}
-            </p>
-          )}
-          {task.assigned_to && (
-            <p className="text-xs text-muted-foreground mt-0.5">{task.assigned_to}</p>
-          )}
-        </div>
-
-        {/* ── Right controls ── */}
-        <div className="flex flex-col items-center justify-center gap-1 px-2 py-2 shrink-0">
-
-          {/* Priority cycle */}
-          <button
-            type="button"
-            onPointerUp={(e) => { e.stopPropagation(); if (!cyclePriority.isPending) cyclePriority.mutate(); }}
-            className={`${pCfg.bg} ${pCfg.text} text-[10px] font-bold rounded-md px-2 py-1 min-w-[44px] min-h-[32px] flex items-center justify-center active:opacity-70 transition-opacity`}
-            style={{ touchAction: "manipulation" }}
-            title="Tap to change priority"
-          >
-            {pCfg.label}
-          </button>
-
-          <div className="flex items-center gap-0.5 mt-1">
-            {onEdit && (
-              <button
-                type="button"
-                onPointerUp={(e) => { e.stopPropagation(); onEdit(); }}
-                className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-primary active:opacity-70 transition-all rounded"
-                style={{ touchAction: "manipulation" }}
-              >
-                <Pencil className="w-3.5 h-3.5" />
-              </button>
-            )}
-            {onExpand && (
-              <button
-                type="button"
-                onPointerUp={(e) => { e.stopPropagation(); onExpand(); }}
-                className={`w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-primary active:opacity-70 transition-all rounded ${expanded ? "rotate-180" : ""}`}
-                style={{ touchAction: "manipulation" }}
-              >
-                <ChevronDown className="w-3.5 h-3.5" />
-              </button>
-            )}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <button
-                  type="button"
-                  className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-destructive active:opacity-70 transition-all rounded"
-                  style={{ touchAction: "manipulation" }}
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete task?</AlertDialogTitle>
-                  <AlertDialogDescription>This will permanently remove "{task.title}".</AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => remove.mutate()} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            </span>
           </div>
+        )}
+        {task.assigned_to && (
+          <p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", margin: "2px 0 0" }}>{task.assigned_to}</p>
+        )}
+      </div>
+
+      {/* ── Right controls ── */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, padding: "8px 8px 8px 4px", flexShrink: 0 }}>
+
+        {/* Priority pill */}
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => { if (!cyclePriority.isPending) cyclePriority.mutate(); }}
+          style={{
+            backgroundColor: pCfg.bg,
+            color: pCfg.text,
+            fontSize: 10,
+            fontWeight: 700,
+            borderRadius: 6,
+            padding: "4px 8px",
+            minWidth: 44,
+            minHeight: 28,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            WebkitTapHighlightColor: "transparent",
+            touchAction: "manipulation",
+            userSelect: "none",
+          }}
+        >
+          {pCfg.label}
         </div>
 
+        {/* Action row */}
+        <div style={{ display: "flex", alignItems: "center", gap: 2, marginTop: 2 }}>
+          {onEdit && (
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => onEdit()}
+              style={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", borderRadius: 6, WebkitTapHighlightColor: "transparent", touchAction: "manipulation" }}
+            >
+              <Pencil size={13} color="hsl(var(--muted-foreground))" />
+            </div>
+          )}
+          {onExpand && (
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => onExpand()}
+              style={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", borderRadius: 6, WebkitTapHighlightColor: "transparent", touchAction: "manipulation", transform: expanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}
+            >
+              <ChevronDown size={13} color="hsl(var(--muted-foreground))" />
+            </div>
+          )}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <div
+                role="button"
+                tabIndex={0}
+                style={{ width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", borderRadius: 6, WebkitTapHighlightColor: "transparent", touchAction: "manipulation" }}
+              >
+                <Trash2 size={13} color="hsl(var(--muted-foreground))" />
+              </div>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete task?</AlertDialogTitle>
+                <AlertDialogDescription>This will permanently remove "{task.title}".</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => remove.mutate()} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
     </div>
   );
