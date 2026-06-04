@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { MapPin, ArrowRight, Trash2 } from "lucide-react";
+import { MapPin, ArrowRight, Trash2, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useQuery } from "@tanstack/react-query";
@@ -17,8 +17,16 @@ export default function ProjectCard({ project, onDelete }) {
     queryKey: ["tasks", project.id],
     queryFn: () => base44.entities.Task.filter({ project_id: project.id }),
   });
+  const { data: projectNotes = [] } = useQuery({
+    queryKey: ["notes", project.id],
+    queryFn: () => base44.entities.Note.filter({ project_id: project.id }),
+  });
   const todayStr = new Date().toISOString().split("T")[0];
   const overdueCount = projectTasks.filter(t => !t.completed && t.due_date && t.due_date <= todayStr).length;
+
+  // Unread messages badge
+  const seenCount = parseInt(localStorage.getItem(`seenMsgsCount_${project.id}`) || "0", 10);
+  const hasUnreadMsgs = projectNotes.length > seenCount;
 
   return (
     <Link to={`/project/${project.id}`}
@@ -34,6 +42,14 @@ export default function ProjectCard({ project, onDelete }) {
               <span className="text-[10px] font-semibold text-orange-400 flex items-center gap-1 shrink-0">
                 <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse inline-block" />
                 {overdueCount} overdue
+              </span>
+            )}
+            {hasUnreadMsgs && (
+              <span className="flex items-center gap-1 shrink-0">
+                <span className="relative">
+                  <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
+                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+                </span>
               </span>
             )}
           </div>
