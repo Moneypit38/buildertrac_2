@@ -64,10 +64,18 @@ export default function ProjectDetail() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["projects"] }); toast.success("Project deleted"); navigate("/"); },
   });
 
-  // Mark tasks as viewed when this project detail page loads
+  // Mark overdue tasks as seen when tasks tab is viewed
+  const markTasksViewed = () => {
+    const todayStr = new Date().toISOString().split("T")[0];
+    const overdueIds = tasks.filter(t => !t.completed && t.due_date && t.due_date <= todayStr).map(t => t.id);
+    localStorage.setItem(`seenOverdueTasks_${projectId}`, JSON.stringify(overdueIds));
+    window.dispatchEvent(new Event("tasks-seen-updated"));
+  };
+
+  // Also mark on initial load if tasks tab is default
   useEffect(() => {
-    markViewed("tasks");
-  }, [projectId]);
+    if (tasks.length > 0 && !isClient) markTasksViewed();
+  }, [tasks.length, projectId]);
   const toggleExpand = (id) => setExpandedTasks(p => ({ ...p, [id]: !p[id] }));
 
   if (isLoading) return <div className="flex items-center justify-center h-64"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
@@ -127,7 +135,7 @@ export default function ProjectDetail() {
       {/* Tabs */}
       <Tabs defaultValue={isClient ? "docs" : "tasks"}>
         <TabsList className="w-full bg-card border border-border p-0.5 flex">
-          {!isClient && <TabsTrigger value="tasks" className="flex-1 gap-1 text-xs px-1 py-1"><ClipboardList className="w-3 h-3" /><span>Tasks</span></TabsTrigger>}
+          {!isClient && <TabsTrigger value="tasks" className="flex-1 gap-1 text-xs px-1 py-1" onClick={markTasksViewed}><ClipboardList className="w-3 h-3" /><span>Tasks</span></TabsTrigger>}
           <TabsTrigger value="docs" className="flex-1 gap-1 text-xs px-1 py-1"><FileText className="w-3 h-3" /><span>Docs</span></TabsTrigger>
           <TabsTrigger value="photos" className="flex-1 gap-1 text-xs px-1 py-1"><Camera className="w-3 h-3" /><span>Photos</span></TabsTrigger>
           {isAdmin && <TabsTrigger value="team" className="flex-1 gap-1 text-xs px-1 py-1"><Users className="w-3 h-3" /><span>Team</span></TabsTrigger>}

@@ -29,7 +29,24 @@ export default function ProjectCard({ project, onDelete, allTasks, allNotes }) {
   const projectNotes = allNotes ? allNotes.filter(n => n.project_id === project.id) : projectNotesData;
 
   const todayStr = new Date().toISOString().split("T")[0];
-  const overdueCount = projectTasks.filter(t => !t.completed && t.due_date && t.due_date <= todayStr).length;
+  const overdueTasks = projectTasks.filter(t => !t.completed && t.due_date && t.due_date <= todayStr);
+  const overdueCount = overdueTasks.length;
+
+  // Overdue task alert — only show if user hasn't viewed tasks since overdue tasks appeared
+  const [seenOverdueIds, setSeenOverdueIds] = useState(() => {
+    const stored = localStorage.getItem(`seenOverdueTasks_${project.id}`);
+    return stored ? new Set(JSON.parse(stored)) : null; // null = never visited tasks tab
+  });
+  useEffect(() => {
+    const handler = () => {
+      const stored = localStorage.getItem(`seenOverdueTasks_${project.id}`);
+      setSeenOverdueIds(stored ? new Set(JSON.parse(stored)) : null);
+    };
+    window.addEventListener("tasks-seen-updated", handler);
+    return () => window.removeEventListener("tasks-seen-updated", handler);
+  }, [project.id]);
+  const hasUnseenOverdue = seenOverdueIds !== null &&
+    overdueTasks.some(t => !seenOverdueIds.has(t.id));
 
   // Unread messages badge — only show if notes arrived after last visit
   // If never visited (no localStorage entry), initialize to current count (no alert)
@@ -50,7 +67,7 @@ export default function ProjectCard({ project, onDelete, allTasks, allNotes }) {
 
   return (
     <Link to={`/project/${project.id}`}
-      className={`block bg-card border rounded-xl p-4 hover:border-primary/50 transition-all duration-200 group ${overdueCount > 0 ? "border-orange-400/60 border-t-2 border-t-orange-400" : "border-border"}`}>
+      className={`block bg-card border rounded-xl p-4 hover:border-primary/50 transition-all duration-200 group ${hasUnseenOverdue ? "border-orange-400/60 border-t-2 border-t-orange-400" : "border-border"}`}>
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
@@ -58,7 +75,7 @@ export default function ProjectCard({ project, onDelete, allTasks, allNotes }) {
             <Badge variant="outline" className={`text-[10px] shrink-0 ${statusColors[project.status] || ""}`}>
               {project.status || "Planning"}
             </Badge>
-            {overdueCount > 0 && (
+            {hasUnseenOverdue && (
               <span className="text-[10px] font-semibold text-orange-400 flex items-center gap-1 shrink-0">
                 <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse inline-block" />
                 {overdueCount} overdue

@@ -19,7 +19,11 @@ export default function Dashboard() {
   useEffect(() => {
     const handler = () => forceUpdate(n => n + 1);
     window.addEventListener("msgs-seen-updated", handler);
-    return () => window.removeEventListener("msgs-seen-updated", handler);
+    window.addEventListener("tasks-seen-updated", handler);
+    return () => {
+      window.removeEventListener("msgs-seen-updated", handler);
+      window.removeEventListener("tasks-seen-updated", handler);
+    };
   }, []);
   const { refreshing, touchHandlers } = usePullToRefresh(() => qc.invalidateQueries());
   const { data: projects = [] } = useQuery({ queryKey: ["projects"], queryFn: () => base44.entities.Project.list() });
@@ -36,12 +40,16 @@ export default function Dashboard() {
 
   const todayStr = new Date().toISOString().split("T")[0];
 
-  // Tasks overdue or due today (not completed)
-  const urgentTasks = visibleTasks.filter(t => {
-    if (t.completed) return false;
-    if (!t.due_date) return false;
-    return t.due_date <= todayStr;
-  }).length;
+  // Tasks overdue — only count ones not yet seen per-project
+  const urgentTasks = visibleProjects.reduce((count, p) => {
+    const stored = localStorage.getItem(`seenOverdueTasks_${p.id}`);
+    const seenIds = stored ? new Set(JSON.parse(stored)) : null;
+    const projectOverdue = visibleTasks.filter(t =>
+      t.project_id === p.id && !t.completed && t.due_date && t.due_date <= todayStr
+    );
+    if (seenIds === null) return count + projectOverdue.length; // never visited, all count
+    return count + projectOverdue.filter(t => !seenIds.has(t.id)).length;
+  }, 0);
 
   // Docs uploaded in last 72h and not yet viewed
   const newDocs = visibleDocs.filter(d => isNew(d.created_date, "docs")).length;
