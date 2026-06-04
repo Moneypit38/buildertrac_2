@@ -35,9 +35,8 @@ export default function ProjectDetail() {
   const isClient = myRole === "client";
   const canDelete = !isClient; // clients can upload/download but not delete
 
-  // Messages badge — track last viewed per project
-  const msgsKey = `lastViewed_msgs_${projectId}`;
-  const getLastViewedMsgs = () => { const v = localStorage.getItem(msgsKey); return v ? new Date(v) : null; };
+  // Messages badge
+  const msgsCountKey = `seenMsgsCount_${projectId}`;
   const [msgsBadge, setMsgsBadge] = useState(false);
 
   const { data: notes = [] } = useQuery({
@@ -46,31 +45,15 @@ export default function ProjectDetail() {
   });
 
   useEffect(() => {
-    if (!currentUser) return;
-    const lastViewed = getLastViewedMsgs();
-    const hasNew = notes.some(n =>
-      n.author_email !== currentUser.email &&
-      (!lastViewed || new Date(n.created_date) > lastViewed)
-    );
-    setMsgsBadge(hasNew);
-  }, [notes, currentUser]);
-
-  // Real-time: update badge immediately when a new note arrives from someone else
-  useEffect(() => {
-    if (!currentUser) return;
-    const unsubscribe = base44.entities.Note.subscribe((event) => {
-      if (event.type !== "create") return;
-      if (event.data?.project_id !== projectId) return;
-      if (event.data?.author_email === currentUser.email) return;
-      setMsgsBadge(true);
-    });
-    return unsubscribe;
-  }, [projectId, currentUser]);
+    if (!notes.length) return;
+    const seenCount = parseInt(localStorage.getItem(msgsCountKey) || "0", 10);
+    setMsgsBadge(notes.length > seenCount);
+  }, [notes]);
 
   const markMsgsViewed = useCallback(() => {
-    localStorage.setItem(msgsKey, new Date().toISOString());
+    localStorage.setItem(msgsCountKey, String(notes.length));
     setMsgsBadge(false);
-  }, [msgsKey]);
+  }, [msgsCountKey, notes.length]);
 
   const [showTaskDialog, setShowTaskDialog] = useState(false);
   const [editTask, setEditTask] = useState(null);
