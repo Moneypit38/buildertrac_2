@@ -25,14 +25,15 @@ export default function ProjectCard({ project, onDelete }) {
   const todayStr = new Date().toISOString().split("T")[0];
   const overdueCount = projectTasks.filter(t => !t.completed && t.due_date && t.due_date <= todayStr).length;
 
-  // Unread messages badge — re-reads localStorage when user marks messages viewed
-  const [, setTick] = useState(0);
+  // Unread messages badge
+  const [seenCount, setSeenCount] = useState(() =>
+    parseInt(localStorage.getItem(`seenMsgsCount_${project.id}`) || "0", 10)
+  );
   useEffect(() => {
-    const handler = () => setTick(t => t + 1);
+    const handler = () => setSeenCount(parseInt(localStorage.getItem(`seenMsgsCount_${project.id}`) || "0", 10));
     window.addEventListener("msgs-seen-updated", handler);
     return () => window.removeEventListener("msgs-seen-updated", handler);
-  }, []);
-  const seenCount = parseInt(localStorage.getItem(`seenMsgsCount_${project.id}`) || "0", 10);
+  }, [project.id]);
   const hasUnreadMsgs = projectNotes.length > seenCount;
 
   return (

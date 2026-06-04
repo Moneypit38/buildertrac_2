@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -35,27 +35,19 @@ export default function ProjectDetail() {
   const isClient = myRole === "client";
   const canDelete = !isClient; // clients can upload/download but not delete
 
-  // Messages badge
-  const msgsCountKey = `seenMsgsCount_${projectId}`;
-  const [msgsBadge, setMsgsBadge] = useState(false);
-
   const { data: notes = [] } = useQuery({
     queryKey: ["notes", projectId],
     queryFn: () => base44.entities.Note.filter({ project_id: projectId }),
   });
 
-  useEffect(() => {
-    if (!notes.length) return;
-    const seenCount = parseInt(localStorage.getItem(msgsCountKey) || "0", 10);
-    setMsgsBadge(notes.length > seenCount);
-  }, [notes]);
+  const msgsCountKey = `seenMsgsCount_${projectId}`;
+  const seenCount = parseInt(localStorage.getItem(msgsCountKey) || "0", 10);
+  const msgsBadge = notes.length > seenCount;
 
-  const markMsgsViewed = useCallback(() => {
+  const markMsgsViewed = () => {
     localStorage.setItem(msgsCountKey, String(notes.length));
-    setMsgsBadge(false);
-    // Tell any ProjectCard that's mounted to re-check its seen count
     window.dispatchEvent(new Event("msgs-seen-updated"));
-  }, [msgsCountKey, notes.length]);
+  };
 
   const [showTaskDialog, setShowTaskDialog] = useState(false);
   const [editTask, setEditTask] = useState(null);
