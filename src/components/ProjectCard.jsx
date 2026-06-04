@@ -29,7 +29,7 @@ export default function ProjectCard({ project, onDelete, allTasks, allNotes }) {
   const projectNotes = allNotes ? allNotes.filter(n => n.project_id === project.id) : projectNotesData;
 
   const todayStr = new Date().toISOString().split("T")[0];
-  const overdueTasks = projectTasks.filter(t => !t.completed && t.due_date && t.due_date <= todayStr);
+  const overdueTasks = projectTasks.filter(t => !t.completed && t.status !== "Done" && t.due_date && t.due_date < todayStr);
   const overdueCount = overdueTasks.length;
 
   const hasUnseenOverdue = overdueCount > 0;
