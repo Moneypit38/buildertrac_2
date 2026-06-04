@@ -40,9 +40,10 @@ export default function Dashboard() {
 
   const todayStr = new Date().toISOString().split("T")[0];
 
-  // Count all overdue (past due date, not completed/done) tasks
+  // Count all overdue tasks — only for existing projects
+  const visibleProjectIds = new Set(visibleProjects.map(p => p.id));
   const urgentTasks = visibleTasks.filter(t =>
-    !t.completed && t.status !== "Done" && t.due_date && t.due_date < todayStr
+    !t.completed && t.status !== "Done" && t.due_date && t.due_date < todayStr && visibleProjectIds.has(t.project_id)
   ).length;
 
   // Docs uploaded in last 72h and not yet viewed
