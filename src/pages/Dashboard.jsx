@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useClientAccess } from "../hooks/useClientAccess";
@@ -14,6 +15,12 @@ import { isNew } from "../hooks/useLastViewed";
 export default function Dashboard() {
   const { allowedProjectIds, isLoading: accessLoading } = useClientAccess();
   const qc = useQueryClient();
+  const [, forceUpdate] = useState(0);
+  useEffect(() => {
+    const handler = () => forceUpdate(n => n + 1);
+    window.addEventListener("msgs-seen-updated", handler);
+    return () => window.removeEventListener("msgs-seen-updated", handler);
+  }, []);
   const { refreshing, touchHandlers } = usePullToRefresh(() => qc.invalidateQueries());
   const { data: projects = [] } = useQuery({ queryKey: ["projects"], queryFn: () => base44.entities.Project.list() });
   const { data: portfolios = [] } = useQuery({ queryKey: ["portfolios"], queryFn: () => base44.entities.Portfolio.list() });
@@ -42,11 +49,13 @@ export default function Dashboard() {
   // Photos uploaded in last 72h and not yet viewed
   const newPhotos = visiblePhotos.filter(ph => isNew(ph.created_date, "photos")).length;
 
-  // Notes added in last 72h and not yet viewed
-  const newNotes = (notes || []).filter(n => {
-    if (allowedProjectIds && !allowedProjectIds.includes(n.project_id)) return false;
-    return isNew(n.created_date, "notes");
-  }).length;
+  // New messages = projects where notes count exceeds last-seen count
+  const newNotes = visibleProjects.reduce((count, p) => {
+    const stored = localStorage.getItem(`seenMsgsCount_${p.id}`);
+    if (stored === null) return count; // never visited — no alert
+    const projectNoteCount = notes.filter(n => n.project_id === p.id).length;
+    return count + (projectNoteCount > parseInt(stored, 10) ? 1 : 0);
+  }, 0);
 
   // Clients only see portfolios with accessible projects; admins see all portfolios
   const visiblePortfolios = allowedProjectIds

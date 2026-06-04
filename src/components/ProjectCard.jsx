@@ -25,16 +25,22 @@ export default function ProjectCard({ project, onDelete }) {
   const todayStr = new Date().toISOString().split("T")[0];
   const overdueCount = projectTasks.filter(t => !t.completed && t.due_date && t.due_date <= todayStr).length;
 
-  // Unread messages badge
-  const [seenCount, setSeenCount] = useState(() =>
-    parseInt(localStorage.getItem(`seenMsgsCount_${project.id}`) || "0", 10)
-  );
+  // Unread messages badge — only show if notes arrived after last visit
+  // If never visited (no localStorage entry), initialize to current count (no alert)
+  const [seenCount, setSeenCount] = useState(() => {
+    const stored = localStorage.getItem(`seenMsgsCount_${project.id}`);
+    return stored !== null ? parseInt(stored, 10) : null; // null = never visited
+  });
   useEffect(() => {
-    const handler = () => setSeenCount(parseInt(localStorage.getItem(`seenMsgsCount_${project.id}`) || "0", 10));
+    const handler = () => {
+      const stored = localStorage.getItem(`seenMsgsCount_${project.id}`);
+      setSeenCount(stored !== null ? parseInt(stored, 10) : null);
+    };
     window.addEventListener("msgs-seen-updated", handler);
     return () => window.removeEventListener("msgs-seen-updated", handler);
   }, [project.id]);
-  const hasUnreadMsgs = projectNotes.length > seenCount;
+  // Only show badge if we have a baseline AND new messages arrived since then
+  const hasUnreadMsgs = seenCount !== null && projectNotes.length > seenCount;
 
   return (
     <Link to={`/project/${project.id}`}
