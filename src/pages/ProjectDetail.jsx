@@ -53,6 +53,8 @@ export default function ProjectDetail() {
   const markMsgsViewed = useCallback(() => {
     localStorage.setItem(msgsCountKey, String(notes.length));
     setMsgsBadge(false);
+    // Tell any ProjectCard that's mounted to re-check its seen count
+    window.dispatchEvent(new Event("msgs-seen-updated"));
   }, [msgsCountKey, notes.length]);
 
   const [showTaskDialog, setShowTaskDialog] = useState(false);

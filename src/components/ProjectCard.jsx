@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, ArrowRight, Trash2, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +25,13 @@ export default function ProjectCard({ project, onDelete }) {
   const todayStr = new Date().toISOString().split("T")[0];
   const overdueCount = projectTasks.filter(t => !t.completed && t.due_date && t.due_date <= todayStr).length;
 
-  // Unread messages badge
+  // Unread messages badge — re-reads localStorage when user marks messages viewed
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const handler = () => setTick(t => t + 1);
+    window.addEventListener("msgs-seen-updated", handler);
+    return () => window.removeEventListener("msgs-seen-updated", handler);
+  }, []);
   const seenCount = parseInt(localStorage.getItem(`seenMsgsCount_${project.id}`) || "0", 10);
   const hasUnreadMsgs = projectNotes.length > seenCount;
 
