@@ -13,15 +13,21 @@ const statusColors = {
   "Completed": "bg-green-500/20 text-green-400",
 };
 
-export default function ProjectCard({ project, onDelete }) {
-  const { data: projectTasks = [] } = useQuery({
+export default function ProjectCard({ project, onDelete, allTasks, allNotes }) {
+  const { data: projectTasksData = [] } = useQuery({
     queryKey: ["tasks", project.id],
     queryFn: () => base44.entities.Task.filter({ project_id: project.id }),
+    enabled: !allTasks, // skip if parent passed tasks in
   });
-  const { data: projectNotes = [] } = useQuery({
+  const { data: projectNotesData = [] } = useQuery({
     queryKey: ["notes", project.id],
     queryFn: () => base44.entities.Note.filter({ project_id: project.id }),
+    enabled: !allNotes,
   });
+
+  const projectTasks = allTasks ? allTasks.filter(t => t.project_id === project.id) : projectTasksData;
+  const projectNotes = allNotes ? allNotes.filter(n => n.project_id === project.id) : projectNotesData;
+
   const todayStr = new Date().toISOString().split("T")[0];
   const overdueCount = projectTasks.filter(t => !t.completed && t.due_date && t.due_date <= todayStr).length;
 

@@ -11,6 +11,8 @@ import { Plus, FolderKanban } from "lucide-react";
 
 export default function Projects() {
   const { data: projects = [], isLoading } = useQuery({ queryKey: ["projects"], queryFn: () => base44.entities.Project.list() });
+  const { data: allTasks = [] } = useQuery({ queryKey: ["tasks"], queryFn: () => base44.entities.Task.list() });
+  const { data: allNotes = [] } = useQuery({ queryKey: ["notes"], queryFn: () => base44.entities.Note.list() });
   const { isClientOnly, allowedProjectIds } = useClientAccess();
   const qc = useQueryClient();
   const { refreshing, touchHandlers } = usePullToRefresh(() => qc.invalidateQueries({ queryKey: ["projects"] }));
@@ -57,7 +59,7 @@ export default function Projects() {
           <p className="text-muted-foreground">No projects here yet. Create your first one.</p>
         </div>
       ) : (
-        <div className="space-y-3">{filtered.map(p => <ProjectCard key={p.id} project={p} onDelete={!isClientOnly ? () => deleteProject.mutate(p.id) : undefined} />)}</div>
+        <div className="space-y-3">{filtered.map(p => <ProjectCard key={p.id} project={p} onDelete={!isClientOnly ? () => deleteProject.mutate(p.id) : undefined} allTasks={allTasks} allNotes={allNotes} />)}</div>
       )}
 
       <CreateProjectDialog open={showCreate} onClose={() => setShowCreate(false)} />

@@ -129,7 +129,7 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="space-y-3">
-            {visibleProjects.map(p => <ProjectCard key={p.id} project={p} />)}
+            {visibleProjects.map(p => <ProjectCard key={p.id} project={p} allTasks={tasks} allNotes={notes} />)}
           </div>
         )}
       </div>
