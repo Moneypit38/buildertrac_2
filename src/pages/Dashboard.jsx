@@ -40,17 +40,10 @@ export default function Dashboard() {
 
   const todayStr = new Date().toISOString().split("T")[0];
 
-  // Tasks overdue — only count ones not yet seen per-project
-  const urgentTasks = visibleProjects.reduce((count, p) => {
-    const stored = localStorage.getItem(`seenOverdueTasks_${p.id}`);
-    const seenIds = stored ? new Set(JSON.parse(stored)) : null;
-    const projectOverdue = visibleTasks.filter(t =>
-      t.project_id === p.id && !t.completed && t.due_date && t.due_date <= todayStr
-    );
-    // null = never visited → all overdue tasks count
-    if (seenIds === null) return count + projectOverdue.length;
-    return count + projectOverdue.filter(t => !seenIds.has(t.id)).length;
-  }, 0);
+  // Count all overdue (past due date, not completed) tasks
+  const urgentTasks = visibleTasks.filter(t =>
+    !t.completed && t.due_date && t.due_date <= todayStr
+  ).length;
 
   // Docs uploaded in last 72h and not yet viewed
   const newDocs = visibleDocs.filter(d => isNew(d.created_date, "docs")).length;

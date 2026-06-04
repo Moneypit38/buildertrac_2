@@ -32,24 +32,7 @@ export default function ProjectCard({ project, onDelete, allTasks, allNotes }) {
   const overdueTasks = projectTasks.filter(t => !t.completed && t.due_date && t.due_date <= todayStr);
   const overdueCount = overdueTasks.length;
 
-  // Overdue task alert — only show if user hasn't viewed tasks since overdue tasks appeared
-  const [seenOverdueIds, setSeenOverdueIds] = useState(() => {
-    const stored = localStorage.getItem(`seenOverdueTasks_${project.id}`);
-    return stored ? new Set(JSON.parse(stored)) : null; // null = never visited tasks tab
-  });
-  useEffect(() => {
-    const handler = () => {
-      const stored = localStorage.getItem(`seenOverdueTasks_${project.id}`);
-      setSeenOverdueIds(stored ? new Set(JSON.parse(stored)) : null);
-    };
-    window.addEventListener("tasks-seen-updated", handler);
-    return () => window.removeEventListener("tasks-seen-updated", handler);
-  }, [project.id]);
-  // null = never visited tasks tab → show alert if any overdue tasks exist
-  // otherwise show alert if any overdue task ID wasn't seen
-  const hasUnseenOverdue = seenOverdueIds === null
-    ? overdueCount > 0
-    : overdueTasks.some(t => !seenOverdueIds.has(t.id));
+  const hasUnseenOverdue = overdueCount > 0;
 
   // Unread messages badge — only show if notes arrived after last visit
   // If never visited (no localStorage entry), initialize to current count (no alert)
