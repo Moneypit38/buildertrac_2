@@ -92,7 +92,7 @@ export default function TaskCalendar({ tasks = [], projects = [] }) {
         <div className="flex items-center gap-1">
           <button
             onClick={goToday}
-            className="text-[11px] font-medium text-primary px-2 py-1 rounded-lg hover:bg-accent transition-colors"
+            className="text-[11px] font-medium text-yellow-300 px-2 py-1 rounded-lg hover:bg-accent transition-colors"
           >
             Today
           </button>
@@ -146,7 +146,7 @@ export default function TaskCalendar({ tasks = [], projects = [] }) {
                       className={`w-1.5 h-1.5 rounded-full ${
                         t.status === "Done" ? "bg-green-400" :
                         dateStr < todayStr && !t.completed ? "bg-orange-400" :
-                        "bg-primary"
+                        "bg-blue-400"
                       }`}
                     />
                   ))}
@@ -180,7 +180,7 @@ export default function TaskCalendar({ tasks = [], projects = [] }) {
                     <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
                       t.status === "Done" ? "bg-green-400" :
                       selectedDate < todayStr && !t.completed ? "bg-orange-400" :
-                      "bg-primary"
+                      "bg-blue-400"
                     }`} />
                     <div className="flex-1 min-w-0">
                       <p className={`text-sm font-medium truncate ${t.status === "Done" ? "line-through text-muted-foreground" : ""}`}>{t.title}</p>
