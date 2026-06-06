@@ -19,7 +19,7 @@ function getFirstDayOfMonth(year, month) {
   return new Date(year, month, 1).getDay(); // 0=Sun
 }
 
-export default function TaskCalendar({ tasks = [], projects = [] }) {
+export default function TaskCalendar({ tasks = [], projects = [], appointments = [] }) {
   const today = new Date();
   const [viewDate, setViewDate] = useState({ year: today.getFullYear(), month: today.getMonth() });
   const [selectedDate, setSelectedDate] = useState(null);
@@ -46,6 +46,17 @@ export default function TaskCalendar({ tasks = [], projects = [] }) {
     return map;
   }, [tasks]);
 
+  // Build a map: "YYYY-MM-DD" -> appointments[]
+  const apptsByDate = useMemo(() => {
+    const map = {};
+    appointments.forEach(a => {
+      if (!a.date) return;
+      if (!map[a.date]) map[a.date] = [];
+      map[a.date].push(a);
+    });
+    return map;
+  }, [appointments]);
+
   const monthName = new Date(year, month, 1).toLocaleString("default", { month: "long" });
 
   const prevMonth = () => {
@@ -70,6 +81,7 @@ export default function TaskCalendar({ tasks = [], projects = [] }) {
   };
 
   const selectedTasks = selectedDate ? (tasksByDate[selectedDate] || []) : [];
+  const selectedAppts = selectedDate ? (apptsByDate[selectedDate] || []) : [];
 
   // Build calendar grid
   const cells = [];
@@ -119,10 +131,12 @@ export default function TaskCalendar({ tasks = [], projects = [] }) {
 
           const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
           const dayTasks = tasksByDate[dateStr] || [];
+          const dayAppts = apptsByDate[dateStr] || [];
           const isToday = dateStr === todayStr;
           const isOverdue = dateStr < todayStr && dayTasks.some(t => !t.completed && t.status !== "Done");
           const isSelected = selectedDate === dateStr;
           const hasTasks = dayTasks.length > 0;
+          const hasAppts = dayAppts.length > 0;
 
           return (
             <button
@@ -138,11 +152,11 @@ export default function TaskCalendar({ tasks = [], projects = [] }) {
               `}>
                 {day}
               </span>
-              {hasTasks && (
+              {(hasTasks || hasAppts) && (
                 <div className="flex gap-0.5 mt-0.5 flex-wrap justify-center px-0.5">
-                  {dayTasks.slice(0, 3).map((t, i) => (
+                  {dayTasks.slice(0, 2).map((t, i) => (
                     <span
-                      key={i}
+                      key={`t-${i}`}
                       className={`w-1.5 h-1.5 rounded-full ${
                         t.status === "Done" ? "bg-green-400" :
                         dateStr < todayStr && !t.completed ? "bg-orange-400" :
@@ -150,7 +164,9 @@ export default function TaskCalendar({ tasks = [], projects = [] }) {
                       }`}
                     />
                   ))}
-                  {dayTasks.length > 3 && <span className="text-[8px] text-muted-foreground leading-none">+{dayTasks.length - 3}</span>}
+                  {dayAppts.slice(0, 2).map((_, i) => (
+                    <span key={`a-${i}`} className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                  ))}
                 </div>
               )}
             </button>
@@ -172,27 +188,42 @@ export default function TaskCalendar({ tasks = [], projects = [] }) {
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 {new Date(selectedDate + "T12:00:00").toLocaleDateString("default", { weekday: "long", month: "short", day: "numeric" })}
               </p>
-              {selectedTasks.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-2 text-center">No tasks due this day</p>
+              {selectedTasks.length === 0 && selectedAppts.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-2 text-center">Nothing scheduled this day</p>
               ) : (
-                selectedTasks.map(t => (
-                  <Link key={t.id} to={`/project/${t.project_id}`} className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors group">
-                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                      t.status === "Done" ? "bg-green-400" :
-                      selectedDate < todayStr && !t.completed ? "bg-orange-400" :
-                      "bg-blue-400"
-                    }`} />
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium truncate ${t.status === "Done" ? "line-through text-muted-foreground" : ""}`}>{t.title}</p>
-                      {projectMap[t.project_id] && (
-                        <p className="text-[11px] text-muted-foreground truncate">{projectMap[t.project_id]}</p>
-                      )}
-                    </div>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full border font-medium flex-shrink-0 ${STATUS_COLORS[t.status] || STATUS_COLORS["Not Started"]}`}>
-                      {t.status}
-                    </span>
-                  </Link>
-                ))
+                <>
+                  {selectedAppts.map(a => (
+                    <Link key={a.id} to={`/project/${a.project_id}`} className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors group">
+                      <span className="w-2 h-2 rounded-full flex-shrink-0 bg-purple-400" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{a.title}</p>
+                        <p className="text-[11px] text-muted-foreground truncate">
+                          {a.start_time ? a.start_time : ""}
+                          {projectMap[a.project_id] ? ` · ${projectMap[a.project_id]}` : ""}
+                        </p>
+                      </div>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full border font-medium flex-shrink-0 bg-purple-500/20 text-purple-400 border-purple-500/30">Appt</span>
+                    </Link>
+                  ))}
+                  {selectedTasks.map(t => (
+                    <Link key={t.id} to={`/project/${t.project_id}`} className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors group">
+                      <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                        t.status === "Done" ? "bg-green-400" :
+                        selectedDate < todayStr && !t.completed ? "bg-orange-400" :
+                        "bg-blue-400"
+                      }`} />
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-medium truncate ${t.status === "Done" ? "line-through text-muted-foreground" : ""}`}>{t.title}</p>
+                        {projectMap[t.project_id] && (
+                          <p className="text-[11px] text-muted-foreground truncate">{projectMap[t.project_id]}</p>
+                        )}
+                      </div>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full border font-medium flex-shrink-0 ${STATUS_COLORS[t.status] || STATUS_COLORS["Not Started"]}`}>
+                        {t.status}
+                      </span>
+                    </Link>
+                  ))}
+                </>
               )}
             </div>
           </motion.div>

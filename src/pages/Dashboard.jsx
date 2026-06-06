@@ -34,6 +34,7 @@ export default function Dashboard() {
   const { data: docs = [] } = useQuery({ queryKey: ["documents"], queryFn: () => base44.entities.Document.list() });
   const { data: photos = [] } = useQuery({ queryKey: ["photos"], queryFn: () => base44.entities.SitePhoto.list() });
   const { data: notes = [] } = useQuery({ queryKey: ["notes"], queryFn: () => base44.entities.Note.list() });
+  const { data: appointments = [] } = useQuery({ queryKey: ["appointments"], queryFn: () => base44.entities.Appointment.list() });
 
   const visibleProjects = allowedProjectIds ? projects.filter(p => allowedProjectIds.includes(p.id)) : projects;
   const visibleTasks = allowedProjectIds ? tasks.filter(t => allowedProjectIds.includes(t.project_id)) : tasks;
@@ -109,7 +110,7 @@ export default function Dashboard() {
         <h2 className="text-primary font-bold text-sm uppercase tracking-wider mb-3 flex items-center gap-2">
           <span>Task Calendar</span>
         </h2>
-        <TaskCalendar tasks={visibleTasks} projects={visibleProjects} />
+        <TaskCalendar tasks={visibleTasks} projects={visibleProjects} appointments={appointments} />
       </motion.div>
 
       {/* Portfolios */}
