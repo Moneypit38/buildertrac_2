@@ -104,7 +104,7 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
         <div className="flex items-center gap-1">
           <button
             onClick={goToday}
-            className="text-[11px] font-medium text-yellow-300 px-2 py-1 rounded-lg hover:bg-accent transition-colors"
+            className="text-[11px] font-medium text-black dark:text-yellow-300 px-2 py-1 rounded-lg hover:bg-accent transition-colors"
           >
             Today
           </button>
