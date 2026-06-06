@@ -190,7 +190,7 @@ export default function Layout() {
                 >
                   <Icon className="w-5 h-5" />
                   {badgeCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-card animate-pulse" />
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-yellow-300 ring-2 ring-background animate-pulse" />
                   )}
                 </motion.span>
                 <span className="text-[11px] font-medium">{label}</span>

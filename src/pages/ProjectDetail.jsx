@@ -130,7 +130,7 @@ export default function ProjectDetail() {
           <TabsTrigger value="notes" className="flex-1 gap-1 text-xs px-1 py-1 relative" onClick={markMsgsViewed}>
             <span className="relative">
               <MessageSquare className="w-3 h-3" />
-              {msgsBadge && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-card animate-pulse" />}
+              {msgsBadge && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-yellow-300 ring-2 ring-background animate-pulse" />}
             </span>
             <span>Messages</span>
           </TabsTrigger>
