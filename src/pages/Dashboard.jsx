@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import { isNew } from "../hooks/useLastViewed";
 import { motion } from "framer-motion";
+import TaskCalendar from "../components/TaskCalendar";
 
 
 
@@ -132,8 +133,16 @@ export default function Dashboard() {
         </motion.div>
       )}
 
+      {/* Task Calendar */}
+      <motion.div {...fadeUp(0.18)}>
+        <h2 className="text-primary font-bold text-sm uppercase tracking-wider mb-3 flex items-center gap-2">
+          <span>Task Calendar</span>
+        </h2>
+        <TaskCalendar tasks={visibleTasks} projects={visibleProjects} />
+      </motion.div>
+
       {/* Projects */}
-      <motion.div {...fadeUp(0.2)}>
+      <motion.div {...fadeUp(0.24)}>
         <h2 className="text-primary font-bold text-sm uppercase tracking-wider mb-3">Your Projects</h2>
         {visibleProjects.length === 0 ? (
           <div className="bg-card border border-border rounded-xl p-8 text-center">
