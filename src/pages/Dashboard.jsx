@@ -104,9 +104,17 @@ export default function Dashboard() {
         ]} />
       </motion.div>
 
+      {/* Task Calendar */}
+      <motion.div {...fadeUp(0.14)}>
+        <h2 className="text-primary font-bold text-sm uppercase tracking-wider mb-3 flex items-center gap-2">
+          <span>Task Calendar</span>
+        </h2>
+        <TaskCalendar tasks={visibleTasks} projects={visibleProjects} />
+      </motion.div>
+
       {/* Portfolios */}
       {visiblePortfolios.length > 0 && (
-        <motion.div {...fadeUp(0.14)}>
+        <motion.div {...fadeUp(0.2)}>
           <h2 className="text-primary font-bold text-sm uppercase tracking-wider mb-3 flex items-center gap-2">
             <Layers className="w-4 h-4" /> Portfolios
           </h2>
@@ -133,16 +141,8 @@ export default function Dashboard() {
         </motion.div>
       )}
 
-      {/* Task Calendar */}
-      <motion.div {...fadeUp(0.18)}>
-        <h2 className="text-primary font-bold text-sm uppercase tracking-wider mb-3 flex items-center gap-2">
-          <span>Task Calendar</span>
-        </h2>
-        <TaskCalendar tasks={visibleTasks} projects={visibleProjects} />
-      </motion.div>
-
       {/* Projects */}
-      <motion.div {...fadeUp(0.24)}>
+      <motion.div {...fadeUp(0.26)}>
         <h2 className="text-primary font-bold text-sm uppercase tracking-wider mb-3">Your Projects</h2>
         {visibleProjects.length === 0 ? (
           <div className="bg-card border border-border rounded-xl p-8 text-center">
