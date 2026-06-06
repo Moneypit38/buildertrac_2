@@ -63,7 +63,7 @@ export default function ProjectCard({ project, onDelete, allTasks, allNotes }) {
             </Badge>
             {hasUnseenOverdue && (
               <span className="text-[10px] font-semibold text-orange-400 flex items-center gap-1 shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse inline-block" />
+                <span className="w-2 h-2 rounded-full bg-amber-400 ring-2 ring-card animate-pulse inline-block" />
                 {overdueCount} overdue
               </span>
             )}
@@ -71,7 +71,7 @@ export default function ProjectCard({ project, onDelete, allTasks, allNotes }) {
               <span className="flex items-center gap-1 shrink-0">
                 <span className="relative">
                   <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
-                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-sky-400 ring-2 ring-card animate-pulse" />
                 </span>
               </span>
             )}
