@@ -183,12 +183,16 @@ export default function Layout() {
                 to={path}
                 className={`flex flex-col items-center gap-1 px-4 min-h-[44px] py-2 rounded-xl transition-all duration-200 relative ${isActive ? "text-primary bg-accent" : "text-muted-foreground hover:text-foreground"}`}
               >
-                <span className="relative">
+                <motion.span
+                  className="relative"
+                  animate={isActive ? { scale: 1.2 } : { scale: 1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                >
                   <Icon className="w-5 h-5" />
                   {badgeCount > 0 && (
                     <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
                   )}
-                </span>
+                </motion.span>
                 <span className="text-[11px] font-medium">{label}</span>
               </Link>
             );

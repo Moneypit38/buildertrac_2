@@ -9,6 +9,7 @@ import PortfolioIcon, { getColor } from "../components/PortfolioIcon";
 import { Link } from "react-router-dom";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import { isNew } from "../hooks/useLastViewed";
+import { motion } from "framer-motion";
 
 
 
@@ -71,13 +72,19 @@ export default function Dashboard() {
     </div>
   );
 
+  const fadeUp = (delay = 0) => ({
+    initial: { opacity: 0, y: 16 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.35, ease: "easeOut", delay },
+  });
+
   return (
     <div className="p-4 max-w-2xl mx-auto space-y-6" {...touchHandlers}>
       {refreshing && (
         <div className="flex justify-center pt-2"><div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
       )}
       {/* Hero */}
-      <div className="flex items-center gap-4 pt-2">
+      <motion.div className="flex items-center gap-4 pt-2" {...fadeUp(0)}>
         <img src="https://media.base44.com/images/public/6a1c6a3340e642df44a0130d/c979cb0cc_IMG_2880.png" alt="BuilderTrac Logo" className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
         <div>
           <h1 className="text-2xl font-extrabold font-display flex items-center gap-2">
@@ -85,45 +92,48 @@ export default function Dashboard() {
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">Everything at a glance</p>
         </div>
-      </div>
+      </motion.div>
 
-      <StatCards stats={[
-        { value: urgentTasks, label: "Tasks Due / Overdue", href: "/projects" },
-        { value: newNotes, label: "New Messages", href: "/projects" },
-        { value: newDocs, label: "New Documents", href: "/documents" },
-        { value: newPhotos, label: "New Photos", href: "/photos" },
-      ]} />
+      <motion.div {...fadeUp(0.07)}>
+        <StatCards stats={[
+          { value: urgentTasks, label: "Tasks Due / Overdue", href: "/projects" },
+          { value: newNotes, label: "New Messages", href: "/projects" },
+          { value: newDocs, label: "New Documents", href: "/documents" },
+          { value: newPhotos, label: "New Photos", href: "/photos" },
+        ]} />
+      </motion.div>
 
       {/* Portfolios */}
       {visiblePortfolios.length > 0 && (
-        <div>
+        <motion.div {...fadeUp(0.14)}>
           <h2 className="text-primary font-bold text-sm uppercase tracking-wider mb-3 flex items-center gap-2">
             <Layers className="w-4 h-4" /> Portfolios
           </h2>
           <div className="grid grid-cols-2 gap-2">
-            {visiblePortfolios.map(pf => {
+            {visiblePortfolios.map((pf, i) => {
               const pfProjects = visibleProjects.filter(p => p.portfolio === pf.name);
               const colorDef = getColor(pf.color);
               return (
-                <Link
-                  key={pf.id}
-                  to="/portfolios"
-                  className={`flex flex-col gap-2 p-3 bg-card border border-border rounded-xl hover:border-primary/40 transition-all`}
-                >
-                  <PortfolioIcon icon={pf.icon} color={pf.color} size="sm" />
-                  <div className="min-w-0">
-                    <p className={`font-semibold text-sm truncate ${colorDef.text}`}>{pf.name}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{pfProjects.length} project{pfProjects.length !== 1 ? "s" : ""}</p>
-                  </div>
-                </Link>
+                <motion.div key={pf.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.25, delay: 0.18 + i * 0.05 }}>
+                  <Link
+                    to="/portfolios"
+                    className={`flex flex-col gap-2 p-3 bg-card border border-border rounded-xl hover:border-primary/40 transition-all`}
+                  >
+                    <PortfolioIcon icon={pf.icon} color={pf.color} size="sm" />
+                    <div className="min-w-0">
+                      <p className={`font-semibold text-sm truncate ${colorDef.text}`}>{pf.name}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{pfProjects.length} project{pfProjects.length !== 1 ? "s" : ""}</p>
+                    </div>
+                  </Link>
+                </motion.div>
               );
             })}
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Projects */}
-      <div>
+      <motion.div {...fadeUp(0.2)}>
         <h2 className="text-primary font-bold text-sm uppercase tracking-wider mb-3">Your Projects</h2>
         {visibleProjects.length === 0 ? (
           <div className="bg-card border border-border rounded-xl p-8 text-center">
@@ -132,10 +142,14 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="space-y-3">
-            {visibleProjects.map(p => <ProjectCard key={p.id} project={p} allTasks={tasks} allNotes={notes} />)}
+            {visibleProjects.map((p, i) => (
+              <motion.div key={p.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.22 + i * 0.06 }}>
+                <ProjectCard project={p} allTasks={tasks} allNotes={notes} />
+              </motion.div>
+            ))}
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }
