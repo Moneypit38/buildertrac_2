@@ -67,6 +67,13 @@ export default function Layout() {
   const { data: docs = [] } = useQuery({ queryKey: ["documents"], queryFn: () => base44.entities.Document.list() });
   const { data: photos = [] } = useQuery({ queryKey: ["photos"], queryFn: () => base44.entities.SitePhoto.list() });
 
+  // Re-render badges when photos-seen event fires
+  useEffect(() => {
+    const handler = () => forceUpdate(n => n + 1);
+    window.addEventListener("photos-seen-updated", handler);
+    return () => window.removeEventListener("photos-seen-updated", handler);
+  }, []);
+
   // Mark section as viewed when user navigates to that tab, then re-render badges
   useEffect(() => {
     const sectionKey = NAV_SECTION_KEYS[activeTab];

@@ -22,9 +22,11 @@ export default function Dashboard() {
     const handler = () => forceUpdate(n => n + 1);
     window.addEventListener("msgs-seen-updated", handler);
     window.addEventListener("tasks-seen-updated", handler);
+    window.addEventListener("photos-seen-updated", handler);
     return () => {
       window.removeEventListener("msgs-seen-updated", handler);
       window.removeEventListener("tasks-seen-updated", handler);
+      window.removeEventListener("photos-seen-updated", handler);
     };
   }, []);
   const { refreshing, touchHandlers } = usePullToRefresh(() => qc.invalidateQueries());
@@ -122,13 +124,18 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 gap-2">
             {visiblePortfolios.map((pf, i) => {
               const pfProjects = visibleProjects.filter(p => p.portfolio === pf.name);
+              const pfProjectIds = new Set(pfProjects.map(p => p.id));
+              const pfHasNewPhotos = visiblePhotos.some(ph => pfProjectIds.has(ph.project_id) && isNew(ph.created_date, "photos"));
               const colorDef = getColor(pf.color);
               return (
                 <motion.div key={pf.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.25, delay: 0.18 + i * 0.05 }}>
                   <Link
                     to="/portfolios"
-                    className={`flex flex-col gap-2 p-3 bg-card border border-border rounded-xl hover:border-primary/40 transition-all`}
+                    className={`flex flex-col gap-2 p-3 bg-card border border-border rounded-xl hover:border-primary/40 transition-all relative`}
                   >
+                    {pfHasNewPhotos && (
+                      <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-purple-300 ring-2 ring-background animate-pulse" />
+                    )}
                     <PortfolioIcon icon={pf.icon} color={pf.color} size="sm" />
                     <div className="min-w-0">
                       <p className={`font-semibold text-sm truncate ${colorDef.text}`}>{pf.name}</p>
@@ -154,7 +161,7 @@ export default function Dashboard() {
           <div className="space-y-3">
             {visibleProjects.map((p, i) => (
               <motion.div key={p.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.22 + i * 0.06 }}>
-                <ProjectCard project={p} allTasks={tasks} allNotes={notes} />
+                <ProjectCard project={p} allTasks={tasks} allNotes={notes} allPhotos={photos} />
               </motion.div>
             ))}
           </div>

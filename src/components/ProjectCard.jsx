@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, ArrowRight, Trash2, MessageSquare } from "lucide-react";
+import { MapPin, ArrowRight, Trash2, MessageSquare, Camera } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { isNew } from "../hooks/useLastViewed";
 
 const statusColors = {
   "Planning": "bg-blue-500/20 text-blue-400",
@@ -13,20 +14,35 @@ const statusColors = {
   "Completed": "bg-green-500/20 text-green-400",
 };
 
-export default function ProjectCard({ project, onDelete, allTasks, allNotes }) {
+export default function ProjectCard({ project, onDelete, allTasks, allNotes, allPhotos }) {
   const { data: projectTasksData = [] } = useQuery({
     queryKey: ["tasks", project.id],
     queryFn: () => base44.entities.Task.filter({ project_id: project.id }),
-    enabled: !allTasks, // skip if parent passed tasks in
+    enabled: !allTasks,
   });
   const { data: projectNotesData = [] } = useQuery({
     queryKey: ["notes", project.id],
     queryFn: () => base44.entities.Note.filter({ project_id: project.id }),
     enabled: !allNotes,
   });
+  const { data: projectPhotosData = [] } = useQuery({
+    queryKey: ["photos", project.id],
+    queryFn: () => base44.entities.SitePhoto.filter({ project_id: project.id }),
+    enabled: !allPhotos,
+  });
 
   const projectTasks = allTasks ? allTasks.filter(t => t.project_id === project.id) : projectTasksData;
   const projectNotes = allNotes ? allNotes.filter(n => n.project_id === project.id) : projectNotesData;
+  const projectPhotos = allPhotos ? allPhotos.filter(ph => ph.project_id === project.id) : projectPhotosData;
+
+  const [, forceUpdate] = useState(0);
+  useEffect(() => {
+    const handler = () => forceUpdate(n => n + 1);
+    window.addEventListener("photos-seen-updated", handler);
+    return () => window.removeEventListener("photos-seen-updated", handler);
+  }, []);
+
+  const hasNewPhotos = projectPhotos.some(ph => isNew(ph.created_date, "photos"));
 
   const todayStr = new Date().toISOString().split("T")[0];
   const overdueTasks = projectTasks.filter(t => !t.completed && t.status !== "Done" && t.due_date && t.due_date < todayStr);
@@ -72,6 +88,14 @@ export default function ProjectCard({ project, onDelete, allTasks, allNotes }) {
                 <span className="relative">
                   <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
                   <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-cyan-300 ring-2 ring-background animate-pulse" />
+                </span>
+              </span>
+            )}
+            {hasNewPhotos && (
+              <span className="flex items-center gap-1 shrink-0">
+                <span className="relative">
+                  <Camera className="w-3.5 h-3.5 text-purple-400" />
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-purple-300 ring-2 ring-background animate-pulse" />
                 </span>
               </span>
             )}

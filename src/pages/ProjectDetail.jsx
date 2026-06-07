@@ -15,6 +15,7 @@ import { ArrowLeft, Plus, MapPin, ClipboardList, FileText, Camera, Pencil, Dolla
 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { markViewed } from "../hooks/useLastViewed";
 import ProjectMembersTab from "../components/ProjectMembersTab";
 import NotesTab from "../components/NotesTab";
 import SubtaskList from "../components/SubtaskList";
@@ -129,7 +130,7 @@ export default function ProjectDetail() {
         <TabsList className="w-full bg-card border border-border p-0.5 flex">
           {!isClient && <TabsTrigger value="tasks" className="flex-1 gap-1 text-xs px-1 py-1"><ClipboardList className="w-3 h-3" /><span>Tasks</span></TabsTrigger>}
           <TabsTrigger value="docs" className="flex-1 gap-1 text-xs px-1 py-1"><FileText className="w-3 h-3" /><span>Docs</span></TabsTrigger>
-          <TabsTrigger value="photos" className="flex-1 gap-1 text-xs px-1 py-1"><Camera className="w-3 h-3" /><span>Photos</span></TabsTrigger>
+          <TabsTrigger value="photos" className="flex-1 gap-1 text-xs px-1 py-1" onClick={() => { markViewed("photos"); window.dispatchEvent(new Event("photos-seen-updated")); }}><Camera className="w-3 h-3" /><span>Photos</span></TabsTrigger>
           {!isClient && <TabsTrigger value="appointments" className="flex-1 gap-1 text-xs px-1 py-1"><CalendarClock className="w-3 h-3" /><span>Appts</span></TabsTrigger>}
           {isAdmin && <TabsTrigger value="team" className="flex-1 gap-1 text-xs px-1 py-1"><Users className="w-3 h-3" /><span>Team</span></TabsTrigger>}
           <TabsTrigger value="notes" className="flex-1 gap-1 text-xs px-1 py-1 relative" onClick={markMsgsViewed}>
