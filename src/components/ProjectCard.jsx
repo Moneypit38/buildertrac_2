@@ -19,16 +19,19 @@ export default function ProjectCard({ project, onDelete, allTasks, allNotes, all
     queryKey: ["tasks", project.id],
     queryFn: () => base44.entities.Task.filter({ project_id: project.id }),
     enabled: !allTasks,
+    staleTime: 60000,
   });
   const { data: projectNotesData = [] } = useQuery({
     queryKey: ["notes", project.id],
     queryFn: () => base44.entities.Note.filter({ project_id: project.id }),
     enabled: !allNotes,
+    staleTime: 60000,
   });
   const { data: projectPhotosData = [] } = useQuery({
     queryKey: ["photos", project.id],
     queryFn: () => base44.entities.SitePhoto.filter({ project_id: project.id }),
     enabled: !allPhotos,
+    staleTime: 60000,
   });
 
   const projectTasks = allTasks ? allTasks.filter(t => t.project_id === project.id) : projectTasksData;

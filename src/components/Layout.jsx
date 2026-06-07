@@ -68,8 +68,8 @@ export default function Layout() {
   const isChildRoute = !onTab;
 
   // Fetch data needed for nav badge counts
-  const { data: docs = [] } = useQuery({ queryKey: ["documents"], queryFn: () => base44.entities.Document.list() });
-  const { data: photos = [] } = useQuery({ queryKey: ["photos"], queryFn: () => base44.entities.SitePhoto.list() });
+  const { data: docs = [] } = useQuery({ queryKey: ["documents"], queryFn: () => base44.entities.Document.list(), staleTime: 60000 });
+  const { data: photos = [] } = useQuery({ queryKey: ["photos"], queryFn: () => base44.entities.SitePhoto.list(), staleTime: 60000 });
 
   // Mark section as viewed when user navigates to that tab, then update React state + notify others
   useEffect(() => {
