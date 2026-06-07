@@ -3,7 +3,7 @@ import { Trash2, User, CalendarDays, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
-import { markViewed } from "../hooks/useLastViewed";
+import { markPhotoSeen } from "../lib/viewedContext";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
@@ -114,8 +114,7 @@ export default function PhotoGrid({ photos = [], canDelete = true }) {
   const [selected, setSelected] = useState(null);
 
   const handleSelect = (photo) => {
-    markViewed("photos");
-    window.dispatchEvent(new Event("photos-seen-updated"));
+    markPhotoSeen(photo.id);
     setSelected(photo);
   };
 

@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { markViewed, getLastViewed } from "../hooks/useLastViewed";
-import { ViewedContext, isNewItem } from "../lib/viewedContext";
+import { ViewedContext, isNewItem, getSeenPhotoIds } from "../lib/viewedContext";
 import SubscriptionGate from "./SubscriptionGate";
 
 // Tab page components — rendered persistently to preserve state
@@ -85,10 +85,14 @@ export default function Layout() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, onTab]); // onTab included so navigating back to a tab from a child route also triggers
 
-  // Badge counts per nav path — driven by React state, not raw localStorage reads
+  // Badge counts per nav path
+  const seenPhotoIds = getSeenPhotoIds();
   const navBadges = {
     "/documents": docs.filter(d => isNewItem(d.created_date, lastViewedTimes.docs)).length,
-    "/photos": photos.filter(ph => isNewItem(ph.created_date, lastViewedTimes.photos)).length,
+    "/photos": photos.filter(ph => {
+      const cutoff72h = new Date(Date.now() - 72 * 60 * 60 * 1000);
+      return new Date(ph.created_date) > cutoff72h && !seenPhotoIds.has(ph.id);
+    }).length,
   };
 
   return (

@@ -8,7 +8,7 @@ import { HardHat, Layers } from "lucide-react";
 import PortfolioIcon, { getColor } from "../components/PortfolioIcon";
 import { Link } from "react-router-dom";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
-import { useViewedTimes, isNewItem } from "../lib/viewedContext";
+import { useViewedTimes, isNewItem, getSeenPhotoIds } from "../lib/viewedContext";
 import { motion } from "framer-motion";
 import TaskCalendar from "../components/TaskCalendar";
 
@@ -44,8 +44,12 @@ export default function Dashboard() {
   // Docs uploaded in last 72h and not yet viewed
   const newDocs = visibleDocs.filter(d => isNewItem(d.created_date, lastViewedTimes.docs)).length;
 
-  // Photos uploaded in last 72h and not yet viewed
-  const newPhotos = visiblePhotos.filter(ph => isNewItem(ph.created_date, lastViewedTimes.photos)).length;
+  // Photos uploaded in last 72h and not yet individually viewed
+  const seenPhotoIds = getSeenPhotoIds();
+  const newPhotos = visiblePhotos.filter(ph => {
+    const cutoff72h = new Date(Date.now() - 72 * 60 * 60 * 1000);
+    return new Date(ph.created_date) > cutoff72h && !seenPhotoIds.has(ph.id);
+  }).length;
 
   // New messages = projects where notes count exceeds last-seen count
   const newNotes = visibleProjects.reduce((count, p) => {

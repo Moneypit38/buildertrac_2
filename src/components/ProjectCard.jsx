@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { useViewedTimes, isNewItem } from "../lib/viewedContext";
+import { getSeenPhotoIds } from "../lib/viewedContext";
 
 const statusColors = {
   "Planning": "bg-blue-500/20 text-blue-400",
@@ -39,8 +39,11 @@ export default function ProjectCard({ project, onDelete, allTasks, allNotes, all
   const projectNotes = allNotes ? allNotes.filter(n => n.project_id === project.id) : projectNotesData;
   const projectPhotos = allPhotos ? allPhotos.filter(ph => ph.project_id === project.id) : projectPhotosData;
 
-  const { photos: lastViewedPhotos } = useViewedTimes();
-  const hasNewPhotos = projectPhotos.some(ph => isNewItem(ph.created_date, lastViewedPhotos));
+  const seenPhotoIds = getSeenPhotoIds();
+  const hasNewPhotos = projectPhotos.some(ph => {
+    const cutoff72h = new Date(Date.now() - 72 * 60 * 60 * 1000);
+    return new Date(ph.created_date) > cutoff72h && !seenPhotoIds.has(ph.id);
+  });
 
   const todayStr = new Date().toISOString().split("T")[0];
   const overdueTasks = projectTasks.filter(t => !t.completed && t.status !== "Done" && t.due_date && t.due_date < todayStr);
