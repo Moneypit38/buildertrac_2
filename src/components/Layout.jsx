@@ -14,7 +14,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { motion, AnimatePresence } from "framer-motion";
-import { markViewed, isNew } from "../hooks/useLastViewed";
+import { markViewed, getLastViewed } from "../hooks/useLastViewed";
 import SubscriptionGate from "./SubscriptionGate";
 
 // Tab page components — rendered persistently to preserve state
@@ -57,7 +57,11 @@ export default function Layout() {
   const initials = user?.full_name?.split(" ").map(n => n[0]).join("").toUpperCase() || "U";
   const { theme, setTheme } = useTheme();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [, forceUpdate] = useState(0);
+  // Store last-viewed timestamps in React state so badge recomputation is guaranteed to use fresh values
+  const [lastViewedTimes, setLastViewedTimes] = useState({
+    docs: getLastViewed("docs"),
+    photos: getLastViewed("photos"),
+  });
 
   const onTab = isTabPath(location.pathname);
   const activeTab = getActiveTab(location.pathname);
@@ -67,31 +71,33 @@ export default function Layout() {
   const { data: docs = [] } = useQuery({ queryKey: ["documents"], queryFn: () => base44.entities.Document.list() });
   const { data: photos = [] } = useQuery({ queryKey: ["photos"], queryFn: () => base44.entities.SitePhoto.list() });
 
-  // Re-render badges when photos-seen event fires
-  useEffect(() => {
-    const handler = () => forceUpdate(n => n + 1);
-    window.addEventListener("photos-seen-updated", handler);
-    return () => window.removeEventListener("photos-seen-updated", handler);
-  }, []);
-
-  // Mark section as viewed when user navigates to that tab, then re-render badges
+  // Mark section as viewed when user navigates to that tab, then update React state + notify others
   useEffect(() => {
     const sectionKey = NAV_SECTION_KEYS[activeTab];
     if (sectionKey) {
       markViewed(sectionKey);
-      // Small delay ensures localStorage is written before dependent components re-read it
-      setTimeout(() => {
-        forceUpdate(n => n + 1);
-        if (sectionKey === "photos") window.dispatchEvent(new Event("photos-seen-updated"));
-        if (sectionKey === "docs") window.dispatchEvent(new Event("docs-seen-updated"));
-      }, 50);
+      const newTs = getLastViewed(sectionKey);
+      setLastViewedTimes(prev => ({ ...prev, [sectionKey]: newTs }));
+      if (sectionKey === "photos") window.dispatchEvent(new Event("photos-seen-updated"));
+      if (sectionKey === "docs") window.dispatchEvent(new Event("docs-seen-updated"));
     }
   }, [activeTab]);
 
-  // Badge counts per nav path
+  // Helper: is an item new given a last-viewed timestamp from state?
+  const isNewItem = (createdDate, sectionKey) => {
+    const now = new Date();
+    const cutoff72h = new Date(now.getTime() - 72 * 60 * 60 * 1000);
+    const created = new Date(createdDate);
+    if (created < cutoff72h) return false;
+    const lv = lastViewedTimes[sectionKey];
+    if (!lv) return true;
+    return created > lv;
+  };
+
+  // Badge counts per nav path — driven by React state, not raw localStorage reads
   const navBadges = {
-    "/documents": docs.filter(d => isNew(d.created_date, "docs")).length,
-    "/photos": photos.filter(ph => isNew(ph.created_date, "photos")).length,
+    "/documents": docs.filter(d => isNewItem(d.created_date, "docs")).length,
+    "/photos": photos.filter(ph => isNewItem(ph.created_date, "photos")).length,
   };
 
   return (
