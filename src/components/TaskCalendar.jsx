@@ -5,8 +5,10 @@ import { Link } from "react-router-dom";
 
 const STATUS_COLORS = {
   "Done": "bg-green-500/20 text-green-400 border-green-500/30",
+  "Completed": "bg-green-500/20 text-green-400 border-green-500/30",
   "In Progress": "bg-blue-500/20 text-blue-400 border-blue-500/30",
   "Blocked": "bg-red-500/20 text-red-400 border-red-500/30",
+  "Overdue": "bg-orange-500/20 text-orange-400 border-orange-500/30",
   "Pending Approval": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
   "Not Started": "bg-muted text-muted-foreground border-border",
 };
@@ -218,9 +220,17 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
                           <p className="text-[11px] text-muted-foreground truncate">{projectMap[t.project_id]}</p>
                         )}
                       </div>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full border font-medium flex-shrink-0 ${STATUS_COLORS[t.status] || STATUS_COLORS["Not Started"]}`}>
-                        {t.status}
-                      </span>
+                      {(() => {
+                        const isOverdue = selectedDate < todayStr && t.status !== "Done" && !t.completed;
+                        const isDone = t.status === "Done" || t.completed;
+                        const label = isDone ? "Completed" : isOverdue ? "Overdue" : t.status;
+                        const colorClass = STATUS_COLORS[isDone ? "Done" : isOverdue ? "Overdue" : t.status] || STATUS_COLORS["Not Started"];
+                        return (
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full border font-medium flex-shrink-0 ${colorClass}`}>
+                            {label}
+                          </span>
+                        );
+                      })()}
                     </Link>
                   ))}
                 </>
