@@ -100,10 +100,7 @@ export default function ProjectCard({ project, onDelete, allTasks, allNotes, all
             )}
             {hasNewPhotos && (
               <span className="flex items-center gap-1 shrink-0">
-                <span className="relative">
-                  <Camera className="w-3.5 h-3.5 text-purple-400" />
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-purple-300 ring-2 ring-background animate-pulse" />
-                </span>
+                <Camera className="w-3.5 h-3.5 text-blue-400" />
               </span>
             )}
           </div>
