@@ -5,15 +5,11 @@ import { useClientAccess } from "../hooks/useClientAccess";
 import PhotoGrid from "../components/PhotoGrid";
 import { Camera } from "lucide-react";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
-import { markViewed } from "../hooks/useLastViewed";
 
 export default function Photos() {
   const qc = useQueryClient();
 
-  useEffect(() => {
-    markViewed("photos");
-    window.dispatchEvent(new Event("photos-seen-updated"));
-  }, []);
+  // No-op: marking viewed is handled by Layout when the Photos tab becomes active
   const { refreshing, touchHandlers } = usePullToRefresh(() => qc.invalidateQueries());
   const { data: photos = [], isLoading } = useQuery({ queryKey: ["photos"], queryFn: () => base44.entities.SitePhoto.list() });
   const { allowedProjectIds } = useClientAccess();
