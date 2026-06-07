@@ -29,7 +29,8 @@ export default function ProjectMembersTab({ projectId }) {
   const [inviting, setInviting] = useState(false);
   const [mode, setMode] = useState("contact"); // "contact" | "manual"
   const [form, setForm] = useState(blank);
-  const [selectedContactId, setSelectedContactId] = useState("");
+  const [selectedContactIds, setSelectedContactIds] = useState([]);
+  const [bulkRole, setBulkRole] = useState("team_member");
   const [showContacts, setShowContacts] = useState(false);
 
   const { data: members = [] } = useQuery({
@@ -51,7 +52,7 @@ export default function ProjectMembersTab({ projectId }) {
       qc.invalidateQueries({ queryKey: ["members", projectId] });
       toast.success("Member invited! They'll receive an email to join.");
       setForm(blank);
-      setSelectedContactId("");
+      setSelectedContactIds([]);
       setInviting(false);
     },
   });
@@ -66,16 +67,24 @@ export default function ProjectMembersTab({ projectId }) {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["members", projectId] }); toast.success("Member removed"); },
   });
 
-  const handleContactSelect = (contactId) => {
-    setSelectedContactId(contactId);
-    const c = contacts.find(c => c.id === contactId);
-    if (c) setForm({ user_name: c.name, user_email: c.email, role: c.default_role || "team_member" });
+  const toggleContact = (contactId) => {
+    setSelectedContactIds(prev =>
+      prev.includes(contactId) ? prev.filter(id => id !== contactId) : [...prev, contactId]
+    );
   };
 
-  const handleInvite = (e) => {
+  const handleInvite = async (e) => {
     e.preventDefault();
-    if (!form.user_email.trim()) return toast.error("Email is required");
-    addMember.mutate(form);
+    if (mode === "contact") {
+      if (selectedContactIds.length === 0) return toast.error("Select at least one contact");
+      for (const cid of selectedContactIds) {
+        const c = contacts.find(x => x.id === cid);
+        if (c) await addMember.mutateAsync({ user_name: c.name, user_email: c.email, role: bulkRole });
+      }
+    } else {
+      if (!form.user_email.trim()) return toast.error("Email is required");
+      addMember.mutate(form);
+    }
   };
 
   // Already-added member emails
@@ -92,7 +101,7 @@ export default function ProjectMembersTab({ projectId }) {
           <Button size="sm" variant="outline" onClick={() => setShowContacts(true)}>
             <BookUser className="w-4 h-4 mr-1" /> Contacts
           </Button>
-          <Button size="sm" onClick={() => { setInviting(!inviting); setForm(blank); setSelectedContactId(""); }}>
+          <Button size="sm" onClick={() => { setInviting(v => !v); setForm(blank); setSelectedContactIds([]); }}>
             <UserPlus className="w-4 h-4 mr-1" /> Invite
           </Button>
         </div>
@@ -105,12 +114,12 @@ export default function ProjectMembersTab({ projectId }) {
           {/* Mode toggle */}
           <div className="flex gap-1 bg-accent rounded-lg p-0.5 w-fit">
             <button type="button"
-              onClick={() => { setMode("contact"); setForm(blank); setSelectedContactId(""); }}
+              onClick={() => { setMode("contact"); setForm(blank); setSelectedContactIds([]); }}
               className={`text-xs px-3 py-1 rounded-md font-medium transition-colors ${mode === "contact" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
               From Contacts
             </button>
             <button type="button"
-              onClick={() => { setMode("manual"); setForm(blank); setSelectedContactId(""); }}
+              onClick={() => { setMode("manual"); setForm(blank); setSelectedContactIds([]); }}
               className={`text-xs px-3 py-1 rounded-md font-medium transition-colors ${mode === "manual" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
               Enter Manually
             </button>
@@ -125,43 +134,50 @@ export default function ProjectMembersTab({ projectId }) {
                     : "All your contacts are already on this project."}
                 </p>
               ) : (
-                <div className="space-y-1.5 max-h-52 overflow-y-auto">
-                  {availableContacts.map(c => (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => handleContactSelect(c.id)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg border text-left transition-colors
-                        ${selectedContactId === c.id ? "border-primary bg-primary/10" : "border-border bg-card hover:bg-accent"}`}
-                    >
-                      <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center text-xs font-bold text-primary shrink-0">
-                        {c.name?.[0]?.toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{c.name}</p>
-                        <p className="text-xs text-muted-foreground truncate">{c.email}{c.company ? ` · ${c.company}` : ""}</p>
-                      </div>
-                      <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground shrink-0">
-                        {roleLabels[c.default_role] || c.default_role}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {selectedContactId && (
-                <div>
-                  <Label>Role for this project</Label>
-                  <ResponsiveSelect
-                    value={form.role}
-                    onValueChange={v => setForm(f => ({ ...f, role: v }))}
-                    options={[
-                      { value: "team_member", label: "Team Member — full project access" },
-                      { value: "client", label: "Client — docs & photos only" },
-                      { value: "admin", label: "Admin — manage everything" },
-                    ]}
-                  />
-                </div>
+                <>
+                  <div className="space-y-1.5 max-h-52 overflow-y-auto">
+                    {availableContacts.map(c => {
+                      const checked = selectedContactIds.includes(c.id);
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => toggleContact(c.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg border text-left transition-colors
+                            ${checked ? "border-primary bg-primary/10" : "border-border bg-card hover:bg-accent"}`}
+                        >
+                          <div className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${checked ? "bg-primary border-primary" : "border-muted-foreground"}`}>
+                            {checked && <span className="text-primary-foreground text-[10px] font-bold">✓</span>}
+                          </div>
+                          <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center text-xs font-bold text-primary shrink-0">
+                            {c.name?.[0]?.toUpperCase()}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{c.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{c.email}{c.company ? ` · ${c.company}` : ""}</p>
+                          </div>
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground shrink-0">
+                            {roleLabels[c.default_role] || c.default_role}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {selectedContactIds.length > 0 && (
+                    <div>
+                      <Label>Role for selected ({selectedContactIds.length})</Label>
+                      <ResponsiveSelect
+                        value={bulkRole}
+                        onValueChange={setBulkRole}
+                        options={[
+                          { value: "team_member", label: "Team Member — full project access" },
+                          { value: "client", label: "Client — docs & photos only" },
+                          { value: "admin", label: "Admin — manage everything" },
+                        ]}
+                      />
+                    </div>
+                  )}
+                </>
               )}
             </div>
           ) : (
@@ -188,7 +204,7 @@ export default function ProjectMembersTab({ projectId }) {
             <Button
               type="submit"
               size="sm"
-              disabled={addMember.isPending || (mode === "contact" && !selectedContactId)}
+              disabled={addMember.isPending || (mode === "contact" && selectedContactIds.length === 0)}
             >
               {addMember.isPending ? "Inviting..." : "Send Invite"}
             </Button>

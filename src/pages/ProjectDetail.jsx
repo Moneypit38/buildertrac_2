@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import TaskItem from "../components/TaskItem";
 import DocumentCard from "../components/DocumentCard";
-import PhotoCard from "../components/PhotoCard";
+import PhotoGrid from "../components/PhotoGrid";
 import CreateTaskDialog from "../components/CreateTaskDialog";
 import UploadDocDialog from "../components/UploadDocDialog";
 import UploadPhotoDialog from "../components/UploadPhotoDialog";
@@ -176,7 +176,7 @@ export default function ProjectDetail() {
           {photos.length === 0 ? (
             <div className="bg-card border border-border rounded-xl p-8 text-center"><Camera className="w-8 h-8 text-muted-foreground mx-auto mb-2" /><p className="text-sm text-muted-foreground">No site photos yet. Capture the progress.</p></div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{photos.map(p => <PhotoCard key={p.id} photo={p} canDelete={canDelete} />)}</div>
+            <PhotoGrid photos={photos} canDelete={canDelete} />
           )}
         </TabsContent>
 

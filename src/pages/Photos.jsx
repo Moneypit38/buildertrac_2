@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useClientAccess } from "../hooks/useClientAccess";
-import PhotoCard from "../components/PhotoCard";
+import PhotoGrid from "../components/PhotoGrid";
 import { Camera } from "lucide-react";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 
@@ -27,9 +27,7 @@ export default function Photos() {
           <p className="text-muted-foreground">No site photos yet. Open a project to start capturing progress.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {visiblePhotos.map(p => <PhotoCard key={p.id} photo={p} />)}
-        </div>
+        <PhotoGrid photos={visiblePhotos} />
       )}
     </div>
   );
