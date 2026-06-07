@@ -58,7 +58,6 @@ export default function Layout() {
   const initials = user?.full_name?.split(" ").map(n => n[0]).join("").toUpperCase() || "U";
   const { theme, setTheme } = useTheme();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  // Store last-viewed timestamps in React state so badge recomputation is guaranteed to use fresh values
   const [lastViewedTimes, setLastViewedTimes] = useState({
     docs: getLastViewed("docs"),
     photos: getLastViewed("photos"),
@@ -67,6 +66,17 @@ export default function Layout() {
   const onTab = isTabPath(location.pathname);
   const activeTab = getActiveTab(location.pathname);
   const isChildRoute = !onTab;
+
+  // Lazy-mount tabs: only mount a tab once it's been visited, then keep it alive
+  const [mountedTabs, setMountedTabs] = useState(() => new Set([activeTab]));
+  useEffect(() => {
+    setMountedTabs(prev => {
+      if (prev.has(activeTab)) return prev;
+      const next = new Set(prev);
+      next.add(activeTab);
+      return next;
+    });
+  }, [activeTab]);
 
   // Fetch data needed for nav badge counts
   const { data: docs = [] } = useQuery({ queryKey: ["documents"], queryFn: () => base44.entities.Document.list(), staleTime: 60000 });
@@ -161,11 +171,13 @@ export default function Layout() {
       {/* Main content */}
       <main className="flex-1 overflow-y-auto" style={{ paddingBottom: "calc(4rem + env(safe-area-inset-bottom))" }}>
         <SubscriptionGate>
-          {/* Tab pages — always mounted, hidden when inactive to preserve state */}
+          {/* Tab pages — lazily mounted on first visit, then kept alive (hidden) */}
           {navItems.map(({ path, Component }) => (
-            <div key={path} className={onTab && activeTab === path ? "block" : "hidden"}>
-              <Component />
-            </div>
+            mountedTabs.has(path) ? (
+              <div key={path} className={onTab && activeTab === path ? "block" : "hidden"}>
+                <Component />
+              </div>
+            ) : null
           ))}
 
           {/* Child routes (e.g. /project/:id) — slide in over tabs */}
