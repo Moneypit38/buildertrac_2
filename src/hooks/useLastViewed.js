@@ -17,7 +17,9 @@ export function getLastViewed(section) {
 }
 
 export function markViewed(section) {
-  localStorage.setItem(KEYS[section], new Date().toISOString());
+  // Set to a time 10 seconds in the future to ensure all currently-loaded items are covered
+  const ts = new Date(Date.now() + 10000).toISOString();
+  localStorage.setItem(KEYS[section], ts);
 }
 
 /**

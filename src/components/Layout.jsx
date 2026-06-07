@@ -79,9 +79,12 @@ export default function Layout() {
     const sectionKey = NAV_SECTION_KEYS[activeTab];
     if (sectionKey) {
       markViewed(sectionKey);
-      forceUpdate(n => n + 1);
-      if (sectionKey === "photos") window.dispatchEvent(new Event("photos-seen-updated"));
-      if (sectionKey === "docs") window.dispatchEvent(new Event("docs-seen-updated"));
+      // Small delay ensures localStorage is written before dependent components re-read it
+      setTimeout(() => {
+        forceUpdate(n => n + 1);
+        if (sectionKey === "photos") window.dispatchEvent(new Event("photos-seen-updated"));
+        if (sectionKey === "docs") window.dispatchEvent(new Event("docs-seen-updated"));
+      }, 50);
     }
   }, [activeTab]);
 
