@@ -39,7 +39,13 @@ export default function ProjectCard({ project, onDelete, allTasks, allNotes, all
   const projectNotes = allNotes ? allNotes.filter(n => n.project_id === project.id) : projectNotesData;
   const projectPhotos = allPhotos ? allPhotos.filter(ph => ph.project_id === project.id) : projectPhotosData;
 
-  const seenPhotoIds = getSeenPhotoIds();
+  const [seenPhotoIds, setSeenPhotoIds] = useState(() => getSeenPhotoIds());
+  useEffect(() => {
+    const handler = () => setSeenPhotoIds(getSeenPhotoIds());
+    window.addEventListener("photos-seen-updated", handler);
+    return () => window.removeEventListener("photos-seen-updated", handler);
+  }, []);
+
   const hasNewPhotos = projectPhotos.some(ph => {
     const cutoff72h = new Date(Date.now() - 72 * 60 * 60 * 1000);
     return new Date(ph.created_date) > cutoff72h && !seenPhotoIds.has(ph.id);

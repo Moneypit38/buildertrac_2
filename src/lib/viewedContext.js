@@ -31,4 +31,5 @@ export function markPhotoSeen(photoId) {
   const ids = getSeenPhotoIds();
   ids.add(photoId);
   localStorage.setItem(SEEN_PHOTOS_KEY, JSON.stringify([...ids]));
+  window.dispatchEvent(new Event("photos-seen-updated"));
 }

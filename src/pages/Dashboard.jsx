@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useClientAccess } from "../hooks/useClientAccess";
@@ -45,7 +45,13 @@ export default function Dashboard() {
   const newDocs = visibleDocs.filter(d => isNewItem(d.created_date, lastViewedTimes.docs)).length;
 
   // Photos uploaded in last 72h and not yet individually viewed
-  const seenPhotoIds = getSeenPhotoIds();
+  const [seenPhotoIds, setSeenPhotoIds] = useState(() => getSeenPhotoIds());
+  useEffect(() => {
+    const handler = () => setSeenPhotoIds(getSeenPhotoIds());
+    window.addEventListener("photos-seen-updated", handler);
+    return () => window.removeEventListener("photos-seen-updated", handler);
+  }, []);
+
   const newPhotos = visiblePhotos.filter(ph => {
     const cutoff72h = new Date(Date.now() - 72 * 60 * 60 * 1000);
     return new Date(ph.created_date) > cutoff72h && !seenPhotoIds.has(ph.id);
