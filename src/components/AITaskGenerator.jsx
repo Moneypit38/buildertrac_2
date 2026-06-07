@@ -71,7 +71,7 @@ Create 8-12 specific, actionable tasks that a construction team would actually n
       <button
         type="button"
         onClick={() => setExpanded(e => !e)}
-        className="w-full flex items-center gap-2 px-4 py-3 text-sm font-medium text-primary hover:bg-primary/5 transition-colors"
+        className="w-full flex items-center gap-2 px-4 py-3 text-sm font-medium text-foreground hover:bg-primary/5 transition-colors"
       >
         <Sparkles className="w-4 h-4" />
         Generate tasks with AI
