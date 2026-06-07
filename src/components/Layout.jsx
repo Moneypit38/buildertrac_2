@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { markViewed, getLastViewed } from "../hooks/useLastViewed";
+import { ViewedContext, isNewItem } from "../lib/viewedContext";
 import SubscriptionGate from "./SubscriptionGate";
 
 // Tab page components — rendered persistently to preserve state
@@ -71,7 +72,7 @@ export default function Layout() {
   const { data: docs = [] } = useQuery({ queryKey: ["documents"], queryFn: () => base44.entities.Document.list(), staleTime: 60000 });
   const { data: photos = [] } = useQuery({ queryKey: ["photos"], queryFn: () => base44.entities.SitePhoto.list(), staleTime: 60000 });
 
-  // Mark section as viewed when user navigates to that tab, then update React state + notify others
+  // Mark section as viewed whenever the active tab changes OR on first mount
   useEffect(() => {
     const sectionKey = NAV_SECTION_KEYS[activeTab];
     if (sectionKey) {
@@ -81,26 +82,17 @@ export default function Layout() {
       if (sectionKey === "photos") window.dispatchEvent(new Event("photos-seen-updated"));
       if (sectionKey === "docs") window.dispatchEvent(new Event("docs-seen-updated"));
     }
-  }, [activeTab]);
-
-  // Helper: is an item new given a last-viewed timestamp from state?
-  const isNewItem = (createdDate, sectionKey) => {
-    const now = new Date();
-    const cutoff72h = new Date(now.getTime() - 72 * 60 * 60 * 1000);
-    const created = new Date(createdDate);
-    if (created < cutoff72h) return false;
-    const lv = lastViewedTimes[sectionKey];
-    if (!lv) return true;
-    return created > lv;
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, onTab]); // onTab included so navigating back to a tab from a child route also triggers
 
   // Badge counts per nav path — driven by React state, not raw localStorage reads
   const navBadges = {
-    "/documents": docs.filter(d => isNewItem(d.created_date, "docs")).length,
-    "/photos": photos.filter(ph => isNewItem(ph.created_date, "photos")).length,
+    "/documents": docs.filter(d => isNewItem(d.created_date, lastViewedTimes.docs)).length,
+    "/photos": photos.filter(ph => isNewItem(ph.created_date, lastViewedTimes.photos)).length,
   };
 
   return (
+    <ViewedContext.Provider value={lastViewedTimes}>
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--background))' }}>
       {/* Header with safe-area top inset */}
       <header
@@ -251,5 +243,6 @@ export default function Layout() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+    </ViewedContext.Provider>
   );
 }

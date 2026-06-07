@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useClientAccess } from "../hooks/useClientAccess";
@@ -8,7 +8,7 @@ import { HardHat, Layers } from "lucide-react";
 import PortfolioIcon, { getColor } from "../components/PortfolioIcon";
 import { Link } from "react-router-dom";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
-import { isNew } from "../hooks/useLastViewed";
+import { useViewedTimes, isNewItem } from "../lib/viewedContext";
 import { motion } from "framer-motion";
 import TaskCalendar from "../components/TaskCalendar";
 
@@ -16,19 +16,9 @@ import TaskCalendar from "../components/TaskCalendar";
 
 export default function Dashboard() {
   const { allowedProjectIds, isLoading: accessLoading } = useClientAccess();
+  const lastViewedTimes = useViewedTimes();
   const qc = useQueryClient();
-  const [, forceUpdate] = useState(0);
-  useEffect(() => {
-    const handler = () => forceUpdate(n => n + 1);
-    window.addEventListener("msgs-seen-updated", handler);
-    window.addEventListener("tasks-seen-updated", handler);
-    window.addEventListener("photos-seen-updated", handler);
-    return () => {
-      window.removeEventListener("msgs-seen-updated", handler);
-      window.removeEventListener("tasks-seen-updated", handler);
-      window.removeEventListener("photos-seen-updated", handler);
-    };
-  }, []);
+
   const { refreshing, touchHandlers } = usePullToRefresh(() => qc.invalidateQueries());
   const { data: projects = [] } = useQuery({ queryKey: ["projects"], queryFn: () => base44.entities.Project.list() });
   const { data: portfolios = [] } = useQuery({ queryKey: ["portfolios"], queryFn: () => base44.entities.Portfolio.list() });
@@ -52,10 +42,10 @@ export default function Dashboard() {
   ).length;
 
   // Docs uploaded in last 72h and not yet viewed
-  const newDocs = visibleDocs.filter(d => isNew(d.created_date, "docs")).length;
+  const newDocs = visibleDocs.filter(d => isNewItem(d.created_date, lastViewedTimes.docs)).length;
 
   // Photos uploaded in last 72h and not yet viewed
-  const newPhotos = visiblePhotos.filter(ph => isNew(ph.created_date, "photos")).length;
+  const newPhotos = visiblePhotos.filter(ph => isNewItem(ph.created_date, lastViewedTimes.photos)).length;
 
   // New messages = projects where notes count exceeds last-seen count
   const newNotes = visibleProjects.reduce((count, p) => {
@@ -125,7 +115,7 @@ export default function Dashboard() {
             {visiblePortfolios.map((pf, i) => {
               const pfProjects = visibleProjects.filter(p => p.portfolio === pf.name);
               const pfProjectIds = new Set(pfProjects.map(p => p.id));
-              const pfHasNewPhotos = visiblePhotos.some(ph => pfProjectIds.has(ph.project_id) && isNew(ph.created_date, "photos"));
+              const pfHasNewPhotos = visiblePhotos.some(ph => pfProjectIds.has(ph.project_id) && isNewItem(ph.created_date, lastViewedTimes.photos));
               const colorDef = getColor(pf.color);
               return (
                 <motion.div key={pf.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.25, delay: 0.18 + i * 0.05 }}>
