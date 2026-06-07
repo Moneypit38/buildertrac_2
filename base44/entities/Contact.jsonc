@@ -1,0 +1,34 @@
+{
+  "name": "Contact",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string"
+    },
+    "default_role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "team_member",
+        "client"
+      ],
+      "default": "team_member"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "email"
+  ]
+}
