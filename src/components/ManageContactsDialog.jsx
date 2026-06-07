@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ResponsiveSelect from "./ResponsiveSelect";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trash2, Plus, User } from "lucide-react";
+import { Trash2, Plus, User, Search } from "lucide-react";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
@@ -19,6 +19,8 @@ export default function ManageContactsDialog({ open, onClose }) {
   const [form, setForm] = useState(blank);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
 
   const { data: contacts = [] } = useQuery({
     queryKey: ["contacts"],
@@ -63,18 +65,52 @@ export default function ManageContactsDialog({ open, onClose }) {
 
         {!showForm ? (
           <div className="space-y-3">
-            <Button size="sm" onClick={() => { setForm(blank); setEditId(null); setShowForm(true); }}>
-              <Plus className="w-4 h-4 mr-1" /> New Contact
-            </Button>
+            <div className="flex gap-2">
+              <Button size="sm" onClick={() => { setForm(blank); setEditId(null); setShowForm(true); }}>
+                <Plus className="w-4 h-4 mr-1" /> New Contact
+              </Button>
+            </div>
 
-            {contacts.length === 0 ? (
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search by name, email, or company…"
+                className="pl-8 h-8 text-sm"
+              />
+            </div>
+
+            {/* Role filter tabs */}
+            <div className="flex gap-1 bg-accent rounded-lg p-0.5 w-fit">
+              {[["all", "All"], ["team_member", "Team"], ["client", "Clients"], ["admin", "Admins"]].map(([val, label]) => (
+                <button key={val} type="button"
+                  onClick={() => setRoleFilter(val)}
+                  className={`text-xs px-3 py-1 rounded-md font-medium transition-colors ${roleFilter === val ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {(() => {
+              const filtered = contacts.filter(c => {
+                const matchesRole = roleFilter === "all" || c.default_role === roleFilter;
+                const q = search.toLowerCase();
+                const matchesSearch = !q || c.name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.company?.toLowerCase().includes(q);
+                return matchesRole && matchesSearch;
+              });
+
+              return contacts.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground text-sm">
                 <User className="w-8 h-8 mx-auto mb-2 opacity-40" />
                 No contacts yet. Add people you work with frequently.
               </div>
+            ) : filtered.length === 0 ? (
+              <div className="text-center py-6 text-muted-foreground text-sm">No contacts match your search.</div>
             ) : (
               <div className="space-y-2">
-                {contacts.map(c => (
+                {filtered.map(c => (
                   <div key={c.id} className="bg-accent/40 border border-border rounded-xl px-3 py-2.5 flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center text-sm font-bold text-primary shrink-0">
                       {c.name?.[0]?.toUpperCase() || "?"}
@@ -103,7 +139,8 @@ export default function ManageContactsDialog({ open, onClose }) {
                   </div>
                 ))}
               </div>
-            )}
+            );
+            })()}
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-3">
