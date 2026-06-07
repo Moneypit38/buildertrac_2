@@ -23,6 +23,9 @@ import AppointmentsTab from "../components/AppointmentsTab";
 
 export default function ProjectDetail() {
   const { projectId } = useParams();
+  const urlParams = new URLSearchParams(window.location.search);
+  const tabParam = urlParams.get("tab");
+  const apptParam = urlParams.get("appt");
   const { data: project, isLoading } = useQuery({ queryKey: ["project", projectId], queryFn: () => base44.entities.Project.get(projectId) });
   const { data: tasks = [] } = useQuery({ queryKey: ["tasks", projectId], queryFn: () => base44.entities.Task.filter({ project_id: projectId }) });
   const { data: docs = [] } = useQuery({ queryKey: ["documents", projectId], queryFn: () => base44.entities.Document.filter({ project_id: projectId }) });
@@ -122,7 +125,7 @@ export default function ProjectDetail() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue={isClient ? "docs" : "tasks"}>
+      <Tabs defaultValue={tabParam || (isClient ? "docs" : "tasks")}>
         <TabsList className="w-full bg-card border border-border p-0.5 flex">
           {!isClient && <TabsTrigger value="tasks" className="flex-1 gap-1 text-xs px-1 py-1"><ClipboardList className="w-3 h-3" /><span>Tasks</span></TabsTrigger>}
           <TabsTrigger value="docs" className="flex-1 gap-1 text-xs px-1 py-1"><FileText className="w-3 h-3" /><span>Docs</span></TabsTrigger>
@@ -179,7 +182,7 @@ export default function ProjectDetail() {
 
         {!isClient && (
         <TabsContent value="appointments" className="mt-4">
-          <AppointmentsTab projectId={projectId} canDelete={canDelete} />
+          <AppointmentsTab projectId={projectId} canDelete={canDelete} highlightApptId={apptParam} />
         </TabsContent>
         )}
 

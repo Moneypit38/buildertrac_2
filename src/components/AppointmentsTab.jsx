@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ function formatTime(t) {
   return `${hour}:${String(m).padStart(2, "0")} ${ampm}`;
 }
 
-export default function AppointmentsTab({ projectId, canDelete }) {
+export default function AppointmentsTab({ projectId, canDelete, highlightApptId }) {
   const qc = useQueryClient();
   const [showDialog, setShowDialog] = useState(false);
   const [editAppt, setEditAppt] = useState(null);
@@ -41,10 +41,21 @@ export default function AppointmentsTab({ projectId, canDelete }) {
   const upcoming = sorted.filter(a => a.date >= todayStr);
   const past = sorted.filter(a => a.date < todayStr);
 
+  const highlightRef = useRef(null);
+  useEffect(() => {
+    if (highlightApptId && highlightRef.current) {
+      setTimeout(() => highlightRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 300);
+    }
+  }, [highlightApptId, appointments]);
+
   const AppointmentCard = ({ appt }) => {
     const isPast = appt.date < todayStr;
+    const isHighlighted = appt.id === highlightApptId;
     return (
-      <div className={`bg-card border rounded-xl p-3 ${isPast ? "opacity-60 border-border" : "border-purple-500/40"}`}>
+      <div
+        ref={isHighlighted ? highlightRef : null}
+        className={`bg-card border rounded-xl p-3 transition-all duration-500 ${isPast ? "opacity-60 border-border" : "border-purple-500/40"} ${isHighlighted ? "ring-2 ring-purple-400 ring-offset-2 ring-offset-background" : ""}`}
+      >
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-start gap-2 flex-1 min-w-0">
             <div className="mt-0.5 w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0">
