@@ -11,6 +11,7 @@ import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import { useViewedTimes, isNewItem, getSeenPhotoIds } from "../lib/viewedContext";
 import { motion } from "framer-motion";
 import TaskCalendar from "../components/TaskCalendar";
+import { Camera } from "lucide-react";
 
 
 
@@ -125,7 +126,10 @@ export default function Dashboard() {
             {visiblePortfolios.map((pf, i) => {
               const pfProjects = visibleProjects.filter(p => p.portfolio === pf.name);
               const pfProjectIds = new Set(pfProjects.map(p => p.id));
-              const pfHasNewPhotos = visiblePhotos.some(ph => pfProjectIds.has(ph.project_id) && isNewItem(ph.created_date, lastViewedTimes.photos));
+              const pfHasNewPhotos = visiblePhotos.some(ph => {
+                const cutoff72h = new Date(Date.now() - 72 * 60 * 60 * 1000);
+                return pfProjectIds.has(ph.project_id) && new Date(ph.created_date) > cutoff72h && !seenPhotoIds.has(ph.id);
+              });
               const colorDef = getColor(pf.color);
               return (
                 <motion.div key={pf.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.25, delay: 0.18 + i * 0.05 }}>
@@ -134,7 +138,9 @@ export default function Dashboard() {
                     className={`flex flex-col gap-2 p-3 bg-card border border-border rounded-xl hover:border-primary/40 transition-all relative`}
                   >
                     {pfHasNewPhotos && (
-                      <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-purple-300 ring-2 ring-background animate-pulse" />
+                      <span className="absolute top-2 right-2">
+                        <Camera className="w-3.5 h-3.5 text-blue-400" />
+                      </span>
                     )}
                     <PortfolioIcon icon={pf.icon} color={pf.color} size="sm" />
                     <div className="min-w-0">
