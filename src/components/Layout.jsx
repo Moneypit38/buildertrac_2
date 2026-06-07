@@ -80,6 +80,8 @@ export default function Layout() {
     if (sectionKey) {
       markViewed(sectionKey);
       forceUpdate(n => n + 1);
+      if (sectionKey === "photos") window.dispatchEvent(new Event("photos-seen-updated"));
+      if (sectionKey === "docs") window.dispatchEvent(new Event("docs-seen-updated"));
     }
   }, [activeTab]);
 
