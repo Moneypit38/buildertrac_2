@@ -18,7 +18,7 @@ import {
 import InviteToPortfolioDialog from "../components/InviteToPortfolioDialog";
 import CreateProjectDialog from "../components/CreateProjectDialog";
 import PortfolioMembersDialog from "../components/PortfolioMembersDialog";
-import SubscriptionGate from "../components/SubscriptionGate";
+
 
 // ── Create / Edit Portfolio Dialog ──────────────────────────────────────────
 function PortfolioFormDialog({ open, onClose, portfolio }) {
@@ -238,7 +238,6 @@ export default function Portfolios() {
                 </div>
 
                 {/* Projects list */}
-                <SubscriptionGate portfolio={pf}>
                 <div className="p-4 space-y-3">
                   {pfProjects.length === 0 ? (
                     <p className="text-xs text-muted-foreground text-center py-3">No projects in this portfolio yet.</p>
@@ -267,7 +266,6 @@ export default function Portfolios() {
                     </button>
                   )}
                 </div>
-                </SubscriptionGate>
               </div>
             );
           })}

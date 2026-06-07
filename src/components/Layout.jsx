@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { markViewed, isNew } from "../hooks/useLastViewed";
+import SubscriptionGate from "./SubscriptionGate";
 
 // Tab page components — rendered persistently to preserve state
 import Dashboard from "../pages/Dashboard";
@@ -145,27 +146,29 @@ export default function Layout() {
 
       {/* Main content */}
       <main className="flex-1 overflow-y-auto" style={{ paddingBottom: "calc(4rem + env(safe-area-inset-bottom))" }}>
-        {/* Tab pages — always mounted, hidden when inactive to preserve state */}
-        {navItems.map(({ path, Component }) => (
-          <div key={path} className={onTab && activeTab === path ? "block" : "hidden"}>
-            <Component />
-          </div>
-        ))}
+        <SubscriptionGate>
+          {/* Tab pages — always mounted, hidden when inactive to preserve state */}
+          {navItems.map(({ path, Component }) => (
+            <div key={path} className={onTab && activeTab === path ? "block" : "hidden"}>
+              <Component />
+            </div>
+          ))}
 
-        {/* Child routes (e.g. /project/:id) — slide in over tabs */}
-        {isChildRoute && (
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0, x: 24 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -24 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-            >
-              <Outlet />
-            </motion.div>
-          </AnimatePresence>
-        )}
+          {/* Child routes (e.g. /project/:id) — slide in over tabs */}
+          {isChildRoute && (
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={location.pathname}
+                initial={{ opacity: 0, x: 24 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -24 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+              >
+                <Outlet />
+              </motion.div>
+            </AnimatePresence>
+          )}
+        </SubscriptionGate>
       </main>
 
       {/* Bottom nav with safe-area bottom inset */}

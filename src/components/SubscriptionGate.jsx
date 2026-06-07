@@ -2,15 +2,19 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Loader2, Lock, CheckCircle2, Zap } from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
 
-export default function SubscriptionGate({ portfolio, children }) {
+export default function SubscriptionGate({ children }) {
+  const { user } = useAuth();
   const [status, setStatus] = useState(null); // null=loading, true=active, false=inactive
   const [loading, setLoading] = useState(false);
 
+  // Only gate admin users — team members & clients pass through
+  const isAdmin = user?.role === "admin";
+
   const checkStatus = async () => {
-    if (!portfolio?.id) return;
     try {
-      const res = await base44.functions.invoke("getSubscriptionStatus", { portfolioId: portfolio.id });
+      const res = await base44.functions.invoke("getSubscriptionStatus", {});
       setStatus(res.data.isActive);
     } catch {
       setStatus(false);
@@ -18,31 +22,27 @@ export default function SubscriptionGate({ portfolio, children }) {
   };
 
   useEffect(() => {
+    if (!isAdmin) { setStatus(true); return; }
     checkStatus();
-  }, [portfolio?.id]);
+  }, [isAdmin]);
 
-  // Check for success redirect
+  // Handle redirect back from Stripe
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("subscription") === "success" && params.get("portfolioId") === portfolio?.id) {
-      // Clean URL and recheck
+    if (params.get("subscription") === "success") {
       window.history.replaceState({}, "", window.location.pathname);
-      setTimeout(checkStatus, 2000); // give Stripe a moment
+      setTimeout(checkStatus, 2000);
     }
-  }, [portfolio?.id]);
+  }, []);
 
   const handleSubscribe = async () => {
-    // Block if in iframe (preview mode)
     if (window.self !== window.top) {
       alert("Checkout only works from the published app, not the preview.");
       return;
     }
     setLoading(true);
     try {
-      const res = await base44.functions.invoke("createCheckoutSession", {
-        portfolioId: portfolio.id,
-        portfolioName: portfolio.name,
-      });
+      const res = await base44.functions.invoke("createCheckoutSession", {});
       if (res.data.url) window.location.href = res.data.url;
     } catch (e) {
       alert("Could not start checkout: " + e.message);
@@ -68,14 +68,14 @@ export default function SubscriptionGate({ portfolio, children }) {
           <Lock className="w-7 h-7 text-primary" />
         </div>
         <div>
-          <h2 className="text-xl font-bold mb-1">Activate "{portfolio?.name}"</h2>
-          <p className="text-sm text-muted-foreground">Subscribe to unlock all projects, team members, documents, and more for this portfolio.</p>
+          <h2 className="text-xl font-bold mb-1">Unlock BuilderTrac</h2>
+          <p className="text-sm text-muted-foreground">Subscribe to manage your projects, team, documents, and more.</p>
         </div>
 
         <div className="bg-accent/50 rounded-xl p-4 text-left space-y-2">
           {[
-            "Unlimited projects",
-            "Unlimited team members & clients",
+            "Unlimited projects & portfolios",
+            "Invite team members & clients",
             "Documents, photos & appointments",
             "AI task generation",
             "Task reminders & notifications",
@@ -88,13 +88,13 @@ export default function SubscriptionGate({ portfolio, children }) {
         </div>
 
         <div>
-          <p className="text-3xl font-bold">$49<span className="text-base font-normal text-muted-foreground">/month</span></p>
-          <p className="text-xs text-muted-foreground mt-0.5">Per portfolio · Cancel anytime</p>
+          <p className="text-3xl font-bold">$9.99<span className="text-base font-normal text-muted-foreground">/month</span></p>
+          <p className="text-xs text-muted-foreground mt-0.5">Per admin · Cancel anytime</p>
         </div>
 
         <Button className="w-full" size="lg" onClick={handleSubscribe} disabled={loading}>
           {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Zap className="w-4 h-4 mr-2" />}
-          {loading ? "Redirecting..." : "Subscribe Now"}
+          {loading ? "Redirecting..." : "Subscribe Now — $9.99/mo"}
         </Button>
       </div>
     </div>

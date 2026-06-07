@@ -7,13 +7,20 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { portfolioId } = await req.json();
-
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
 
-    // Search for active subscriptions with this portfolio_id in metadata
-    const subscriptions = await stripe.subscriptions.search({
-      query: `metadata['portfolio_id']:'${portfolioId}' AND status:'active'`,
+    // Find active subscriptions for this user's email
+    const customers = await stripe.customers.list({ email: user.email, limit: 5 });
+
+    if (customers.data.length === 0) {
+      return Response.json({ isActive: false });
+    }
+
+    const customerId = customers.data[0].id;
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customerId,
+      status: 'active',
+      limit: 1,
     });
 
     const isActive = subscriptions.data.length > 0;
