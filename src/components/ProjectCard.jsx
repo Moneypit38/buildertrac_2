@@ -8,7 +8,7 @@ import { base44 } from "@/api/base44Client";
 
 const statusColors = {
   "Planning": "bg-blue-500/20 text-blue-400",
-  "In Progress": "bg-primary/20 text-primary",
+  "In Progress": "bg-blue-500/20 text-blue-400",
   "On Hold": "bg-yellow-500/20 text-yellow-400",
   "Completed": "bg-green-500/20 text-green-400",
 };
