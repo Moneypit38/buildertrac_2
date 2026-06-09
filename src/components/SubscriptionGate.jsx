@@ -4,10 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Lock, CheckCircle2, Zap } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 
+const PAYMENTS_ENABLED = false;
+
 export default function SubscriptionGate({ children }) {
   const { user } = useAuth();
   const [status, setStatus] = useState(null); // null=loading, true=active, false=inactive
   const [loading, setLoading] = useState(false);
+
+  if (!PAYMENTS_ENABLED) return children;
 
   // Only gate admin users — team members & clients pass through
   const isAdmin = user?.role === "admin";
