@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Plus, Layers, FolderKanban, Trash2, Pencil, UserPlus, Users } from "lucide-react";
 import PortfolioIcon, { PORTFOLIO_ICONS, PORTFOLIO_COLORS, getColor, getIconComponent } from "../components/PortfolioIcon";
 import { useClientAccess } from "../hooks/useClientAccess";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -101,6 +101,20 @@ export default function Portfolios() {
   const { data: projects = [] } = useQuery({ queryKey: ["projects"], queryFn: () => base44.entities.Project.list() });
   const { isClientOnly, allowedProjectIds } = useClientAccess();
   const qc = useQueryClient();
+  const location = useLocation();
+  const portfolioRefs = useRef({});
+  const [highlightedId, setHighlightedId] = useState(null);
+
+  useEffect(() => {
+    const openId = location.state?.openPortfolioId;
+    if (!openId || portfolios.length === 0) return;
+    setHighlightedId(openId);
+    setTimeout(() => {
+      portfolioRefs.current[openId]?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+    const timer = setTimeout(() => setHighlightedId(null), 2000);
+    return () => clearTimeout(timer);
+  }, [location.state?.openPortfolioId, portfolios]);
 
   const [showCreate, setShowCreate] = useState(false);
   const [editPortfolio, setEditPortfolio] = useState(null);
@@ -160,7 +174,7 @@ export default function Portfolios() {
           {visiblePortfolios.map(pf => {
             const pfProjects = projectsByPortfolio(pf.name);
             return (
-              <div key={pf.id} className="bg-card border border-border rounded-xl overflow-hidden shadow-sm" style={{borderTopColor: getColor(pf.color).name}}>
+              <div key={pf.id} ref={el => portfolioRefs.current[pf.id] = el} className={`bg-card border rounded-xl overflow-hidden shadow-sm transition-all duration-500 ${highlightedId === pf.id ? "border-primary ring-2 ring-primary/40" : "border-border"}`} style={{borderTopColor: getColor(pf.color).name}}>
                 {/* Portfolio Header */}
                 <div className="px-5 pt-5 pb-4 border-b border-border bg-gradient-to-r from-primary/10 to-transparent">
                   <div className="flex items-start justify-between gap-3">

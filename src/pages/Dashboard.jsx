@@ -135,6 +135,7 @@ export default function Dashboard() {
                 <motion.div key={pf.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.25, delay: 0.18 + i * 0.05 }}>
                   <Link
                     to="/portfolios"
+                    state={{ openPortfolioId: pf.id }}
                     className={`flex flex-col gap-2 p-3 bg-card border border-border rounded-xl hover:border-primary/40 transition-all relative`}
                   >
                     {pfHasNewPhotos && (
