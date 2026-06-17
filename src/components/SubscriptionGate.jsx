@@ -11,8 +11,6 @@ export default function SubscriptionGate({ children }) {
   const [status, setStatus] = useState(null); // null=loading, true=active, false=inactive
   const [loading, setLoading] = useState(false);
 
-  if (!PAYMENTS_ENABLED) return children;
-
   // Only gate admin users — team members & clients pass through
   const isAdmin = user?.role === "admin";
 
@@ -26,18 +24,22 @@ export default function SubscriptionGate({ children }) {
   };
 
   useEffect(() => {
+    if (!PAYMENTS_ENABLED) return;
     if (!isAdmin) { setStatus(true); return; }
     checkStatus();
   }, [isAdmin]);
 
   // Handle redirect back from Stripe
   useEffect(() => {
+    if (!PAYMENTS_ENABLED) return;
     const params = new URLSearchParams(window.location.search);
     if (params.get("subscription") === "success") {
       window.history.replaceState({}, "", window.location.pathname);
       setTimeout(checkStatus, 2000);
     }
   }, []);
+
+  if (!PAYMENTS_ENABLED) return children;
 
   const handleSubscribe = async () => {
     if (window.self !== window.top) {
