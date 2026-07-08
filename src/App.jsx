@@ -12,6 +12,7 @@ import Layout from './components/Layout';
 import useTaskReminders from './hooks/useTaskReminders';
 import ProjectDetail from './pages/ProjectDetail';
 import AppStoreMockups from './pages/AppStoreMockups';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
@@ -59,6 +60,7 @@ const AuthenticatedApp = () => {
           {/* Child routes rendered via Outlet */}
           <Route path="/project/:projectId" element={<ProjectDetail />} />
           <Route path="/app-store-mockups" element={<AppStoreMockups />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
