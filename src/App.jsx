@@ -11,6 +11,7 @@ import { Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import useTaskReminders from './hooks/useTaskReminders';
 import ProjectDetail from './pages/ProjectDetail';
+import AppStoreMockups from './pages/AppStoreMockups';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
@@ -57,6 +58,7 @@ const AuthenticatedApp = () => {
           <Route path="/photos" element={<></>} />
           {/* Child routes rendered via Outlet */}
           <Route path="/project/:projectId" element={<ProjectDetail />} />
+          <Route path="/app-store-mockups" element={<AppStoreMockups />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
