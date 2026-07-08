@@ -5,7 +5,6 @@ import { useClientAccess } from "../hooks/useClientAccess";
 import StatCards from "../components/StatCards";
 import ProjectCard from "../components/ProjectCard";
 import { HardHat, Layers } from "lucide-react";
-import PortfolioIcon, { getColor } from "../components/PortfolioIcon";
 import { Link } from "react-router-dom";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import { useViewedTimes, isNewItem, getSeenPhotoIds } from "../lib/viewedContext";
@@ -89,14 +88,9 @@ export default function Dashboard() {
         <div className="flex justify-center pt-2"><div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>
       )}
       {/* Hero */}
-      <motion.div className="flex items-center gap-4 pt-2" {...fadeUp(0)}>
-        <img src="https://media.base44.com/images/public/6a1c6a3340e642df44a0130d/c979cb0cc_IMG_2880.png" alt="BuilderTrac Logo" className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
-        <div>
-          <h1 className="text-2xl font-extrabold font-display flex items-center gap-2">
-            <HardHat className="w-6 h-6 text-primary" /> Your Site Overview
-          </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Everything at a glance</p>
-        </div>
+      <motion.div className="pt-2" {...fadeUp(0)}>
+        <p className="text-xs text-muted-foreground font-medium">Your Site Overview /</p>
+        <h1 className="text-2xl font-extrabold font-display mt-0.5">Everything at a glance</h1>
       </motion.div>
 
       <motion.div {...fadeUp(0.07)}>
@@ -130,23 +124,30 @@ export default function Dashboard() {
                 const cutoff72h = new Date(Date.now() - 72 * 60 * 60 * 1000);
                 return pfProjectIds.has(ph.project_id) && new Date(ph.created_date) > cutoff72h && !seenPhotoIds.has(ph.id);
               });
-              const colorDef = getColor(pf.color);
+              // Pick a cover photo from the portfolio's projects
+              const coverPhoto = visiblePhotos.find(ph => pfProjectIds.has(ph.project_id) && ph.photo_url);
+              const coverImage = coverPhoto?.photo_url || pfProjects.find(p => p.image)?.image;
               return (
                 <motion.div key={pf.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.25, delay: 0.18 + i * 0.05 }}>
                   <Link
                     to="/portfolios"
                     state={{ openPortfolioId: pf.id }}
-                    className={`flex flex-col gap-2 p-3 bg-card border border-border rounded-xl hover:border-primary/40 transition-all relative`}
+                    className="relative rounded-xl overflow-hidden border border-border hover:border-primary/40 transition-all block aspect-[4/3]"
                   >
+                    {coverImage ? (
+                      <img src={coverImage} alt={pf.name} className="absolute inset-0 w-full h-full object-cover" />
+                    ) : (
+                      <div className="absolute inset-0 bg-muted" />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                     {pfHasNewPhotos && (
                       <span className="absolute top-2 right-2">
-                        <Camera className="w-3.5 h-3.5 text-blue-400" />
+                        <Camera className="w-3.5 h-3.5 text-blue-400 drop-shadow" />
                       </span>
                     )}
-                    <PortfolioIcon icon={pf.icon} color={pf.color} size="sm" />
-                    <div className="min-w-0">
-                      <p className={`font-semibold text-sm truncate ${colorDef.text}`}>{pf.name}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{pfProjects.length} project{pfProjects.length !== 1 ? "s" : ""}</p>
+                    <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                      <p className="font-semibold text-sm text-white leading-tight truncate">{pf.name}</p>
+                      <p className="text-[11px] text-white/70 mt-0.5">{pfProjects.length} project{pfProjects.length !== 1 ? "s" : ""}</p>
                     </div>
                   </Link>
                 </motion.div>

@@ -144,33 +144,32 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
             <button
               key={dateStr}
               onClick={() => setSelectedDate(isSelected ? null : dateStr)}
-              className={`h-12 flex flex-col items-center justify-start pt-1 border-b border-r border-border/40 last:border-r-0 transition-colors relative
+              className={`min-h-[52px] flex flex-col items-start justify-start pt-1 px-0.5 border-b border-r border-border/40 last:border-r-0 transition-colors relative
                 ${isSelected ? "bg-accent" : "hover:bg-accent/50"}
                 ${isToday ? "ring-1 ring-inset ring-primary" : ""}
               `}
             >
-              <span className={`text-[11px] font-semibold w-5 h-5 flex items-center justify-center rounded-full
+              <span className={`text-[11px] font-semibold w-5 h-5 flex items-center justify-center rounded-full mx-auto
                 ${isToday ? "bg-primary text-primary-foreground" : isOverdue ? "text-orange-400" : "text-foreground"}
               `}>
                 {day}
               </span>
-              {(hasTasks || hasAppts) && (
-                <div className="flex gap-0.5 mt-0.5 flex-wrap justify-center px-0.5">
-                  {dayTasks.slice(0, 2).map((t, i) => (
-                    <span
-                      key={`t-${i}`}
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        t.status === "Done" ? "bg-green-400" :
-                        dateStr < todayStr && !t.completed ? "bg-orange-400" :
-                        "bg-blue-400"
-                      }`}
-                    />
-                  ))}
-                  {dayAppts.slice(0, 2).map((_, i) => (
-                    <span key={`a-${i}`} className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                  ))}
-                </div>
-              )}
+              <div className="w-full space-y-0.5 mt-0.5 px-0.5">
+                {dayAppts.slice(0, 1).map((a, i) => (
+                  <div key={`a-${i}`} className="w-full truncate text-[9px] leading-tight bg-purple-500/20 text-purple-300 rounded px-0.5 py-px">
+                    {a.title}
+                  </div>
+                ))}
+                {dayTasks.slice(0, 2).map((t, i) => (
+                  <div key={`t-${i}`} className={`w-full truncate text-[9px] leading-tight rounded px-0.5 py-px ${
+                    t.status === "Done" ? "bg-green-500/20 text-green-400" :
+                    dateStr < todayStr && !t.completed ? "bg-orange-500/20 text-orange-300" :
+                    "bg-blue-500/20 text-blue-300"
+                  }`}>
+                    {t.title}
+                  </div>
+                ))}
+              </div>
             </button>
           );
         })}
