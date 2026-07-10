@@ -62,9 +62,9 @@ const AuthenticatedApp = () => {
           <Route path="/project/:projectId" element={<ProjectDetail />} />
           <Route path="/app-store-mockups" element={<AppStoreMockups />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/delete-account" element={<DeleteAccount />} />
         </Route>
       </Route>
+      <Route path="/delete-account" element={<DeleteAccount />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
