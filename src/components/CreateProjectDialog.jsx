@@ -27,7 +27,10 @@ export default function CreateProjectDialog({ open, onClose, project, defaultPor
       return { prev };
     },
     onError: (_, __, ctx) => { if (ctx?.prev) qc.setQueryData(["projects"], ctx.prev); },
-    onSettled: () => { qc.invalidateQueries({ queryKey: ["projects"] }); },
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ["projects"] });
+      if (isEdit) qc.invalidateQueries({ queryKey: ["project", project.id] });
+    },
     onSuccess: () => { toast.success(isEdit ? "Project updated" : "Project created!"); onClose(); },
   });
 
