@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Settings, LogOut, Trash2, Sun, Moon, Database, AlertTriangle, ChevronRight } from "lucide-react";
+import { LogOut, Trash2, Sun, Moon, Database, AlertTriangle, ChevronRight } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useTheme } from "next-themes";
 import { useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -44,11 +45,12 @@ export default function SettingsSheet({ user }) {
     <>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
-          <button
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-            title="Settings"
-          >
-            <Settings className="w-4 h-4" />
+          <button className="min-h-[44px] min-w-[44px] flex items-center justify-center" title="Settings">
+            <Avatar className="w-9 h-9 border border-primary cursor-pointer">
+              <AvatarFallback className="bg-card text-primary font-bold text-sm">
+                {user?.full_name?.split(" ").map(n => n[0]).join("").toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
           </button>
         </SheetTrigger>
         <SheetContent side="right" className="w-80">
