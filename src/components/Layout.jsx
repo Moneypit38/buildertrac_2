@@ -1,22 +1,13 @@
 import { useState, useEffect } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, FolderKanban, FileText, Camera, Layers, LogOut, Sun, Moon, Trash2, ChevronLeft } from "lucide-react";
-import { useTheme } from "next-themes";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { LayoutDashboard, FolderKanban, FileText, Camera, Layers, ChevronLeft } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuSeparator, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { markViewed, getLastViewed } from "../hooks/useLastViewed";
 import { ViewedContext, isNewItem, getSeenPhotoIds } from "../lib/viewedContext";
 import SubscriptionGate from "./SubscriptionGate";
+import SettingsSheet from "./SettingsSheet";
 
 // Tab page components — rendered persistently to preserve state
 import Dashboard from "../pages/Dashboard";
@@ -55,9 +46,6 @@ export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { data: user } = useQuery({ queryKey: ["me"], queryFn: () => base44.auth.me() });
-  const initials = user?.full_name?.split(" ").map(n => n[0]).join("").toUpperCase() || "U";
-  const { theme, setTheme } = useTheme();
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [lastViewedTimes, setLastViewedTimes] = useState({
     docs: getLastViewed("docs"),
     photos: getLastViewed("photos"),
@@ -130,41 +118,7 @@ export default function Layout() {
 
         {/* Right actions */}
         <div className="flex items-center gap-1">
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-            title="Toggle theme"
-          >
-            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="min-h-[44px] min-w-[44px] flex items-center justify-center">
-                <Avatar className="w-9 h-9 border border-primary cursor-pointer">
-                  <AvatarFallback className="bg-card text-primary font-bold text-sm">{initials}</AvatarFallback>
-                </Avatar>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <div className="px-3 py-2 border-b border-border">
-                <p className="text-sm font-medium">{user?.full_name || "User"}</p>
-                <p className="text-xs text-muted-foreground">{user?.email}</p>
-              </div>
-              <DropdownMenuItem
-                onClick={() => base44.auth.logout()}
-                className="cursor-pointer min-h-[44px]"
-              >
-                <LogOut className="w-4 h-4 mr-2" /> Sign out
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => setShowDeleteDialog(true)}
-                className="text-destructive cursor-pointer focus:text-destructive min-h-[44px]"
-              >
-                <Trash2 className="w-4 h-4 mr-2" /> Delete Account
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <SettingsSheet user={user} />
         </div>
       </header>
 
@@ -229,35 +183,7 @@ export default function Layout() {
         </div>
       </nav>
 
-      {/* Delete Account confirmation */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete your account?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently remove your account and all associated data. This action cannot be undone. You will be signed out immediately.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="min-h-[44px]">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={async () => {
-                try {
-                  // Attempt SDK deletion if available
-                  if (typeof base44.auth.deleteAccount === "function") {
-                    await base44.auth.deleteAccount();
-                  }
-                } finally {
-                  base44.auth.logout();
-                }
-              }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 min-h-[44px]"
-            >
-              Delete & Sign out
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+
     </div>
     </ViewedContext.Provider>
   );
