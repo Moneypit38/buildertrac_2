@@ -9,6 +9,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
 
 export default function SettingsSheet({ user }) {
   const { theme, setTheme } = useTheme();
@@ -17,6 +18,7 @@ export default function SettingsSheet({ user }) {
   const [showClearDataDialog, setShowClearDataDialog] = useState(false);
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
   const [clearing, setClearing] = useState(false);
+  const [clearPassword, setClearPassword] = useState("");
 
   const handleClearAllData = async () => {
     setClearing(true);
@@ -34,6 +36,7 @@ export default function SettingsSheet({ user }) {
         base44.entities.ProjectMember.deleteMany({}),
       ]);
       queryClient.invalidateQueries();
+      setClearPassword("");
       setShowClearDataDialog(false);
       setOpen(false);
     } finally {
@@ -120,7 +123,7 @@ export default function SettingsSheet({ user }) {
       </Sheet>
 
       {/* Clear Data confirmation */}
-      <AlertDialog open={showClearDataDialog} onOpenChange={setShowClearDataDialog}>
+      <AlertDialog open={showClearDataDialog} onOpenChange={(v) => { setShowClearDataDialog(v); if (!v) setClearPassword(""); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
@@ -130,11 +133,21 @@ export default function SettingsSheet({ user }) {
               This will permanently delete all your portfolios, projects, tasks, documents, photos, appointments, and notes. This cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          <div className="px-1 pb-2">
+            <p className="text-sm font-medium mb-1.5">Enter your password to confirm</p>
+            <Input
+              type="password"
+              placeholder="Your account password"
+              value={clearPassword}
+              onChange={(e) => setClearPassword(e.target.value)}
+              className="min-h-[44px]"
+            />
+          </div>
           <AlertDialogFooter>
-            <AlertDialogCancel className="min-h-[44px]">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="min-h-[44px]" onClick={() => setClearPassword("")}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleClearAllData}
-              disabled={clearing}
+              disabled={clearing || !clearPassword.trim()}
               className="bg-orange-500 hover:bg-orange-600 text-white min-h-[44px]"
             >
               {clearing ? "Clearing..." : "Clear All Data"}
