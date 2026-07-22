@@ -13,8 +13,8 @@ Deno.serve(async (req) => {
       payment_method_types: ['card'],
       mode: 'subscription',
       line_items: [{ price: 'price_1TfhxWIt5ybbqONMdWNNkkBx', quantity: 1 }],
-      success_url: `${req.headers.get('origin') || 'https://app.base44.com'}/?subscription=success`,
-      cancel_url: `${req.headers.get('origin') || 'https://app.base44.com'}/?subscription=cancelled`,
+      success_url: `${Deno.env.get('APP_BASE_URL') || 'https://buildertrac.base44.app'}/?subscription=success`,
+      cancel_url: `${Deno.env.get('APP_BASE_URL') || 'https://buildertrac.base44.app'}/?subscription=cancelled`,
       customer_email: user.email,
       metadata: {
         base44_app_id: Deno.env.get('BASE44_APP_ID'),

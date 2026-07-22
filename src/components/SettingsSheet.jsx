@@ -19,9 +19,19 @@ export default function SettingsSheet({ user }) {
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
   const [clearing, setClearing] = useState(false);
   const [clearPassword, setClearPassword] = useState("");
+  const [clearPasswordError, setClearPasswordError] = useState("");
 
   const handleClearAllData = async () => {
+    setClearPasswordError("");
     setClearing(true);
+    try {
+      // Verify the password is correct before deleting by attempting re-authentication
+      await base44.auth.loginViaEmailPassword(user.email, clearPassword);
+    } catch {
+      setClearPasswordError("Incorrect password. Please try again.");
+      setClearing(false);
+      return;
+    }
     try {
       await Promise.all([
         base44.entities.Task.deleteMany({}),
@@ -123,7 +133,7 @@ export default function SettingsSheet({ user }) {
       </Sheet>
 
       {/* Clear Data confirmation */}
-      <AlertDialog open={showClearDataDialog} onOpenChange={(v) => { setShowClearDataDialog(v); if (!v) setClearPassword(""); }}>
+      <AlertDialog open={showClearDataDialog} onOpenChange={(v) => { setShowClearDataDialog(v); if (!v) { setClearPassword(""); setClearPasswordError(""); } }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
@@ -139,9 +149,10 @@ export default function SettingsSheet({ user }) {
               type="password"
               placeholder="Your account password"
               value={clearPassword}
-              onChange={(e) => setClearPassword(e.target.value)}
+              onChange={(e) => { setClearPassword(e.target.value); setClearPasswordError(""); }}
               className="min-h-[44px]"
             />
+            {clearPasswordError && <p className="text-xs text-destructive mt-1.5">{clearPasswordError}</p>}
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel className="min-h-[44px]" onClick={() => setClearPassword("")}>Cancel</AlertDialogCancel>

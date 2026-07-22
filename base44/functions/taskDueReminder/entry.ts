@@ -3,11 +3,12 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 Deno.serve(async (req) => {
   try {
     const secret = Deno.env.get('AUTOMATION_SECRET');
-    if (secret) {
-      const authHeader = req.headers.get('x-automation-secret');
-      if (authHeader !== secret) {
-        return Response.json({ error: 'Unauthorized' }, { status: 401 });
-      }
+    if (!secret) {
+      return Response.json({ error: 'Server misconfiguration: AUTOMATION_SECRET not set' }, { status: 500 });
+    }
+    const authHeader = req.headers.get('x-automation-secret');
+    if (authHeader !== secret) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const base44 = createClientFromRequest(req);
