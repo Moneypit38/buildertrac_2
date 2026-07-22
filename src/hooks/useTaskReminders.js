@@ -29,12 +29,7 @@ export default function useTaskReminders() {
       );
 
       for (const task of dueSoon) {
-        const projectName = projectMap[task.project_id] || "your project";
-        await base44.integrations.Core.SendEmail({
-          to: task.assigned_to,
-          subject: `⏰ Task due soon: ${task.title}`,
-          body: `Hi,\n\nThis is a reminder that the following task is due within 24 hours:\n\n📋 Task: ${task.title}\n📁 Project: ${projectName}\n📅 Due: ${task.due_date}\n${task.description ? `\nDetails: ${task.description}\n` : ""}\nPlease log in to BuildFlow to update your progress.\n\nBuildFlow Team`,
-        });
+        // Mark reminder sent only — email dispatch is handled server-side by the taskDueReminder scheduled function
         await base44.entities.Task.update(task.id, { reminder_sent: true });
       }
     }
