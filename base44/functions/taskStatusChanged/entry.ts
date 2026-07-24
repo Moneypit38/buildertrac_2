@@ -4,11 +4,12 @@ Deno.serve(async (req) => {
   try {
     // Verify the request comes from the Base44 internal automation system
     const secret = Deno.env.get('AUTOMATION_SECRET');
-    if (secret) {
-      const authHeader = req.headers.get('x-automation-secret');
-      if (authHeader !== secret) {
-        return Response.json({ error: 'Unauthorized' }, { status: 401 });
-      }
+    if (!secret) {
+      return Response.json({ error: 'Server misconfiguration: AUTOMATION_SECRET not set' }, { status: 500 });
+    }
+    const authHeader = req.headers.get('x-automation-secret');
+    if (authHeader !== secret) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const base44 = createClientFromRequest(req);
