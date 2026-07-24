@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, CalendarDays, CalendarClock, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarDays, CalendarClock } from "lucide-react";
 import { Link } from "react-router-dom";
 import CreateAppointmentDialog from "@/components/CreateAppointmentDialog";
 
@@ -26,7 +26,6 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
   const today = new Date();
   const [viewDate, setViewDate] = useState({ year: today.getFullYear(), month: today.getMonth() });
   const [selectedDate, setSelectedDate] = useState(null);
-  const [actionSheet, setActionSheet] = useState(null); // date string or null
   const [showApptDialog, setShowApptDialog] = useState(false);
 
   const { year, month } = viewDate;
@@ -149,7 +148,7 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
               onClick={() => {
                 const newSelected = isSelected ? null : dateStr;
                 setSelectedDate(newSelected);
-                if (newSelected) setActionSheet(newSelected);
+                if (newSelected) setShowApptDialog(true);
               }}
               className={`min-h-[52px] flex flex-col items-start justify-start pt-1 px-0.5 border-b border-r border-border/40 last:border-r-0 transition-colors relative
                 ${isSelected ? "bg-accent" : "hover:bg-accent/50"}
@@ -182,80 +181,7 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
         })}
       </div>
 
-      {/* Bottom action sheet — slide up on day tap */}
-      <AnimatePresence>
-        {actionSheet && (
-          <>
-            <motion.div
-              className="fixed inset-0 z-40 bg-black/40"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setActionSheet(null)}
-            />
-            <motion.div
-              className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-2xl border-t border-border p-4 pb-8 space-y-3"
-              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
-              transition={{ type: "spring", stiffness: 340, damping: 32 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <p className="font-semibold text-sm">
-                  {new Date(actionSheet + "T12:00:00").toLocaleDateString("default", { weekday: "long", month: "short", day: "numeric" })}
-                </p>
-                <button onClick={() => setActionSheet(null)} className="p-1 rounded-lg hover:bg-accent">
-                  <X className="w-4 h-4 text-muted-foreground" />
-                </button>
-              </div>
 
-              {/* What's scheduled that day */}
-              {(() => {
-                const dayAppts = apptsByDate[actionSheet] || [];
-                const dayTasks = tasksByDate[actionSheet] || [];
-                const hasItems = dayAppts.length > 0 || dayTasks.length > 0;
-                return hasItems ? (
-                  <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                    {dayAppts.map(a => (
-                      <div key={a.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-500/10 border border-purple-500/20">
-                        <CalendarClock className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{a.title}</p>
-                          <p className="text-[11px] text-muted-foreground truncate">
-                            {a.start_time || ""}{projectMap[a.project_id] ? ` · ${projectMap[a.project_id]}` : ""}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                    {dayTasks.map(t => (
-                      <div key={t.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                        <span className={`w-2 h-2 rounded-full shrink-0 ${t.status === "Done" ? "bg-green-400" : "bg-blue-400"}`} />
-                        <div className="flex-1 min-w-0">
-                          <p className={`text-sm font-medium truncate ${t.status === "Done" ? "line-through text-muted-foreground" : ""}`}>{t.title}</p>
-                          {projectMap[t.project_id] && <p className="text-[11px] text-muted-foreground truncate">{projectMap[t.project_id]}</p>}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground text-center py-1">Nothing scheduled</p>
-                );
-              })()}
-
-              <button
-                onClick={() => {
-                  setShowApptDialog(true);
-                  setTimeout(() => setActionSheet(null), 50);
-                }}
-                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-left"
-              >
-                <CalendarClock className="w-5 h-5 text-purple-400 shrink-0" />
-                <div>
-                  <p className="font-semibold text-sm">New Appointment</p>
-                  <p className="text-xs text-muted-foreground">Date pre-filled</p>
-                </div>
-              </button>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
 
       <CreateAppointmentDialog
         open={showApptDialog}
