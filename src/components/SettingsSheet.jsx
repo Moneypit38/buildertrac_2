@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { LogOut, Trash2, Sun, Moon, Database, AlertTriangle, ChevronRight } from "lucide-react";
+import ColorThemePicker from "@/components/ColorThemePicker";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useTheme } from "next-themes";
 import { useQueryClient } from "@tanstack/react-query";
@@ -77,6 +78,11 @@ export default function SettingsSheet({ user }) {
             <p className="text-sm font-medium">{user?.full_name || "User"}</p>
             <p className="text-xs text-muted-foreground">{user?.email}</p>
           </div>
+
+          {/* Color theme picker */}
+          <ColorThemePicker />
+
+          <div className="border-t border-border mb-2" />
 
           <div className="space-y-2">
             {/* Theme toggle */}

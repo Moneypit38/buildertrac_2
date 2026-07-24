@@ -5,6 +5,7 @@ import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import { ThemeColorProvider } from '@/lib/ThemeContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Navigate } from 'react-router-dom';
@@ -24,7 +25,6 @@ const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
   useTaskReminders();
 
-  // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
@@ -33,18 +33,15 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Handle authentication errors
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
       navigateToLogin();
       return null;
     }
   }
 
-  // Render the main app
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
@@ -53,13 +50,11 @@ const AuthenticatedApp = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<Layout />}>
-          {/* Tab routes: Layout renders these components directly for state preservation */}
           <Route path="/" element={<></>} />
           <Route path="/projects" element={<></>} />
           <Route path="/portfolios" element={<></>} />
           <Route path="/documents" element={<></>} />
           <Route path="/photos" element={<></>} />
-          {/* Child routes rendered via Outlet */}
           <Route path="/project/:projectId" element={<ProjectDetail />} />
           <Route path="/app-store-mockups" element={<AppStoreMockups />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -74,18 +69,18 @@ const AuthenticatedApp = () => {
 
 
 function App() {
-
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={true}>
-    <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <Router>
-
-          <AuthenticatedApp />
-        </Router>
-        <Toaster />
-      </QueryClientProvider>
-    </AuthProvider>
+      <ThemeColorProvider>
+        <AuthProvider>
+          <QueryClientProvider client={queryClientInstance}>
+            <Router>
+              <AuthenticatedApp />
+            </Router>
+            <Toaster />
+          </QueryClientProvider>
+        </AuthProvider>
+      </ThemeColorProvider>
     </ThemeProvider>
   )
 }
