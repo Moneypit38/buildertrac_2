@@ -39,6 +39,7 @@ export default function ProjectCard({ project, onDelete, allTasks, allNotes, all
   const projectNotes = allNotes ? allNotes.filter(n => n.project_id === project.id) : projectNotesData;
   const projectPhotos = allPhotos ? allPhotos.filter(ph => ph.project_id === project.id) : projectPhotosData;
 
+  const [showDelete, setShowDelete] = useState(false);
   const [seenPhotoIds, setSeenPhotoIds] = useState(() => getSeenPhotoIds());
   useEffect(() => {
     const handler = () => setSeenPhotoIds(getSeenPhotoIds());
@@ -115,21 +116,26 @@ export default function ProjectCard({ project, onDelete, allTasks, allNotes, all
         </div>
         <div className="flex items-center gap-1 shrink-0">
           {onDelete && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <button onClick={e => e.preventDefault()} className="p-1 rounded text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete project?</AlertDialogTitle>
-                  <AlertDialogDescription>This will permanently delete "{project.name}" and cannot be undone.</AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={onDelete} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <>
+              <button
+                onClick={e => { e.preventDefault(); e.stopPropagation(); setShowDelete(true); }}
+                className="p-1 rounded text-muted-foreground hover:text-destructive transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+              <AlertDialog open={showDelete} onOpenChange={setShowDelete}>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete project?</AlertDialogTitle>
+                    <AlertDialogDescription>This will permanently delete "{project.name}" and cannot be undone.</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={(e) => { e.preventDefault(); onDelete(); setShowDelete(false); }} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </>
           )}
           <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors mt-1" />
         </div>
