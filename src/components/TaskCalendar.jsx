@@ -195,6 +195,7 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
               className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-2xl border-t border-border p-4 pb-8 space-y-3"
               initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 340, damping: 32 }}
+              onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-1">
                 <p className="font-semibold text-sm">
@@ -239,7 +240,10 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
               })()}
 
               <button
-                onClick={() => { setShowApptDialog(true); setActionSheet(null); }}
+                onClick={() => {
+                  setShowApptDialog(true);
+                  setTimeout(() => setActionSheet(null), 50);
+                }}
                 className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-left"
               >
                 <CalendarClock className="w-5 h-5 text-purple-400 shrink-0" />
