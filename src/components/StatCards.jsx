@@ -72,20 +72,22 @@ export default function StatCards({ stats }) {
             )}
 
             {/* Color picker dot */}
-            <div className="absolute bottom-2.5 right-2.5 relative z-10">
-              <button
-                onClick={(e) => { e.preventDefault(); setOpenPicker(openPicker === i ? null : i); }}
-                className="w-3.5 h-3.5 rounded-full border-2 border-card ring-1 ring-border transition-transform hover:scale-110"
-                style={{ background: accentHex }}
-                title="Pick color"
-              />
-              {openPicker === i && (
-                <ColorPickerPopover
-                  colorId={colorId}
-                  onSelect={(id) => setStatCardColor(key, id)}
-                  onClose={() => setOpenPicker(null)}
+            <div className="absolute bottom-2.5 right-2.5 z-10">
+              <div className="relative">
+                <button
+                  onClick={(e) => { e.preventDefault(); setOpenPicker(openPicker === i ? null : i); }}
+                  className="w-3.5 h-3.5 rounded-full border-2 border-card ring-1 ring-border transition-transform hover:scale-110 block"
+                  style={{ background: accentHex }}
+                  title="Pick color"
                 />
-              )}
+                {openPicker === i && (
+                  <ColorPickerPopover
+                    colorId={colorId}
+                    onSelect={(id) => setStatCardColor(key, id)}
+                    onClose={() => setOpenPicker(null)}
+                  />
+                )}
+              </div>
             </div>
 
             <div className="flex items-center gap-2 mb-1">
