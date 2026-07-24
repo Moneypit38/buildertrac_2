@@ -60,9 +60,25 @@ export const COLOR_THEMES = [
 
 const ThemeColorContext = createContext(null);
 
+// Keys for per-stat card colors (4 cards on the dashboard)
+export const STAT_CARD_KEYS = ["stat-0", "stat-1", "stat-2", "stat-3"];
+
 export function ThemeColorProvider({ children }) {
   const [themeId, setThemeId] = useState(() => localStorage.getItem("color-theme") || "default");
   const [cardColorId, setCardColorId] = useState(() => localStorage.getItem("card-color") || "card-orange");
+
+  // Per-stat-card color: { "stat-0": "card-orange", "stat-1": "card-blue", ... }
+  const [statCardColors, setStatCardColors] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("stat-card-colors") || "{}"); } catch { return {}; }
+  });
+
+  const setStatCardColor = (key, colorId) => {
+    setStatCardColors(prev => {
+      const next = { ...prev, [key]: colorId };
+      localStorage.setItem("stat-card-colors", JSON.stringify(next));
+      return next;
+    });
+  };
 
   useEffect(() => {
     const theme = COLOR_THEMES.find(t => t.id === themeId) || COLOR_THEMES[0];
@@ -95,7 +111,7 @@ export function ThemeColorProvider({ children }) {
   };
 
   return (
-    <ThemeColorContext.Provider value={{ themeId, setThemeId, cardColorId, setCardColorId: handleSetCardColorId }}>
+    <ThemeColorContext.Provider value={{ themeId, setThemeId, cardColorId, setCardColorId: handleSetCardColorId, statCardColors, setStatCardColor }}>
       {children}
     </ThemeColorContext.Provider>
   );
