@@ -149,9 +149,12 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
             <button
               key={dateStr}
               onClick={() => {
-                setSelectedDate(isSelected ? null : dateStr);
-                setActionSheet(dateStr);
-                setActionProjectId(projects[0]?.id || "");
+                const newSelected = isSelected ? null : dateStr;
+                setSelectedDate(newSelected);
+                if (newSelected) {
+                  setActionSheet(newSelected);
+                  setActionProjectId(projects[0]?.id || "");
+                }
               }}
               className={`min-h-[52px] flex flex-col items-start justify-start pt-1 px-0.5 border-b border-r border-border/40 last:border-r-0 transition-colors relative
                 ${isSelected ? "bg-accent" : "hover:bg-accent/50"}
@@ -241,22 +244,20 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
               })()}
 
               {/* Project picker */}
-              {projects.length > 1 && (
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Project for new appointment</p>
-                  <ResponsiveSelect
-                    value={actionProjectId}
-                    onValueChange={setActionProjectId}
-                    placeholder="Select project..."
-                    options={projects.map(p => ({ value: p.id, label: p.name }))}
-                  />
-                </div>
-              )}
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Project</p>
+                <ResponsiveSelect
+                  value={actionProjectId}
+                  onValueChange={setActionProjectId}
+                  placeholder="Select project..."
+                  options={projects.map(p => ({ value: p.id, label: p.name }))}
+                />
+              </div>
 
               <button
                 onClick={() => { setShowApptDialog(true); setActionSheet(null); }}
                 disabled={!actionProjectId}
-                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-accent hover:bg-accent/80 transition-colors text-left disabled:opacity-40"
+                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-left disabled:opacity-40"
               >
                 <CalendarClock className="w-5 h-5 text-purple-400 shrink-0" />
                 <div>
