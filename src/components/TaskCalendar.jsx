@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, CalendarDays, CalendarClock } from "lucide-react";
 import { Link } from "react-router-dom";
 import CreateAppointmentDialog from "@/components/CreateAppointmentDialog";
+import { useColorTheme, COLOR_THEMES } from "@/lib/ThemeContext";
 
 const STATUS_COLORS = {
   "Done": "bg-green-500/20 text-green-400 border-green-500/30",
@@ -27,6 +28,11 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
   const [viewDate, setViewDate] = useState({ year: today.getFullYear(), month: today.getMonth() });
   const [selectedDate, setSelectedDate] = useState(null);
   const [showApptDialog, setShowApptDialog] = useState(false);
+  const { themeId } = useColorTheme();
+  const theme = COLOR_THEMES.find(t => t.id === themeId) || COLOR_THEMES[0];
+  const accentHsl = theme.accent
+    ? `hsl(${theme.accent.h}, ${theme.accent.s}%, ${theme.accent.l}%)`
+    : "hsl(0, 0%, 40%)";
 
   const { year, month } = viewDate;
   const daysInMonth = getDaysInMonth(year, month);
@@ -160,7 +166,7 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
               </span>
               <div className="w-full space-y-0.5 mt-0.5 px-0.5">
                 {dayAppts.slice(0, 1).map((a, i) => (
-                  <div key={`a-${i}`} className="w-full truncate text-[9px] leading-tight bg-purple-500/20 text-purple-300 rounded px-0.5 py-px">
+                  <div key={`a-${i}`} className="w-full truncate text-[9px] leading-tight rounded px-0.5 py-px" style={{ backgroundColor: `${accentHsl}25`, color: accentHsl }}>
                     {a.title}
                   </div>
                 ))}
@@ -204,7 +210,8 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
                 </p>
                 <button
                   onClick={() => setShowApptDialog(true)}
-                  className="flex items-center gap-1 text-xs font-medium text-purple-400 hover:text-purple-300 px-2 py-1 rounded-lg hover:bg-purple-500/10 transition-colors"
+                  className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg transition-colors"
+                  style={{ color: accentHsl, backgroundColor: `${accentHsl}15` }}
                 >
                   <CalendarClock className="w-3.5 h-3.5" />
                   <span>+ Appointment</span>
@@ -216,7 +223,7 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
                 <>
                   {selectedAppts.map(a => (
                     <Link key={a.id} to={`/project/${a.project_id}?tab=appointments&appt=${a.id}`} className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors group">
-                      <span className="w-2 h-2 rounded-full flex-shrink-0 bg-purple-400" />
+                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: accentHsl }} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{a.title}</p>
                         <p className="text-[11px] text-muted-foreground truncate">
@@ -224,7 +231,7 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
                           {projectMap[a.project_id] ? ` · ${projectMap[a.project_id]}` : ""}
                         </p>
                       </div>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full border font-medium flex-shrink-0 bg-purple-500/20 text-purple-400 border-purple-500/30">Appt</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full border font-medium flex-shrink-0" style={{ backgroundColor: `${accentHsl}25`, color: accentHsl, borderColor: `${accentHsl}50` }}>Appt</span>
                     </Link>
                   ))}
                   {selectedTasks.map(t => (
