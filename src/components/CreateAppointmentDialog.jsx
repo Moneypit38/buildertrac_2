@@ -42,9 +42,8 @@ export default function CreateAppointmentDialog({ open, onClose, projectId, appo
     mutationFn: (data) =>
       isEdit
         ? base44.entities.Appointment.update(appointment.id, data)
-        : base44.entities.Appointment.create({ ...data, project_id: projectId }),
+        : base44.entities.Appointment.create({ ...data, ...(projectId ? { project_id: projectId } : {}) }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["appointments", projectId] });
       qc.invalidateQueries({ queryKey: ["appointments"] });
       toast.success(isEdit ? "Appointment updated" : "Appointment created");
       onClose();

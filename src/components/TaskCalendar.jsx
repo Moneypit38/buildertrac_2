@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, CalendarDays, CalendarClock, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import CreateAppointmentDialog from "@/components/CreateAppointmentDialog";
-import ResponsiveSelect from "@/components/ResponsiveSelect";
 
 const STATUS_COLORS = {
   "Done": "bg-green-500/20 text-green-400 border-green-500/30",
@@ -28,7 +27,6 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
   const [viewDate, setViewDate] = useState({ year: today.getFullYear(), month: today.getMonth() });
   const [selectedDate, setSelectedDate] = useState(null);
   const [actionSheet, setActionSheet] = useState(null); // date string or null
-  const [actionProjectId, setActionProjectId] = useState("");
   const [showApptDialog, setShowApptDialog] = useState(false);
 
   const { year, month } = viewDate;
@@ -151,10 +149,7 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
               onClick={() => {
                 const newSelected = isSelected ? null : dateStr;
                 setSelectedDate(newSelected);
-                if (newSelected) {
-                  setActionSheet(newSelected);
-                  setActionProjectId(projects[0]?.id || "");
-                }
+                if (newSelected) setActionSheet(newSelected);
               }}
               className={`min-h-[52px] flex flex-col items-start justify-start pt-1 px-0.5 border-b border-r border-border/40 last:border-r-0 transition-colors relative
                 ${isSelected ? "bg-accent" : "hover:bg-accent/50"}
@@ -243,21 +238,9 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
                 );
               })()}
 
-              {/* Project picker */}
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">Project</p>
-                <ResponsiveSelect
-                  value={actionProjectId}
-                  onValueChange={setActionProjectId}
-                  placeholder="Select project..."
-                  options={projects.map(p => ({ value: p.id, label: p.name }))}
-                />
-              </div>
-
               <button
                 onClick={() => { setShowApptDialog(true); setActionSheet(null); }}
-                disabled={!actionProjectId}
-                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-left disabled:opacity-40"
+                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-left"
               >
                 <CalendarClock className="w-5 h-5 text-purple-400 shrink-0" />
                 <div>
@@ -273,7 +256,6 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
       <CreateAppointmentDialog
         open={showApptDialog}
         onClose={() => setShowApptDialog(false)}
-        projectId={actionProjectId}
         initialDate={selectedDate}
       />
 

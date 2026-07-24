@@ -34,7 +34,6 @@
   },
   "required": [
     "title",
-    "project_id",
     "date"
   ],
   "rls": {
