@@ -1,8 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, CalendarDays, ListTodo, CalendarClock, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarDays, CalendarClock, X } from "lucide-react";
 import { Link } from "react-router-dom";
-import CreateTaskDialog from "@/components/CreateTaskDialog";
 import CreateAppointmentDialog from "@/components/CreateAppointmentDialog";
 import ResponsiveSelect from "@/components/ResponsiveSelect";
 
@@ -29,9 +28,7 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
   const [viewDate, setViewDate] = useState({ year: today.getFullYear(), month: today.getMonth() });
   const [selectedDate, setSelectedDate] = useState(null);
   const [actionSheet, setActionSheet] = useState(null); // date string or null
-  const [actionType, setActionType] = useState(null);   // "task" | "appointment"
   const [actionProjectId, setActionProjectId] = useState("");
-  const [showTaskDialog, setShowTaskDialog] = useState(false);
   const [showApptDialog, setShowApptDialog] = useState(false);
 
   const { year, month } = viewDate;
@@ -189,9 +186,8 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
 
       {/* Bottom action sheet — slide up on day tap */}
       <AnimatePresence>
-        {actionSheet && !actionType && (
+        {actionSheet && (
           <>
-            {/* Backdrop */}
             <motion.div
               className="fixed inset-0 z-40 bg-black/40"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -211,10 +207,43 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
                 </button>
               </div>
 
+              {/* What's scheduled that day */}
+              {(() => {
+                const dayAppts = apptsByDate[actionSheet] || [];
+                const dayTasks = tasksByDate[actionSheet] || [];
+                const hasItems = dayAppts.length > 0 || dayTasks.length > 0;
+                return hasItems ? (
+                  <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                    {dayAppts.map(a => (
+                      <div key={a.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                        <CalendarClock className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{a.title}</p>
+                          <p className="text-[11px] text-muted-foreground truncate">
+                            {a.start_time || ""}{projectMap[a.project_id] ? ` · ${projectMap[a.project_id]}` : ""}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    {dayTasks.map(t => (
+                      <div key={t.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${t.status === "Done" ? "bg-green-400" : "bg-blue-400"}`} />
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-medium truncate ${t.status === "Done" ? "line-through text-muted-foreground" : ""}`}>{t.title}</p>
+                          {projectMap[t.project_id] && <p className="text-[11px] text-muted-foreground truncate">{projectMap[t.project_id]}</p>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-1">Nothing scheduled</p>
+                );
+              })()}
+
               {/* Project picker */}
               {projects.length > 1 && (
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1">Project</p>
+                  <p className="text-xs text-muted-foreground mb-1">Project for new appointment</p>
                   <ResponsiveSelect
                     value={actionProjectId}
                     onValueChange={setActionProjectId}
@@ -225,25 +254,13 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
               )}
 
               <button
-                onClick={() => { setActionType("task"); setShowTaskDialog(true); setActionSheet(null); }}
-                disabled={!actionProjectId}
-                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-accent hover:bg-accent/80 transition-colors text-left disabled:opacity-40"
-              >
-                <ListTodo className="w-5 h-5 text-blue-400 shrink-0" />
-                <div>
-                  <p className="font-semibold text-sm">New Task</p>
-                  <p className="text-xs text-muted-foreground">Due date pre-filled</p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => { setActionType("appointment"); setShowApptDialog(true); setActionSheet(null); }}
+                onClick={() => { setShowApptDialog(true); setActionSheet(null); }}
                 disabled={!actionProjectId}
                 className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-accent hover:bg-accent/80 transition-colors text-left disabled:opacity-40"
               >
                 <CalendarClock className="w-5 h-5 text-purple-400 shrink-0" />
                 <div>
-                  <p className="font-semibold text-sm">New Meeting / Appointment</p>
+                  <p className="font-semibold text-sm">New Appointment</p>
                   <p className="text-xs text-muted-foreground">Date pre-filled</p>
                 </div>
               </button>
@@ -252,16 +269,9 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
         )}
       </AnimatePresence>
 
-      {/* Dialogs */}
-      <CreateTaskDialog
-        open={showTaskDialog}
-        onClose={() => { setShowTaskDialog(false); setActionType(null); }}
-        projectId={actionProjectId}
-        initialDate={selectedDate}
-      />
       <CreateAppointmentDialog
         open={showApptDialog}
-        onClose={() => { setShowApptDialog(false); setActionType(null); }}
+        onClose={() => setShowApptDialog(false)}
         projectId={actionProjectId}
         initialDate={selectedDate}
       />
