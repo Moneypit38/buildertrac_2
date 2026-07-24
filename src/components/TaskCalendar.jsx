@@ -210,8 +210,8 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
                 </p>
                 <button
                   onClick={() => setShowApptDialog(true)}
-                  className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg transition-colors"
-                  style={{ color: accentHsl, backgroundColor: `${accentHsl}15` }}
+                  className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg border transition-colors"
+                  style={{ color: accentHsl, borderColor: `${accentHsl}60` }}
                 >
                   <CalendarClock className="w-3.5 h-3.5" />
                   <span>+ Appointment</span>

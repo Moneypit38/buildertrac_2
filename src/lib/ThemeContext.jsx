@@ -1,5 +1,16 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
+// Separate palette for stat card accent colors
+export const CARD_COLORS = [
+  { id: "card-slate",  name: "Slate",      hex: "#64748b" },
+  { id: "card-orange", name: "Orange",     hex: "#f97316" },
+  { id: "card-amber",  name: "Amber",      hex: "#d97706" },
+  { id: "card-green",  name: "Green",      hex: "#22c55e" },
+  { id: "card-blue",   name: "Blue",       hex: "#3b82f6" },
+  { id: "card-purple", name: "Purple",     hex: "#a855f7" },
+  { id: "card-rose",   name: "Rose",       hex: "#f43f5e" },
+];
+
 // Each theme only overrides the accent/highlight/ring/chart-1 color.
 // The base mono palette (backgrounds, cards, borders) stays intact from index.css.
 export const COLOR_THEMES = [
@@ -51,6 +62,7 @@ const ThemeColorContext = createContext(null);
 
 export function ThemeColorProvider({ children }) {
   const [themeId, setThemeId] = useState(() => localStorage.getItem("color-theme") || "default");
+  const [cardColorId, setCardColorId] = useState(() => localStorage.getItem("card-color") || "card-orange");
 
   useEffect(() => {
     const theme = COLOR_THEMES.find(t => t.id === themeId) || COLOR_THEMES[0];
@@ -77,8 +89,13 @@ export function ThemeColorProvider({ children }) {
     localStorage.setItem("color-theme", themeId);
   }, [themeId]);
 
+  const handleSetCardColorId = (id) => {
+    setCardColorId(id);
+    localStorage.setItem("card-color", id);
+  };
+
   return (
-    <ThemeColorContext.Provider value={{ themeId, setThemeId }}>
+    <ThemeColorContext.Provider value={{ themeId, setThemeId, cardColorId, setCardColorId: handleSetCardColorId }}>
       {children}
     </ThemeColorContext.Provider>
   );
