@@ -146,9 +146,7 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
             <button
               key={dateStr}
               onClick={() => {
-                const newSelected = isSelected ? null : dateStr;
-                setSelectedDate(newSelected);
-                if (newSelected) setShowApptDialog(true);
+                setSelectedDate(isSelected ? null : dateStr);
               }}
               className={`min-h-[52px] flex flex-col items-start justify-start pt-1 px-0.5 border-b border-r border-border/40 last:border-r-0 transition-colors relative
                 ${isSelected ? "bg-accent" : "hover:bg-accent/50"}
@@ -200,9 +198,18 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
             className="overflow-hidden border-t border-border"
           >
             <div className="p-3 space-y-2">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                {new Date(selectedDate + "T12:00:00").toLocaleDateString("default", { weekday: "long", month: "short", day: "numeric" })}
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {new Date(selectedDate + "T12:00:00").toLocaleDateString("default", { weekday: "long", month: "short", day: "numeric" })}
+                </p>
+                <button
+                  onClick={() => setShowApptDialog(true)}
+                  className="flex items-center gap-1 text-xs font-medium text-purple-400 hover:text-purple-300 px-2 py-1 rounded-lg hover:bg-purple-500/10 transition-colors"
+                >
+                  <CalendarClock className="w-3.5 h-3.5" />
+                  <span>+ Appointment</span>
+                </button>
+              </div>
               {selectedTasks.length === 0 && selectedAppts.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-2 text-center">Nothing scheduled this day</p>
               ) : (
