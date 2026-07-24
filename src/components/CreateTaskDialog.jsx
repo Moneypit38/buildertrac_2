@@ -9,9 +9,9 @@ import { Label } from "@/components/ui/label";
 import ResponsiveSelect from "@/components/ResponsiveSelect";
 import { Textarea } from "@/components/ui/textarea";
 
-export default function CreateTaskDialog({ open, onClose, projectId, task }) {
+export default function CreateTaskDialog({ open, onClose, projectId, task, initialDate }) {
   const isEdit = !!task;
-  const blankForm = { title: "", description: "", priority: "medium", status: "Not Started", due_date: "", assigned_to: "" };
+  const blankForm = { title: "", description: "", priority: "medium", status: "Not Started", due_date: initialDate || "", assigned_to: "" };
   const taskForm = task ? {
     title: task.title || "", description: task.description || "", priority: task.priority || "medium",
     status: task.status || "Not Started", due_date: task.due_date || "", assigned_to: task.assigned_to || "",
@@ -20,8 +20,8 @@ export default function CreateTaskDialog({ open, onClose, projectId, task }) {
 
   // Reset form whenever the dialog opens or the task changes
   useEffect(() => {
-    if (open) setForm(taskForm);
-  }, [open, task?.id]);
+    if (open) setForm(task ? taskForm : { ...blankForm, due_date: initialDate || "" });
+  }, [open, task?.id, initialDate]);
 
   const qc = useQueryClient();
   const mutation = useMutation({

@@ -1,7 +1,10 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarDays, ListTodo, CalendarClock, X } from "lucide-react";
 import { Link } from "react-router-dom";
+import CreateTaskDialog from "@/components/CreateTaskDialog";
+import CreateAppointmentDialog from "@/components/CreateAppointmentDialog";
+import ResponsiveSelect from "@/components/ResponsiveSelect";
 
 const STATUS_COLORS = {
   "Done": "bg-green-500/20 text-green-400 border-green-500/30",
@@ -25,6 +28,11 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
   const today = new Date();
   const [viewDate, setViewDate] = useState({ year: today.getFullYear(), month: today.getMonth() });
   const [selectedDate, setSelectedDate] = useState(null);
+  const [actionSheet, setActionSheet] = useState(null); // date string or null
+  const [actionType, setActionType] = useState(null);   // "task" | "appointment"
+  const [actionProjectId, setActionProjectId] = useState("");
+  const [showTaskDialog, setShowTaskDialog] = useState(false);
+  const [showApptDialog, setShowApptDialog] = useState(false);
 
   const { year, month } = viewDate;
   const daysInMonth = getDaysInMonth(year, month);
@@ -143,7 +151,11 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
           return (
             <button
               key={dateStr}
-              onClick={() => setSelectedDate(isSelected ? null : dateStr)}
+              onClick={() => {
+                setSelectedDate(isSelected ? null : dateStr);
+                setActionSheet(dateStr);
+                setActionProjectId(projects[0]?.id || "");
+              }}
               className={`min-h-[52px] flex flex-col items-start justify-start pt-1 px-0.5 border-b border-r border-border/40 last:border-r-0 transition-colors relative
                 ${isSelected ? "bg-accent" : "hover:bg-accent/50"}
                 ${isToday ? "ring-1 ring-inset ring-primary" : ""}
@@ -174,6 +186,85 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
           );
         })}
       </div>
+
+      {/* Bottom action sheet — slide up on day tap */}
+      <AnimatePresence>
+        {actionSheet && !actionType && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              className="fixed inset-0 z-40 bg-black/40"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setActionSheet(null)}
+            />
+            <motion.div
+              className="fixed bottom-0 left-0 right-0 z-50 bg-card rounded-t-2xl border-t border-border p-4 pb-8 space-y-3"
+              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 340, damping: 32 }}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <p className="font-semibold text-sm">
+                  {new Date(actionSheet + "T12:00:00").toLocaleDateString("default", { weekday: "long", month: "short", day: "numeric" })}
+                </p>
+                <button onClick={() => setActionSheet(null)} className="p-1 rounded-lg hover:bg-accent">
+                  <X className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </div>
+
+              {/* Project picker */}
+              {projects.length > 1 && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Project</p>
+                  <ResponsiveSelect
+                    value={actionProjectId}
+                    onValueChange={setActionProjectId}
+                    placeholder="Select project..."
+                    options={projects.map(p => ({ value: p.id, label: p.name }))}
+                  />
+                </div>
+              )}
+
+              <button
+                onClick={() => { setActionType("task"); setShowTaskDialog(true); setActionSheet(null); }}
+                disabled={!actionProjectId}
+                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-accent hover:bg-accent/80 transition-colors text-left disabled:opacity-40"
+              >
+                <ListTodo className="w-5 h-5 text-blue-400 shrink-0" />
+                <div>
+                  <p className="font-semibold text-sm">New Task</p>
+                  <p className="text-xs text-muted-foreground">Due date pre-filled</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => { setActionType("appointment"); setShowApptDialog(true); setActionSheet(null); }}
+                disabled={!actionProjectId}
+                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-accent hover:bg-accent/80 transition-colors text-left disabled:opacity-40"
+              >
+                <CalendarClock className="w-5 h-5 text-purple-400 shrink-0" />
+                <div>
+                  <p className="font-semibold text-sm">New Meeting / Appointment</p>
+                  <p className="text-xs text-muted-foreground">Date pre-filled</p>
+                </div>
+              </button>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Dialogs */}
+      <CreateTaskDialog
+        open={showTaskDialog}
+        onClose={() => { setShowTaskDialog(false); setActionType(null); }}
+        projectId={actionProjectId}
+        initialDate={selectedDate}
+      />
+      <CreateAppointmentDialog
+        open={showApptDialog}
+        onClose={() => { setShowApptDialog(false); setActionType(null); }}
+        projectId={actionProjectId}
+        initialDate={selectedDate}
+      />
 
       {/* Selected day task list */}
       <AnimatePresence>

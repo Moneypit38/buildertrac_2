@@ -8,13 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
-export default function CreateAppointmentDialog({ open, onClose, projectId, appointment }) {
+export default function CreateAppointmentDialog({ open, onClose, projectId, appointment, initialDate }) {
   const qc = useQueryClient();
   const isEdit = !!appointment;
 
   const [form, setForm] = useState({
     title: "",
-    date: "",
+    date: initialDate || "",
     start_time: "",
     end_time: "",
     location: "",
@@ -34,9 +34,9 @@ export default function CreateAppointmentDialog({ open, onClose, projectId, appo
         notes: appointment.notes || "",
       });
     } else {
-      setForm({ title: "", date: "", start_time: "", end_time: "", location: "", attendees: "", notes: "" });
+      setForm({ title: "", date: initialDate || "", start_time: "", end_time: "", location: "", attendees: "", notes: "" });
     }
-  }, [appointment, open]);
+  }, [appointment, open, initialDate]);
 
   const mutation = useMutation({
     mutationFn: (data) =>
