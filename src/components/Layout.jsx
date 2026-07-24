@@ -98,27 +98,29 @@ export default function Layout() {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--background))' }}>
       {/* Header with safe-area top inset */}
       <header
-        className="sticky top-0 z-50 bg-card border-b-2 border-primary px-4 flex items-center justify-between"
+        className="sticky top-0 z-50 bg-card border-b-2 border-primary"
         style={{ paddingTop: `max(0.75rem, env(safe-area-inset-top))`, paddingBottom: "0.75rem" }}
       >
-        {/* Brand or Back button */}
-        {isChildRoute ? (
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-1.5 text-primary font-semibold min-h-[44px] min-w-[44px] -ml-1 px-1"
-          >
-            <ChevronLeft className="w-5 h-5" />
-            <span className="text-sm">Back</span>
-          </button>
-        ) : (
-          <Link to="/" className="font-display text-xl font-extrabold text-foreground tracking-tight min-h-[44px] flex items-center">
-            Builder<span style={{color: "#F5A623"}}>T</span>rac
-          </Link>
-        )}
+        <div className="max-w-2xl mx-auto px-4 flex items-center justify-between">
+          {/* Brand or Back button */}
+          {isChildRoute ? (
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-1.5 text-primary font-semibold min-h-[44px] min-w-[44px] -ml-1 px-1"
+            >
+              <ChevronLeft className="w-5 h-5" />
+              <span className="text-sm">Back</span>
+            </button>
+          ) : (
+            <Link to="/" className="font-display text-xl font-extrabold text-foreground tracking-tight min-h-[44px] flex items-center">
+              Builder<span style={{color: "#F5A623"}}>T</span>rac
+            </Link>
+          )}
 
-        {/* Right actions */}
-        <div className="flex items-center gap-1">
-          <SettingsSheet user={user} />
+          {/* Right actions */}
+          <div className="flex items-center gap-1">
+            <SettingsSheet user={user} />
+          </div>
         </div>
       </header>
 
@@ -156,7 +158,7 @@ export default function Layout() {
         className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t-2 border-primary"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
-        <div className="max-w-lg mx-auto flex justify-around px-2">
+        <div className="max-w-2xl mx-auto flex justify-around px-2">
           {navItems.map(({ path, icon: Icon, label }) => {
             const isActive = path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
             const badgeCount = navBadges[path] || 0;
