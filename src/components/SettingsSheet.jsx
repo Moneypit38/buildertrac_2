@@ -33,17 +33,18 @@ export default function SettingsSheet({ user }) {
       return;
     }
     try {
+      const uid = user.id;
       await Promise.all([
-        base44.entities.Task.deleteMany({}),
-        base44.entities.Project.deleteMany({}),
-        base44.entities.Portfolio.deleteMany({}),
-        base44.entities.Document.deleteMany({}),
-        base44.entities.SitePhoto.deleteMany({}),
-        base44.entities.Appointment.deleteMany({}),
-        base44.entities.Note.deleteMany({}),
-        base44.entities.Contact.deleteMany({}),
-        base44.entities.PortfolioMember.deleteMany({}),
-        base44.entities.ProjectMember.deleteMany({}),
+        base44.entities.Task.deleteMany({ created_by_id: uid }),
+        base44.entities.Project.deleteMany({ created_by_id: uid }),
+        base44.entities.Portfolio.deleteMany({ created_by_id: uid }),
+        base44.entities.Document.deleteMany({ created_by_id: uid }),
+        base44.entities.SitePhoto.deleteMany({ created_by_id: uid }),
+        base44.entities.Appointment.deleteMany({ created_by_id: uid }),
+        base44.entities.Note.deleteMany({ created_by_id: uid }),
+        base44.entities.Contact.deleteMany({ created_by_id: uid }),
+        base44.entities.PortfolioMember.deleteMany({ created_by_id: uid }),
+        base44.entities.ProjectMember.deleteMany({ created_by_id: uid }),
       ]);
       queryClient.invalidateQueries();
       setClearPassword("");
