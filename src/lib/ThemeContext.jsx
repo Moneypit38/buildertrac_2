@@ -2,13 +2,28 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 // Separate palette for stat card accent colors
 export const CARD_COLORS = [
-  { id: "card-slate",  name: "Slate",      hex: "#64748b" },
-  { id: "card-orange", name: "Orange",     hex: "#f97316" },
-  { id: "card-amber",  name: "Amber",      hex: "#d97706" },
-  { id: "card-green",  name: "Green",      hex: "#22c55e" },
-  { id: "card-blue",   name: "Blue",       hex: "#3b82f6" },
-  { id: "card-purple", name: "Purple",     hex: "#a855f7" },
-  { id: "card-rose",   name: "Rose",       hex: "#f43f5e" },
+  { id: "card-slate",       name: "Slate",       hex: "#64748b" },
+  { id: "card-gray",        name: "Gray",        hex: "#9ca3af" },
+  { id: "card-zinc",        name: "Zinc",        hex: "#71717a" },
+  { id: "card-red",         name: "Red",         hex: "#ef4444" },
+  { id: "card-rose",        name: "Rose",        hex: "#f43f5e" },
+  { id: "card-pink",        name: "Pink",        hex: "#ec4899" },
+  { id: "card-fuchsia",     name: "Fuchsia",     hex: "#d946ef" },
+  { id: "card-purple",      name: "Purple",      hex: "#a855f7" },
+  { id: "card-violet",      name: "Violet",      hex: "#8b5cf6" },
+  { id: "card-indigo",      name: "Indigo",      hex: "#6366f1" },
+  { id: "card-blue",        name: "Blue",        hex: "#3b82f6" },
+  { id: "card-sky",         name: "Sky",         hex: "#0ea5e9" },
+  { id: "card-cyan",        name: "Cyan",        hex: "#06b6d4" },
+  { id: "card-teal",        name: "Teal",        hex: "#14b8a6" },
+  { id: "card-emerald",     name: "Emerald",     hex: "#10b981" },
+  { id: "card-green",       name: "Green",       hex: "#22c55e" },
+  { id: "card-lime",        name: "Lime",        hex: "#84cc16" },
+  { id: "card-yellow",      name: "Yellow",      hex: "#eab308" },
+  { id: "card-amber",       name: "Amber",       hex: "#d97706" },
+  { id: "card-orange",      name: "Orange",      hex: "#f97316" },
+  { id: "card-terracotta",  name: "Terracotta",  hex: "#c2522a" },
+  { id: "card-brown",       name: "Brown",       hex: "#92400e" },
 ];
 
 // Each theme only overrides the accent/highlight/ring/chart-1 color.

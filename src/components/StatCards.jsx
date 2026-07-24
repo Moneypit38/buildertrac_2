@@ -19,8 +19,8 @@ function ColorPickerPopover({ colorId, onSelect, onClose }) {
   return (
     <div
       ref={ref}
-      className="absolute top-8 left-0 z-50 bg-card border border-border rounded-xl shadow-xl p-2 flex flex-wrap gap-1.5"
-      style={{ width: 120 }}
+      className="absolute bottom-6 right-0 z-50 bg-card border border-border rounded-xl shadow-xl p-2.5 flex flex-wrap gap-1.5"
+      style={{ width: 156 }}
       onClick={e => e.preventDefault()}
     >
       {CARD_COLORS.map(c => (
@@ -72,7 +72,7 @@ export default function StatCards({ stats }) {
             )}
 
             {/* Color picker dot */}
-            <div className="absolute bottom-2 right-2 relative">
+            <div className="absolute bottom-2.5 right-2.5 relative z-10">
               <button
                 onClick={(e) => { e.preventDefault(); setOpenPicker(openPicker === i ? null : i); }}
                 className="w-3.5 h-3.5 rounded-full border-2 border-card ring-1 ring-border transition-transform hover:scale-110"
