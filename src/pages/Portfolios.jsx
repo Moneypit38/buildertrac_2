@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Layers, FolderKanban, Trash2, Pencil, UserPlus, Users } from "lucide-react";
+import { Plus, Layers, FolderKanban, Trash2, Pencil, UserPlus, Users, MoveRight } from "lucide-react";
 import PortfolioIcon, { PORTFOLIO_ICONS, PORTFOLIO_COLORS, getColor, getIconComponent } from "../components/PortfolioIcon";
 import { useClientAccess } from "../hooks/useClientAccess";
 import { Link, useLocation } from "react-router-dom";
@@ -18,6 +18,7 @@ import {
 import InviteToPortfolioDialog from "../components/InviteToPortfolioDialog";
 import CreateProjectDialog from "../components/CreateProjectDialog";
 import PortfolioMembersDialog from "../components/PortfolioMembersDialog";
+import AssignPortfolioDialog from "../components/AssignPortfolioDialog";
 
 
 // ── Create / Edit Portfolio Dialog ──────────────────────────────────────────
@@ -121,6 +122,7 @@ export default function Portfolios() {
   const [showCreate, setShowCreate] = useState(false);
   const [editPortfolio, setEditPortfolio] = useState(null);
   const [addProjectToPortfolio, setAddProjectToPortfolio] = useState(null);
+  const [assignProject, setAssignProject] = useState(null);
   const [invitePortfolio, setInvitePortfolio] = useState(null);
   const [teamPortfolio, setTeamPortfolio] = useState(null);
 
@@ -318,11 +320,19 @@ export default function Portfolios() {
               <h2 className="font-semibold text-muted-foreground text-sm mb-3">Unassigned Projects</h2>
               <div className="space-y-1.5">
                 {unassigned.map(p => (
-                  <Link key={p.id} to={`/project/${p.id}`} className="flex items-center gap-2 px-3 py-2 bg-background border border-border rounded-lg hover:border-primary/40 transition-colors text-sm">
+                  <div key={p.id} className="flex items-center gap-2 px-3 py-2 bg-background border border-border rounded-lg text-sm">
                     <FolderKanban className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                    <span className="font-medium flex-1 truncate">{p.name}</span>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusBadgeStyle(p.status)}`}>{p.status}</span>
-                  </Link>
+                    <Link to={`/project/${p.id}`} className="font-medium flex-1 truncate hover:text-primary transition-colors">{p.name}</Link>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0 ${statusBadgeStyle(p.status)}`}>{p.status}</span>
+                    {!isClientOnly && (
+                      <button
+                        onClick={() => setAssignProject(p)}
+                        className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary border border-border hover:border-primary/40 px-2 py-1 rounded-md transition-colors shrink-0"
+                      >
+                        <Layers className="w-3 h-3" /> Assign
+                      </button>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
@@ -352,6 +362,9 @@ export default function Portfolios() {
           portfolioName={invitePortfolio.name}
           projects={invitePortfolio.projects}
         />
+      )}
+      {assignProject && (
+        <AssignPortfolioDialog open={!!assignProject} onClose={() => setAssignProject(null)} project={assignProject} />
       )}
     </div>
   );

@@ -5,8 +5,9 @@ import { useClientAccess } from "../hooks/useClientAccess";
 import { base44 } from "@/api/base44Client";
 import ProjectCard from "../components/ProjectCard";
 import CreateProjectDialog from "../components/CreateProjectDialog";
+import AssignPortfolioDialog from "../components/AssignPortfolioDialog";
 import { Button } from "@/components/ui/button";
-import { Plus, FolderKanban } from "lucide-react";
+import { Plus, FolderKanban, Layers } from "lucide-react";
 
 
 export default function Projects() {
@@ -18,6 +19,7 @@ export default function Projects() {
   const { refreshing, touchHandlers } = usePullToRefresh(() => qc.invalidateQueries({ queryKey: ["projects"] }));
   const [showCreate, setShowCreate] = useState(false);
   const [filter, setFilter] = useState("All");
+  const [assignProject, setAssignProject] = useState(null);
   const deleteProject = useMutation({
     mutationFn: (id) => base44.entities.Project.delete(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["projects"] }),
@@ -59,10 +61,27 @@ export default function Projects() {
           <p className="text-muted-foreground">No projects here yet. Create your first one.</p>
         </div>
       ) : (
-        <div className="space-y-3">{filtered.map(p => <ProjectCard key={p.id} project={p} onDelete={!isClientOnly ? () => deleteProject.mutate(p.id) : undefined} allTasks={allTasks} allNotes={allNotes} />)}</div>
+        <div className="space-y-3">
+          {filtered.map(p => (
+            <div key={p.id} className="space-y-1">
+              <ProjectCard project={p} onDelete={!isClientOnly ? () => deleteProject.mutate(p.id) : undefined} allTasks={allTasks} allNotes={allNotes} />
+              {!isClientOnly && !p.portfolio && (
+                <button
+                  onClick={() => setAssignProject(p)}
+                  className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs text-muted-foreground hover:text-primary border border-dashed border-border hover:border-primary/40 rounded-lg transition-colors"
+                >
+                  <Layers className="w-3 h-3" /> Assign to Portfolio
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
       )}
 
       <CreateProjectDialog open={showCreate} onClose={() => setShowCreate(false)} />
+      {assignProject && (
+        <AssignPortfolioDialog open={!!assignProject} onClose={() => setAssignProject(null)} project={assignProject} />
+      )}
     </div>
   );
 }
