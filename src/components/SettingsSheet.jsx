@@ -26,7 +26,6 @@ export default function SettingsSheet({ user }) {
     setClearPasswordError("");
     setClearing(true);
     try {
-      // Verify the password is correct before deleting by attempting re-authentication
       await base44.auth.loginViaEmailPassword(user.email, clearPassword);
     } catch {
       setClearPasswordError("Incorrect password. Please try again.");
@@ -68,73 +67,76 @@ export default function SettingsSheet({ user }) {
             </Avatar>
           </button>
         </SheetTrigger>
-        <SheetContent side="right" className="w-80">
-          <SheetHeader className="mb-6">
+        <SheetContent side="right" className="w-80 flex flex-col p-0">
+          <SheetHeader className="px-6 pt-6 pb-4 flex-shrink-0">
             <SheetTitle>Settings</SheetTitle>
           </SheetHeader>
 
-          {/* User info */}
-          <div className="bg-muted/50 rounded-xl p-4 mb-6">
-            <p className="text-sm font-medium">{user?.full_name || "User"}</p>
-            <p className="text-xs text-muted-foreground">{user?.email}</p>
-          </div>
+          {/* Scrollable body */}
+          <div className="flex-1 overflow-y-auto px-6 pb-8 space-y-4">
+            {/* User info */}
+            <div className="bg-muted/50 rounded-xl p-4">
+              <p className="text-sm font-medium">{user?.full_name || "User"}</p>
+              <p className="text-xs text-muted-foreground">{user?.email}</p>
+            </div>
 
-          {/* Color theme picker */}
-          <ColorThemePicker />
+            {/* Color theme picker */}
+            <ColorThemePicker />
 
-          <div className="border-t border-border mb-2" />
+            <div className="border-t border-border" />
 
-          <div className="space-y-2">
-            {/* Theme toggle */}
-            <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-accent transition-colors min-h-[52px]"
-            >
-              <div className="flex items-center gap-3">
-                {theme === "dark" ? <Sun className="w-4 h-4 text-muted-foreground" /> : <Moon className="w-4 h-4 text-muted-foreground" />}
-                <span className="text-sm font-medium">
-                  {theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
-                </span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
-
-            <div className="border-t border-border my-3" />
-
-            {/* Clear all data */}
-            <button
-              onClick={() => setShowClearDataDialog(true)}
-              className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-accent transition-colors min-h-[52px]"
-            >
-              <div className="flex items-center gap-3">
-                <Database className="w-4 h-4 text-orange-500" />
-                <div className="text-left">
-                  <p className="text-sm font-medium">Clear All Data</p>
-                  <p className="text-xs text-muted-foreground">Remove all projects, tasks & photos</p>
+            <div className="space-y-2">
+              {/* Theme toggle */}
+              <button
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-accent transition-colors min-h-[52px]"
+              >
+                <div className="flex items-center gap-3">
+                  {theme === "dark" ? <Sun className="w-4 h-4 text-muted-foreground" /> : <Moon className="w-4 h-4 text-muted-foreground" />}
+                  <span className="text-sm font-medium">
+                    {theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                  </span>
                 </div>
-              </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </button>
 
-            <div className="border-t border-border my-3" />
+              <div className="border-t border-border" />
 
-            {/* Sign out */}
-            <button
-              onClick={() => base44.auth.logout()}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors min-h-[52px]"
-            >
-              <LogOut className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Sign Out</span>
-            </button>
+              {/* Clear all data */}
+              <button
+                onClick={() => setShowClearDataDialog(true)}
+                className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-accent transition-colors min-h-[52px]"
+              >
+                <div className="flex items-center gap-3">
+                  <Database className="w-4 h-4 text-orange-500" />
+                  <div className="text-left">
+                    <p className="text-sm font-medium">Clear All Data</p>
+                    <p className="text-xs text-muted-foreground">Remove all projects, tasks & photos</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </button>
 
-            {/* Delete Account */}
-            <button
-              onClick={() => setShowDeleteAccountDialog(true)}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-destructive/10 transition-colors min-h-[52px]"
-            >
-              <Trash2 className="w-4 h-4 text-destructive" />
-              <span className="text-sm font-medium text-destructive">Delete Account</span>
-            </button>
+              <div className="border-t border-border" />
+
+              {/* Sign out */}
+              <button
+                onClick={() => base44.auth.logout()}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent transition-colors min-h-[52px]"
+              >
+                <LogOut className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Sign Out</span>
+              </button>
+
+              {/* Delete Account */}
+              <button
+                onClick={() => setShowDeleteAccountDialog(true)}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-destructive/10 transition-colors min-h-[52px]"
+              >
+                <Trash2 className="w-4 h-4 text-destructive" />
+                <span className="text-sm font-medium text-destructive">Delete Account</span>
+              </button>
+            </div>
           </div>
         </SheetContent>
       </Sheet>
