@@ -1,4 +1,8 @@
-import { COLOR_THEMES, CARD_COLORS, useColorTheme } from "@/lib/ThemeContext";
+import { COLOR_THEMES, CARD_COLORS, STAT_CARD_KEYS, useColorTheme } from "@/lib/ThemeContext";
+import { ClipboardList, MessageSquare, FileText, Camera } from "lucide-react";
+
+const STAT_CARD_LABELS = ["Tasks", "Messages", "Documents", "Photos"];
+const STAT_CARD_ICONS = [ClipboardList, MessageSquare, FileText, Camera];
 
 function Swatch({ color, isSelected, onSelect, size = "w-8 h-8" }) {
   return (
@@ -28,7 +32,7 @@ function Swatch({ color, isSelected, onSelect, size = "w-8 h-8" }) {
 }
 
 export default function ColorThemePicker() {
-  const { themeId, setThemeId, cardColorId, setCardColorId } = useColorTheme();
+  const { themeId, setThemeId, cardColorId, setCardColorId, statCardColors, setStatCardColor } = useColorTheme();
 
   // Adapt COLOR_THEMES entries to have a .hex for the Swatch component
   const accentThemes = COLOR_THEMES.map(t => ({
@@ -65,6 +69,41 @@ export default function ColorThemePicker() {
               onSelect={setCardColorId}
             />
           ))}
+        </div>
+      </div>
+
+      {/* Per-stat-card colors */}
+      <div>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Individual Card Colors</p>
+        <div className="space-y-3">
+          {STAT_CARD_KEYS.map((key, i) => {
+            const Icon = STAT_CARD_ICONS[i];
+            const selectedId = statCardColors[key] || cardColorId;
+            return (
+              <div key={key}>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span className="text-[11px] font-medium text-muted-foreground">{STAT_CARD_LABELS[i]}</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {CARD_COLORS.map(color => (
+                    <button
+                      key={color.id}
+                      title={color.name}
+                      onClick={() => setStatCardColor(key, color.id)}
+                      className="w-5 h-5 rounded-full transition-all"
+                      style={{
+                        background: color.hex,
+                        boxShadow: selectedId === color.id ? `0 0 0 2px hsl(var(--background)), 0 0 0 3px ${color.hex}` : "none",
+                        transform: selectedId === color.id ? "scale(1.2)" : "scale(1)",
+                        opacity: selectedId === color.id ? 1 : 0.6,
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
