@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Calendar, ChevronDown, Pencil, Trash2, Check } from "lucide-react";
 import { toast } from "sonner";
-import confetti from "canvas-confetti";
+import { motion, AnimatePresence } from "framer-motion";
 import { isNew } from "../hooks/useLastViewed";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -24,9 +24,17 @@ const tapStyle = {
   cursor: "pointer",
 };
 
+// Tiny particles for the pop burst
+const PARTICLES = Array.from({ length: 8 }, (_, i) => ({
+  id: i,
+  angle: (i / 8) * 360,
+  distance: 28 + Math.random() * 16,
+}));
+
 export default function TaskItem({ task, onExpand, expanded, onEdit }) {
   const qc = useQueryClient();
   const [showDelete, setShowDelete] = useState(false);
+  const [burst, setBurst] = useState(false);
 
   const isNewTask = isNew(task.created_date, "tasks");
   const todayStr = new Date().toISOString().split("T")[0];
@@ -36,17 +44,14 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["tasks"], exact: false });
 
-  const fireConfetti = useCallback(() => {
-    confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 }, colors: ["#f5a623", "#22c55e", "#3b82f6", "#a855f7", "#ef4444"] });
-  }, []);
-
   const toggle = useMutation({
     mutationFn: () => base44.entities.Task.update(task.id, { completed: !task.completed }),
     onSuccess: () => {
       invalidate();
       if (!task.completed) {
-        fireConfetti();
-        toast.success("Task completed! 🎉");
+        setBurst(true);
+        setTimeout(() => setBurst(false), 700);
+        toast.success("Task completed! ✅");
       } else {
         toast.success("Task reopened");
       }
@@ -89,16 +94,53 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: task.completed ? "hsl(var(--primary))" : "transparent",
+            position: "relative",
           }}
         >
-          <div style={{
-            width: 32, height: 32, borderRadius: "50%",
-            border: `2.5px solid ${task.completed ? "hsl(var(--primary-foreground))" : isOverdue ? "#fb923c" : "hsl(var(--muted-foreground) / 0.4)"}`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            backgroundColor: task.completed ? "hsl(var(--primary-foreground))" : "transparent",
-          }}>
-            {task.completed && <Check size={17} color="hsl(var(--primary))" strokeWidth={3} />}
-          </div>
+          {/* Pop burst animation */}
+          <AnimatePresence>
+            {burst && PARTICLES.map(p => {
+              const rad = (p.angle * Math.PI) / 180;
+              const tx = Math.cos(rad) * p.distance;
+              const ty = Math.sin(rad) * p.distance;
+              return (
+                <motion.span
+                  key={p.id}
+                  initial={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+                  animate={{ opacity: 0, x: tx, y: ty, scale: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.55, ease: "easeOut" }}
+                  style={{
+                    position: "absolute", width: 7, height: 7,
+                    borderRadius: p.id % 2 === 0 ? "50%" : "2px",
+                    backgroundColor: p.id % 3 === 0 ? "#f5a623" : p.id % 3 === 1 ? "#fbbf24" : "#fde68a",
+                    pointerEvents: "none",
+                  }}
+                />
+              );
+            })}
+          </AnimatePresence>
+
+          <motion.div
+            animate={burst ? { scale: [1, 1.4, 1] } : {}}
+            transition={{ duration: 0.3 }}
+            style={{
+              width: 32, height: 32, borderRadius: "50%",
+              border: `2.5px solid ${task.completed ? "hsl(var(--primary-foreground))" : isOverdue ? "#fb923c" : "hsl(var(--muted-foreground) / 0.4)"}`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              backgroundColor: task.completed ? "#f5a623" : "transparent",
+            }}
+          >
+            {task.completed && (
+              <motion.span
+                initial={burst ? { scale: 0 } : { scale: 1 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 500, damping: 20 }}
+              >
+                <Check size={17} color="#fff" strokeWidth={3} />
+              </motion.span>
+            )}
+          </motion.div>
         </div>
 
         {/* Body */}
