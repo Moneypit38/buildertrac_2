@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Layers, FolderKanban, Trash2, Pencil, UserPlus, Users, MoveRight } from "lucide-react";
+import { Plus, Layers, FolderKanban, Trash2, Pencil, UserPlus, Users, MoveRight, Sparkles, ImageIcon } from "lucide-react";
 import PortfolioIcon, { PORTFOLIO_ICONS, PORTFOLIO_COLORS, getColor, getIconComponent } from "../components/PortfolioIcon";
 import { useClientAccess } from "../hooks/useClientAccess";
 import { Link, useLocation } from "react-router-dom";
@@ -24,8 +24,32 @@ import AssignPortfolioDialog from "../components/AssignPortfolioDialog";
 // ── Create / Edit Portfolio Dialog ──────────────────────────────────────────
 function PortfolioFormDialog({ open, onClose, portfolio }) {
   const isEdit = !!portfolio;
-  const [form, setForm] = useState({ name: portfolio?.name || "", description: portfolio?.description || "", icon: portfolio?.icon || "Layers", color: portfolio?.color || "orange", contact_name: portfolio?.contact_name || "", contact_email: portfolio?.contact_email || "", contact_phone: portfolio?.contact_phone || "", business_address: portfolio?.business_address || "" });
+  const [form, setForm] = useState({ name: portfolio?.name || "", description: portfolio?.description || "", icon: portfolio?.icon || "Layers", color: portfolio?.color || "orange", contact_name: portfolio?.contact_name || "", contact_email: portfolio?.contact_email || "", contact_phone: portfolio?.contact_phone || "", business_address: portfolio?.business_address || "", logo_url: portfolio?.logo_url || "" });
+  const [logoSearching, setLogoSearching] = useState(false);
   const qc = useQueryClient();
+
+  const searchLogo = async () => {
+    if (!form.name.trim()) return toast.error("Enter a company name first");
+    setLogoSearching(true);
+    try {
+      const res = await base44.integrations.Core.InvokeLLM({
+        prompt: `Find the official logo URL for the company: "${form.name}". Return a direct PNG or SVG image URL from the company's official website or a trusted CDN (like Clearbit, Brandfetch, etc.). Try: https://logo.clearbit.com/${form.name.toLowerCase().replace(/\s+/g, "")}.com first. Return ONLY the image URL, nothing else.`,
+        add_context_from_internet: true,
+        model: "gemini_3_flash",
+      });
+      const url = res?.trim();
+      if (url && url.startsWith("http")) {
+        setForm(f => ({ ...f, logo_url: url }));
+        toast.success("Logo found!");
+      } else {
+        toast.error("Couldn't find a logo. Try entering a URL manually.");
+      }
+    } catch {
+      toast.error("Logo search failed");
+    } finally {
+      setLogoSearching(false);
+    }
+  };
 
   const mutation = useMutation({
     mutationFn: (data) =>
@@ -54,6 +78,35 @@ function PortfolioFormDialog({ open, onClose, portfolio }) {
           className="space-y-4"
         >
           <div><Label>Name *</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="West Coast Residential" /></div>
+
+          {/* Logo finder */}
+          <div>
+            <Label>Company Logo</Label>
+            <div className="flex gap-2 mt-1">
+              <Input
+                value={form.logo_url}
+                onChange={e => setForm(f => ({ ...f, logo_url: e.target.value }))}
+                placeholder="Logo URL (or use AI search →)"
+                className="flex-1"
+              />
+              <Button type="button" variant="outline" size="sm" onClick={searchLogo} disabled={logoSearching} className="shrink-0 gap-1.5">
+                {logoSearching ? <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                {logoSearching ? "Searching..." : "Find Logo"}
+              </Button>
+            </div>
+            {form.logo_url ? (
+              <div className="mt-2 flex items-center gap-2">
+                <img src={form.logo_url} alt="logo preview" className="h-10 w-10 object-contain rounded border border-border bg-white p-1" onError={e => { e.target.style.display = "none"; }} />
+                <span className="text-xs text-muted-foreground truncate">{form.logo_url}</span>
+                <button type="button" onClick={() => setForm(f => ({ ...f, logo_url: "" }))} className="ml-auto text-xs text-muted-foreground hover:text-destructive">Remove</button>
+              </div>
+            ) : (
+              <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                <ImageIcon className="w-3 h-3" /> Type a company name above then click "Find Logo"
+              </div>
+            )}
+          </div>
+
           <div><Label>Description</Label><Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} placeholder="Optional description..." /></div>
           <div className="border-t border-border pt-3">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Contact Information</p>

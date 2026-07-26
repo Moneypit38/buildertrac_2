@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Calendar, ChevronDown, Pencil, Trash2, Check } from "lucide-react";
 import { toast } from "sonner";
+import confetti from "canvas-confetti";
 import { isNew } from "../hooks/useLastViewed";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -35,9 +36,21 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["tasks"], exact: false });
 
+  const fireConfetti = useCallback(() => {
+    confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 }, colors: ["#f5a623", "#22c55e", "#3b82f6", "#a855f7", "#ef4444"] });
+  }, []);
+
   const toggle = useMutation({
     mutationFn: () => base44.entities.Task.update(task.id, { completed: !task.completed }),
-    onSuccess: () => { invalidate(); toast.success(task.completed ? "Task reopened" : "Task completed!"); },
+    onSuccess: () => {
+      invalidate();
+      if (!task.completed) {
+        fireConfetti();
+        toast.success("Task completed! 🎉");
+      } else {
+        toast.success("Task reopened");
+      }
+    },
   });
 
   const cyclePriority = useMutation({
