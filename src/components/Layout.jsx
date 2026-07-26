@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, FolderKanban, FileText, Camera, Layers, ChevronLeft } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
 import { markViewed, getLastViewed } from "../hooks/useLastViewed";
@@ -46,6 +47,8 @@ export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { data: user } = useQuery({ queryKey: ["me"], queryFn: () => base44.auth.me() });
+  const queryClient = useQueryClient();
+  const { refreshing, touchHandlers } = usePullToRefresh(() => queryClient.invalidateQueries());
   const [lastViewedTimes, setLastViewedTimes] = useState({
     docs: getLastViewed("docs"),
     photos: getLastViewed("photos"),
@@ -125,7 +128,13 @@ export default function Layout() {
       </header>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto" style={{ paddingBottom: "calc(4rem + env(safe-area-inset-bottom))" }}>
+      <main className="flex-1 overflow-y-auto" style={{ paddingBottom: "calc(4rem + env(safe-area-inset-bottom))" }} {...touchHandlers}>
+        {/* Pull-to-refresh indicator */}
+        {refreshing && (
+          <div className="flex justify-center py-3">
+            <div className="w-5 h-5 border-2 border-border border-t-primary rounded-full animate-spin" />
+          </div>
+        )}
         <SubscriptionGate>
           {/* Tab pages — lazily mounted on first visit, then kept alive (hidden) */}
           {navItems.map(({ path, Component }) => (
