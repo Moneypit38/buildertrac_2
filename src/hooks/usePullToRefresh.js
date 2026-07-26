@@ -11,9 +11,11 @@ export function usePullToRefresh(onRefresh) {
   };
 
   const onTouchEnd = async (e) => {
+    if (refreshing) return;
     const delta = e.changedTouches[0].clientY - startY.current;
-    const atTop = window.scrollY === 0 || document.documentElement.scrollTop === 0;
-    if (delta > THRESHOLD && atTop && !refreshing) {
+    const el = e.currentTarget;
+    const atTop = el ? el.scrollTop === 0 : window.scrollY === 0;
+    if (delta > THRESHOLD && atTop) {
       setRefreshing(true);
       try { await onRefresh(); } finally { setRefreshing(false); }
     }
