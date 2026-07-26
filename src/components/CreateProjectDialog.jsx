@@ -12,8 +12,8 @@ export default function CreateProjectDialog({ open, onClose, project, defaultPor
   const isEdit = !!project;
   const [form, setForm] = useState(project ? {
     name: project.name || "", address: project.address || "", portfolio: project.portfolio || "",
-    status: project.status || "Planning", budget_total: project.budget_total || 0, budget_spent: project.budget_spent || 0,
-  } : { name: "", address: "", portfolio: defaultPortfolio || "", status: "Planning", budget_total: 0, budget_spent: 0 });
+    status: project.status || "Planning", budget_total: project.budget_total ?? "", budget_spent: project.budget_spent ?? "",
+  } : { name: "", address: "", portfolio: defaultPortfolio || "", status: "Planning", budget_total: "", budget_spent: "" });
 
   const qc = useQueryClient();
   const { data: portfolios = [] } = useQuery({ queryKey: ["portfolios"], queryFn: () => base44.entities.Portfolio.list() });
@@ -66,8 +66,8 @@ export default function CreateProjectDialog({ open, onClose, project, defaultPor
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>Total Budget ($)</Label><Input type="number" min={0} value={form.budget_total} onChange={e => setForm(f => ({ ...f, budget_total: Number(e.target.value) }))} /></div>
-            <div><Label>Spent ($)</Label><Input type="number" min={0} value={form.budget_spent} onChange={e => setForm(f => ({ ...f, budget_spent: Number(e.target.value) }))} /></div>
+            <div><Label>Total Budget ($)</Label><Input type="number" min={0} value={form.budget_total} placeholder="0" onChange={e => setForm(f => ({ ...f, budget_total: e.target.value === "" ? "" : Number(e.target.value) }))} /></div>
+            <div><Label>Spent ($)</Label><Input type="number" min={0} value={form.budget_spent} placeholder="0" onChange={e => setForm(f => ({ ...f, budget_spent: e.target.value === "" ? "" : Number(e.target.value) }))} /></div>
           </div>
           <Button type="submit" className="w-full" disabled={mutation.isPending}>{mutation.isPending ? "Saving..." : isEdit ? "Save Changes" : "Create Project"}</Button>
         </form>
