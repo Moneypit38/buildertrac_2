@@ -75,7 +75,7 @@ export default function SubscriptionGate({ children }) {
         </div>
         <div>
           <h2 className="text-xl font-bold mb-1">Unlock BuilderTrac</h2>
-          <p className="text-sm text-muted-foreground">Subscribe to manage your projects, team, documents, and more.</p>
+          <p className="text-sm text-muted-foreground">One-time purchase to manage your projects, team, documents, and more.</p>
         </div>
 
         <div className="bg-accent/50 rounded-xl p-4 text-left space-y-2">
@@ -94,13 +94,13 @@ export default function SubscriptionGate({ children }) {
         </div>
 
         <div>
-          <p className="text-3xl font-bold">$4.99<span className="text-base font-normal text-muted-foreground">/month</span></p>
-          <p className="text-xs text-muted-foreground mt-0.5">Per admin · Cancel anytime</p>
+          <p className="text-3xl font-bold">$9.99<span className="text-base font-normal text-muted-foreground"> one-time</span></p>
+          <p className="text-xs text-muted-foreground mt-0.5">Per admin · Lifetime access</p>
         </div>
 
         <Button className="w-full" size="lg" onClick={handleSubscribe} disabled={loading}>
           {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Zap className="w-4 h-4 mr-2" />}
-          {loading ? "Redirecting..." : "Subscribe Now — $4.99/mo"}
+          {loading ? "Redirecting..." : "Get BuilderTrac — $9.99"}
         </Button>
       </div>
     </div>

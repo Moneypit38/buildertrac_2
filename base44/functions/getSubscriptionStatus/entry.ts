@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
 
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
 
-    // Find active subscriptions for this user's email
+    // Find customers matching this user's email
     const customers = await stripe.customers.list({ email: user.email, limit: 5 });
 
     if (customers.data.length === 0) {
@@ -17,22 +17,20 @@ Deno.serve(async (req) => {
     }
 
     const customerId = customers.data[0].id;
-    const subscriptions = await stripe.subscriptions.list({
+
+    // Check for a completed one-time payment for this product
+    const sessions = await stripe.checkout.sessions.list({
       customer: customerId,
-      status: 'active',
-      limit: 1,
+      limit: 10,
     });
 
-    const isActive = subscriptions.data.length > 0;
-    const subscription = isActive ? subscriptions.data[0] : null;
+    const hasPaid = sessions.data.some(
+      (s) => s.payment_status === 'paid' && s.mode === 'payment'
+    );
 
-    return Response.json({
-      isActive,
-      subscriptionId: subscription?.id || null,
-      currentPeriodEnd: subscription?.current_period_end || null,
-    });
+    return Response.json({ isActive: hasPaid });
   } catch (error) {
-    console.error('Subscription status error:', error);
+    console.error('Payment status error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
