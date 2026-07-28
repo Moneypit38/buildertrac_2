@@ -94,13 +94,13 @@ export default function SubscriptionGate({ children }) {
         </div>
 
         <div>
-          <p className="text-3xl font-bold">$9.99<span className="text-base font-normal text-muted-foreground">/month</span></p>
+          <p className="text-3xl font-bold">$4.99<span className="text-base font-normal text-muted-foreground">/month</span></p>
           <p className="text-xs text-muted-foreground mt-0.5">Per admin · Cancel anytime</p>
         </div>
 
         <Button className="w-full" size="lg" onClick={handleSubscribe} disabled={loading}>
           {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Zap className="w-4 h-4 mr-2" />}
-          {loading ? "Redirecting..." : "Subscribe Now — $9.99/mo"}
+          {loading ? "Redirecting..." : "Subscribe Now — $4.99/mo"}
         </Button>
       </div>
     </div>

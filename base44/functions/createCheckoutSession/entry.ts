@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'subscription',
-      line_items: [{ price: 'price_1TfhxWIt5ybbqONMdWNNkkBx', quantity: 1 }],
+      line_items: [{ price: 'price_1TyBbwRP0dHkUuN31g6xQyM6', quantity: 1 }],
       success_url: `${Deno.env.get('APP_BASE_URL') || 'https://buildertrac.base44.app'}/?subscription=success`,
       cancel_url: `${Deno.env.get('APP_BASE_URL') || 'https://buildertrac.base44.app'}/?subscription=cancelled`,
       customer_email: user.email,
