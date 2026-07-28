@@ -396,7 +396,7 @@ export default function Portfolios() {
       {/* Dialogs */}
       <PortfolioFormDialog key={showCreate ? "new" : "closed"} open={showCreate} onClose={() => setShowCreate(false)} />
       {addProjectToPortfolio && (
-        <CreateProjectDialog open={!!addProjectToPortfolio} onClose={() => setAddProjectToPortfolio(null)} defaultPortfolio={addProjectToPortfolio} />
+        <CreateProjectDialog key={addProjectToPortfolio} open={!!addProjectToPortfolio} onClose={() => setAddProjectToPortfolio(null)} defaultPortfolio={addProjectToPortfolio} />
       )}
       {editPortfolio && (
         <PortfolioFormDialog open={!!editPortfolio} onClose={() => setEditPortfolio(null)} portfolio={editPortfolio} />

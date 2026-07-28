@@ -26,7 +26,10 @@ export default function CreateProjectDialog({ open, onClose, project, defaultPor
       qc.setQueryData(["projects"], (old = []) => [...old, { ...data, id: `temp-${Date.now()}`, created_date: new Date().toISOString() }]);
       return { prev };
     },
-    onError: (_, __, ctx) => { if (ctx?.prev) qc.setQueryData(["projects"], ctx.prev); },
+    onError: (err, _, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["projects"], ctx.prev);
+      toast.error("Failed to save project: " + (err?.message || "unknown error"));
+    },
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ["projects"] });
       if (isEdit) qc.invalidateQueries({ queryKey: ["project", project.id] });
