@@ -21,7 +21,7 @@ function DocViewer({ doc, onClose }) {
   return (
     <div className="fixed inset-0 z-[100] flex flex-col bg-background">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card shrink-0">
+      <div className="flex items-center justify-between px-4 border-b border-border bg-card shrink-0" style={{ paddingTop: `max(0.75rem, env(safe-area-inset-top))`, paddingBottom: "0.75rem" }}>
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-sm truncate">{doc.name}</p>
           <p className="text-[11px] text-muted-foreground">{doc.category}</p>
