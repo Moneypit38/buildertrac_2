@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Lock, CheckCircle2, Zap } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 
-const PAYMENTS_ENABLED = true;
+const PAYMENTS_ENABLED = false;
 
 export default function SubscriptionGate({ children }) {
   const { user } = useAuth();
