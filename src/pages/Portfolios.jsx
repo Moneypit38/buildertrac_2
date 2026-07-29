@@ -122,8 +122,10 @@ function PortfolioFormDialog({ open, onClose, portfolio }) {
             </div>
             {form.logo_url ? (
               <div className="mt-2 flex items-center gap-2">
-                <img src={form.logo_url} alt="logo preview" className="h-10 w-10 object-contain rounded border border-border bg-white p-1" onError={e => { e.target.style.display = "none"; }} />
-                <span className="text-xs text-muted-foreground truncate">{form.logo_url}</span>
+                <img src={form.logo_url} alt="logo preview" className="h-10 w-10 object-contain rounded border border-border bg-white p-1 shrink-0" onError={e => { e.target.style.display = "none"; }} />
+                <span className="text-xs text-muted-foreground truncate max-w-[120px]">
+                  {form.logo_url.startsWith("blob:") || form.logo_url.length > 40 ? "Image uploaded ✓" : form.logo_url}
+                </span>
                 <button type="button" onClick={() => setForm(f => ({ ...f, logo_url: "" }))} className="ml-auto text-xs text-muted-foreground hover:text-destructive">Remove</button>
               </div>
             ) : (
@@ -291,7 +293,7 @@ export default function Portfolios() {
                   >
                     {/* Icon + actions row */}
                     <div className="flex items-start justify-between">
-                      <PortfolioIcon icon={pf.icon} color={pf.color} size="sm" />
+                      <PortfolioIcon icon={pf.icon} color={pf.color} size="sm" logoUrl={pf.logo_url} />
                       {!isClientOnly && (
                         <div className="flex gap-0.5" onClick={e => e.stopPropagation()}>
                           <button onClick={() => setEditPortfolio(pf)} className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">

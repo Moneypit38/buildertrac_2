@@ -30,11 +30,19 @@ export function getIconComponent(iconName) {
   return PORTFOLIO_ICONS.find(i => i.name === iconName)?.Icon || Layers;
 }
 
-export default function PortfolioIcon({ icon = "Layers", color = "orange", size = "md" }) {
+export default function PortfolioIcon({ icon = "Layers", color = "orange", size = "md", logoUrl }) {
   const colorDef = getColor(color);
   const IconComp = getIconComponent(icon);
   const sizeClass = size === "sm" ? "w-8 h-8" : size === "lg" ? "w-12 h-12" : "w-10 h-10";
   const iconSize = size === "sm" ? "w-4 h-4" : size === "lg" ? "w-6 h-6" : "w-5 h-5";
+
+  if (logoUrl) {
+    return (
+      <div className={`${sizeClass} rounded-xl border border-border bg-white flex items-center justify-center shrink-0 overflow-hidden`}>
+        <img src={logoUrl} alt="logo" className="w-full h-full object-contain p-0.5" onError={e => { e.target.style.display = "none"; }} />
+      </div>
+    );
+  }
 
   return (
     <div className={`${sizeClass} rounded-xl ${colorDef.bg} flex items-center justify-center shrink-0`}>
