@@ -145,9 +145,14 @@ export default function Dashboard() {
                         <Camera className="w-3.5 h-3.5 text-blue-400 drop-shadow" />
                       </span>
                     )}
-                    <div className="absolute bottom-0 left-0 right-0 p-2.5">
-                      <p className="font-semibold text-sm text-white leading-tight truncate">{pf.name}</p>
-                      <p className="text-[11px] text-white/70 mt-0.5">{pfProjects.length} project{pfProjects.length !== 1 ? "s" : ""}</p>
+                    <div className="absolute bottom-0 left-0 right-0 p-2.5 flex items-end gap-2">
+                      {pf.logo_url && (
+                        <img src={pf.logo_url} alt="" className="w-8 h-8 rounded-lg bg-white object-contain p-0.5 shrink-0 border border-white/20" onError={e => { e.target.style.display = "none"; }} />
+                      )}
+                      <div className="min-w-0">
+                        <p className="font-semibold text-sm text-white leading-tight truncate">{pf.name}</p>
+                        <p className="text-[11px] text-white/70 mt-0.5">{pfProjects.length} project{pfProjects.length !== 1 ? "s" : ""}</p>
+                      </div>
                     </div>
                   </Link>
                 </motion.div>
