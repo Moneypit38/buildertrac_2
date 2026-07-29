@@ -19,7 +19,7 @@ function getFileType(url = "") {
 function DocViewer({ doc, onClose }) {
   const type = getFileType(doc.file_url);
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-background">
+    <div className="fixed inset-0 z-[100] flex flex-col bg-background">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card shrink-0">
         <div className="flex-1 min-w-0">
