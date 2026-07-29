@@ -38,8 +38,8 @@ export default function PortfolioIcon({ icon = "Layers", color = "orange", size 
 
   if (logoUrl) {
     return (
-      <div className={`${sizeClass} rounded-xl border border-border bg-white flex items-center justify-center shrink-0 overflow-hidden`}>
-        <img src={logoUrl} alt="logo" className="w-full h-full object-contain p-0.5" onError={e => { e.target.style.display = "none"; }} />
+      <div className={`${sizeClass} rounded-xl border border-border bg-white shrink-0 overflow-hidden`}>
+        <img src={logoUrl} alt="logo" className="w-full h-full object-cover" onError={e => { e.target.style.display = "none"; }} />
       </div>
     );
   }
