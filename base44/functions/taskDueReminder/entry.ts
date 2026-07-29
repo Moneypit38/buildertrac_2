@@ -3,7 +3,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 Deno.serve(async (req) => {
   try {
     const secret = Deno.env.get('AUTOMATION_SECRET');
-    if (secret && req.headers.get('x-automation-secret') !== secret) {
+    if (!secret || req.headers.get('x-automation-secret') !== secret) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
