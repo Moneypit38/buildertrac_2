@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Layers, FolderKanban, Trash2, Pencil, UserPlus, Users, MoveRight, Sparkles, ImageIcon } from "lucide-react";
+import { Plus, Layers, FolderKanban, Trash2, Pencil, UserPlus, Users, MoveRight, Sparkles, ImageIcon, Upload } from "lucide-react";
 import PortfolioIcon, { PORTFOLIO_ICONS, PORTFOLIO_COLORS, getColor, getIconComponent } from "../components/PortfolioIcon";
 import { useClientAccess } from "../hooks/useClientAccess";
 import { Link, useLocation } from "react-router-dom";
@@ -26,7 +26,24 @@ function PortfolioFormDialog({ open, onClose, portfolio }) {
   const isEdit = !!portfolio;
   const [form, setForm] = useState({ name: portfolio?.name || "", description: portfolio?.description || "", icon: portfolio?.icon || "Layers", color: portfolio?.color || "orange", contact_name: portfolio?.contact_name || "", contact_email: portfolio?.contact_email || "", contact_phone: portfolio?.contact_phone || "", business_address: portfolio?.business_address || "", logo_url: portfolio?.logo_url || "" });
   const [logoSearching, setLogoSearching] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
   const qc = useQueryClient();
+
+  const uploadLogo = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLogoUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setForm(f => ({ ...f, logo_url: file_url }));
+      toast.success("Logo uploaded!");
+    } catch {
+      toast.error("Upload failed");
+    } finally {
+      setLogoUploading(false);
+      e.target.value = "";
+    }
+  };
 
   const searchLogo = async () => {
     if (!form.name.trim()) return toast.error("Enter a company name first");
@@ -86,12 +103,21 @@ function PortfolioFormDialog({ open, onClose, portfolio }) {
               <Input
                 value={form.logo_url}
                 onChange={e => setForm(f => ({ ...f, logo_url: e.target.value }))}
-                placeholder="Logo URL (or use AI search →)"
+                placeholder="Logo URL (or upload / AI search)"
                 className="flex-1"
               />
+              <label className="shrink-0">
+                <input type="file" accept="image/*" className="hidden" onChange={uploadLogo} disabled={logoUploading} />
+                <Button type="button" variant="outline" size="sm" disabled={logoUploading} asChild>
+                  <span className="gap-1.5 cursor-pointer">
+                    {logoUploading ? <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                    {logoUploading ? "..." : "Upload"}
+                  </span>
+                </Button>
+              </label>
               <Button type="button" variant="outline" size="sm" onClick={searchLogo} disabled={logoSearching} className="shrink-0 gap-1.5">
                 {logoSearching ? <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                {logoSearching ? "Searching..." : "Find Logo"}
+                {logoSearching ? "..." : "Find"}
               </Button>
             </div>
             {form.logo_url ? (
