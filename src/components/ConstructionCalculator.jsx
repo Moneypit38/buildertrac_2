@@ -233,87 +233,137 @@ function Key({ label, sub, theme = "num", dispatch, action, wide }) {
   );
 }
 
+// ─── Standard calculator keypad (4-col, iOS style) ───────────────────────────
+function StandardKeypad({ state, dispatch }) {
+  const isError = state.display === "Error";
+  const keys = [
+    ["AC",  "",  "clear", { type: "ALL_CLEAR" }],
+    ["+/-", "",  "fn",    { type: "SIGN" }],
+    ["%",   "",  "fn",    { type: "PCT" }],
+    ["÷",   "",  "op",    { type: "OP", payload: "÷" }],
+
+    ["7",   "",  "num",   { type: "DIGIT", payload: "7" }],
+    ["8",   "",  "num",   { type: "DIGIT", payload: "8" }],
+    ["9",   "",  "num",   { type: "DIGIT", payload: "9" }],
+    ["×",   "",  "op",    { type: "OP", payload: "×" }],
+
+    ["4",   "",  "num",   { type: "DIGIT", payload: "4" }],
+    ["5",   "",  "num",   { type: "DIGIT", payload: "5" }],
+    ["6",   "",  "num",   { type: "DIGIT", payload: "6" }],
+    ["-",   "",  "op",    { type: "OP", payload: "-" }],
+
+    ["1",   "",  "num",   { type: "DIGIT", payload: "1" }],
+    ["2",   "",  "num",   { type: "DIGIT", payload: "2" }],
+    ["3",   "",  "num",   { type: "DIGIT", payload: "3" }],
+    ["+",   "",  "op",    { type: "OP", payload: "+" }],
+
+    ["0",   "",  "num",   { type: "DIGIT", payload: "0" }, true],
+    [".",   "",  "num",   { type: "DOT" }],
+    ["=",   "",  "op",    { type: "EQUALS" }],
+  ];
+
+  return (
+    <div className="flex-1 px-3 pb-3 overflow-hidden">
+      <div className="grid grid-cols-4 gap-2 h-full" style={{ gridTemplateRows: "repeat(5, 1fr)" }}>
+        {keys.map((k, i) => {
+          const [label, sub, theme, action, wide] = k;
+          return (
+            <Key key={i} label={label} sub={sub} theme={theme}
+              dispatch={dispatch} action={action} wide={wide} />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── Construction calculator keypad (5-col) ───────────────────────────────────
+function ConstructionKeypad({ state, dispatch }) {
+  const keys = [
+    ["AC",    "",           "clear",   { type: "ALL_CLEAR" }],
+    ["C",     "Clear",      "clear",   { type: "CLEAR" }],
+    ["⌫",    "Back",       "fn",      { type: "BACKSPACE" }],
+    ["M+",    "Mem+",       "mem",     { type: "M_PLUS" }],
+    ["MR",    "Recall",     "mem",     { type: "M_RCL" }],
+
+    ["M−",    "Mem−",       "mem",     { type: "M_MINUS" }],
+    ["MC",    "Mem Clr",    "mem",     { type: "M_CLR" }],
+    ["x²",    "Square",     "fn",      { type: "SQ" }],
+    ["√x",    "Sq Root",    "fn",      { type: "SQRT" }],
+    ["1/x",   "Recip",      "fn",      { type: "INV" }],
+
+    ["IN→FT", "×0.0833",    "dim",     { type: "UNIT_CONV", payload: { from: 1/12, label: "in" } }],
+    ["FT→IN", "×12",        "dim",     { type: "UNIT_CONV", payload: { from: 12, label: "ft→in" } }],
+    ["FT→YD", "÷3",         "dim",     { type: "UNIT_CONV", payload: { from: 1/3, label: "ft→yd" } }],
+    ["FT→M",  "×0.3048",    "dim",     { type: "UNIT_CONV", payload: { from: 0.3048, label: "ft→m" } }],
+    ["M→FT",  "×3.281",     "dim",     { type: "UNIT_CONV", payload: { from: 3.2808, label: "m→ft" } }],
+
+    ["PITCH", "→ Angle",    "special", { type: "PITCH_ANGLE" }],
+    ["DIAG",  "A²+B²",      "special", { type: "HYPO" }],
+    ["3-4-5", "Sq Up",      "special", { type: "SQUAREUP" }],
+    ["STUDS", "16\" OC",    "special", { type: "STUDS" }],
+    ["STUDS", "24\" OC",    "special", { type: "STUDS24" }],
+
+    ["RISER", "Stair Rise", "special", { type: "STAIR_RISE" }],
+    ["CONC",  "Cu Yd",      "special", { type: "CONCRETE" }],
+    ["ROOF",  "Squares",    "special", { type: "ROOFING" }],
+    ["BLOCK", "8×16 CMU",   "special", { type: "BLOCKS" }],
+    ["DRY",   "Drywall",    "special", { type: "DRYWALL" }],
+
+    ["FMT\"", "In→Ft′In″",  "fn",      { type: "FMT_INCH" }],
+    ["FMT′",  "Ft→Ft′In″",  "fn",      { type: "FMT_FEET" }],
+    ["π",     "3.14159",    "fn",      { type: "PI" }],
+    ["+/-",   "Sign",       "fn",      { type: "SIGN" }],
+    ["%",     "Percent",    "fn",      { type: "PCT" }],
+
+    ["7",     "",           "num",     { type: "DIGIT", payload: "7" }],
+    ["8",     "",           "num",     { type: "DIGIT", payload: "8" }],
+    ["9",     "",           "num",     { type: "DIGIT", payload: "9" }],
+    ["÷",     "",           "op",      { type: "OP", payload: "÷" }],
+    ["BF",    "Bd Feet",    "special", { type: "BF" }],
+
+    ["4",     "",           "num",     { type: "DIGIT", payload: "4" }],
+    ["5",     "",           "num",     { type: "DIGIT", payload: "5" }],
+    ["6",     "",           "num",     { type: "DIGIT", payload: "6" }],
+    ["×",     "",           "op",      { type: "OP", payload: "×" }],
+    ["M→",    "Store→Mem",  "mem",     { type: "M_PLUS" }],
+
+    ["1",     "",           "num",     { type: "DIGIT", payload: "1" }],
+    ["2",     "",           "num",     { type: "DIGIT", payload: "2" }],
+    ["3",     "",           "num",     { type: "DIGIT", payload: "3" }],
+    ["-",     "",           "op",      { type: "OP", payload: "-" }],
+    ["",      "",           "num",     null],
+
+    ["0",     "",           "num",     { type: "DIGIT", payload: "0" }],
+    ["00",    "",           "num",     { type: "DIGIT", payload: "00" }],
+    [".",     "Decimal",    "num",     { type: "DOT" }],
+    ["+",     "",           "op",      { type: "OP", payload: "+" }],
+    ["=",     "",           "op",      { type: "EQUALS" }],
+  ];
+
+  return (
+    <div className="flex-1 px-3 pb-3 overflow-hidden">
+      <div className="grid grid-cols-5 gap-1.5 h-full" style={{ gridTemplateRows: "repeat(9, 1fr)" }}>
+        {keys.map((k, i) => {
+          const [label, sub, theme, action] = k;
+          if (!label && !action) return <div key={i} />;
+          return (
+            <Key key={i} label={label} sub={sub} theme={theme} dispatch={dispatch} action={action} />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function ConstructionCalculator() {
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState("construction"); // "standard" | "construction"
   const [state, dispatch] = useReducer(reducer, INIT);
 
-  const d = (type, payload) => dispatch({ type, payload });
-
-  const displayNum = parseFloat(state.display);
   const isError = state.display === "Error";
-
-  // Build the keypad: [label, sub-label, theme, action, wide?]
-  // 5-column grid
-  const keys = [
-    // Row 0 — top fn
-    ["AC",    "",          "clear",   { type: "ALL_CLEAR" }],
-    ["C",     "Clear",     "clear",   { type: "CLEAR" }],
-    ["⌫",    "Back",      "fn",      { type: "BACKSPACE" }],
-    ["M+",   "Mem+",      "mem",     { type: "M_PLUS" }],
-    ["MR",   "Recall",    "mem",     { type: "M_RCL" }],
-
-    // Row 1 — math fns
-    ["M−",   "Mem−",      "mem",     { type: "M_MINUS" }],
-    ["MC",   "Mem Clr",   "mem",     { type: "M_CLR" }],
-    ["x²",   "Square",    "fn",      { type: "SQ" }],
-    ["√x",   "Sq Root",   "fn",      { type: "SQRT" }],
-    ["1/x",  "Recip",     "fn",      { type: "INV" }],
-
-    // Row 2 — unit conversions
-    ["IN→FT","×0.0833",   "dim",     { type: "UNIT_CONV", payload: { from: 1/12, label: "in" } }],
-    ["FT→IN","×12",       "dim",     { type: "UNIT_CONV", payload: { from: 12, label: "ft→in" } }],
-    ["FT→YD","÷3",        "dim",     { type: "UNIT_CONV", payload: { from: 1/3, label: "ft→yd" } }],
-    ["FT→M", "×0.3048",   "dim",     { type: "UNIT_CONV", payload: { from: 0.3048, label: "ft→m" } }],
-    ["M→FT", "×3.2808",   "dim",     { type: "UNIT_CONV", payload: { from: 3.2808, label: "m→ft" } }],
-
-    // Row 3 — construction
-    ["PITCH","→ Angle",   "special", { type: "PITCH_ANGLE" }],
-    ["DIAG", "A²+B²",     "special", { type: "HYPO" }],
-    ["3-4-5","Sq Up",     "special", { type: "SQUAREUP" }],
-    ["STUDS","16\" OC",   "special", { type: "STUDS" }],
-    ["STUDS","24\" OC",   "special", { type: "STUDS24" }],
-
-    // Row 4 — construction
-    ["RISER","Stair Rise","special", { type: "STAIR_RISE" }],
-    ["CONC", "Cu Yd",     "special", { type: "CONCRETE" }],
-    ["ROOF", "Squares",   "special", { type: "ROOFING" }],
-    ["BLOCK","8×16 CMU",  "special", { type: "BLOCKS" }],
-    ["DRY",  "Drywall",   "special", { type: "DRYWALL" }],
-
-    // Row 5 — format helpers
-    ["FMT\"","In→Ft′In″", "fn",      { type: "FMT_INCH" }],
-    ["FMT′","Ft→Ft′In″",  "fn",      { type: "FMT_FEET" }],
-    ["π",    "3.14159",   "fn",      { type: "PI" }],
-    ["+/-",  "Sign",      "fn",      { type: "SIGN" }],
-    ["%",    "Percent",   "fn",      { type: "PCT" }],
-
-    // Rows 6-9 — numeric + operators
-    ["7",    "",          "num",     { type: "DIGIT", payload: "7" }],
-    ["8",    "",          "num",     { type: "DIGIT", payload: "8" }],
-    ["9",    "",          "num",     { type: "DIGIT", payload: "9" }],
-    ["÷",    "",          "op",      { type: "OP", payload: "÷" }],
-    ["BF",   "Bd Feet",   "special", { type: "BF" }],
-
-    ["4",    "",          "num",     { type: "DIGIT", payload: "4" }],
-    ["5",    "",          "num",     { type: "DIGIT", payload: "5" }],
-    ["6",    "",          "num",     { type: "DIGIT", payload: "6" }],
-    ["×",    "",          "op",      { type: "OP", payload: "×" }],
-    ["M→", "Store→Mem",   "mem",     { type: "M_PLUS" }],
-
-    ["1",    "",          "num",     { type: "DIGIT", payload: "1" }],
-    ["2",    "",          "num",     { type: "DIGIT", payload: "2" }],
-    ["3",    "",          "num",     { type: "DIGIT", payload: "3" }],
-    ["-",    "",          "op",      { type: "OP", payload: "-" }],
-    ["",     "",          "num",     null], // placeholder
-
-    ["0",    "",          "num",     { type: "DIGIT", payload: "0" }],
-    ["00",   "",          "num",     { type: "DIGIT", payload: "00" }],
-    [".",    "Decimal",   "num",     { type: "DOT" }],
-    ["+",    "",          "op",      { type: "OP", payload: "+" }],
-    ["=",    "",          "op",      { type: "EQUALS" }],
-  ];
 
   return (
     <>
@@ -330,8 +380,9 @@ export default function ConstructionCalculator() {
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed inset-0 z-50 flex flex-col"
+            className="fixed z-[60] flex flex-col"
             style={{
+              inset: 0,
               background: "#000",
               paddingTop: "env(safe-area-inset-top)",
               paddingBottom: "env(safe-area-inset-bottom)",
@@ -343,7 +394,21 @@ export default function ConstructionCalculator() {
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 pt-3 pb-2 flex-shrink-0">
-              <span className="text-xs font-bold tracking-widest text-[#ff9f0a] uppercase">Construction Master</span>
+              {/* Mode toggle */}
+              <div className="flex bg-[#2c2c2e] rounded-full p-0.5">
+                <button
+                  onClick={() => setMode("standard")}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${mode === "standard" ? "bg-[#ff9f0a] text-black" : "text-[#d1d1d6]"}`}
+                >
+                  Standard
+                </button>
+                <button
+                  onClick={() => setMode("construction")}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${mode === "construction" ? "bg-[#ff9f0a] text-black" : "text-[#d1d1d6]"}`}
+                >
+                  Construction
+                </button>
+              </div>
               <button
                 onClick={() => setOpen(false)}
                 className="w-8 h-8 rounded-full bg-[#2c2c2e] flex items-center justify-center text-white"
@@ -365,25 +430,10 @@ export default function ConstructionCalculator() {
             </div>
 
             {/* Keypad */}
-            <div className="flex-1 px-3 pb-3 overflow-hidden">
-              <div className="grid grid-cols-5 gap-1.5 h-full"
-                style={{ gridTemplateRows: "repeat(9, 1fr)" }}>
-                {keys.map((k, i) => {
-                  const [label, sub, theme, action] = k;
-                  if (!label && !action) return <div key={i} />;
-                  return (
-                    <Key
-                      key={i}
-                      label={label}
-                      sub={sub}
-                      theme={theme}
-                      dispatch={dispatch}
-                      action={action}
-                    />
-                  );
-                })}
-              </div>
-            </div>
+            {mode === "standard"
+              ? <StandardKeypad state={state} dispatch={dispatch} />
+              : <ConstructionKeypad state={state} dispatch={dispatch} />
+            }
           </motion.div>
         )}
       </AnimatePresence>
