@@ -124,9 +124,9 @@ export default function Dashboard() {
                 const cutoff72h = new Date(Date.now() - 72 * 60 * 60 * 1000);
                 return pfProjectIds.has(ph.project_id) && new Date(ph.created_date) > cutoff72h && !seenPhotoIds.has(ph.id);
               });
-              // Pick a cover photo from the portfolio's projects
+              // Pick a cover photo from the portfolio's projects, fall back to logo
               const coverPhoto = visiblePhotos.find(ph => pfProjectIds.has(ph.project_id) && ph.photo_url);
-              const coverImage = coverPhoto?.photo_url || pfProjects.find(p => p.image)?.image;
+              const coverImage = coverPhoto?.photo_url || pfProjects.find(p => p.image)?.image || pf.logo_url;
               return (
                 <motion.div key={pf.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.25, delay: 0.18 + i * 0.05 }}>
                   <Link
@@ -145,14 +145,9 @@ export default function Dashboard() {
                         <Camera className="w-3.5 h-3.5 text-blue-400 drop-shadow" />
                       </span>
                     )}
-                    <div className="absolute bottom-0 left-0 right-0 p-2.5 flex items-end gap-2">
-                      {pf.logo_url && (
-                        <img src={pf.logo_url} alt="" className="w-8 h-8 rounded-lg bg-white object-contain p-0.5 shrink-0 border border-white/20" onError={e => { e.target.style.display = "none"; }} />
-                      )}
-                      <div className="min-w-0">
-                        <p className="font-semibold text-sm text-white leading-tight truncate">{pf.name}</p>
-                        <p className="text-[11px] text-white/70 mt-0.5">{pfProjects.length} project{pfProjects.length !== 1 ? "s" : ""}</p>
-                      </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                      <p className="font-semibold text-sm text-white leading-tight truncate">{pf.name}</p>
+                      <p className="text-[11px] text-white/70 mt-0.5">{pfProjects.length} project{pfProjects.length !== 1 ? "s" : ""}</p>
                     </div>
                   </Link>
                 </motion.div>
