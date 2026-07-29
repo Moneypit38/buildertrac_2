@@ -17,10 +17,9 @@ import {
 const roleStyles = {
   admin: "bg-primary/15 text-primary border-primary/30",
   team_member: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-  client: "bg-purple-500/15 text-purple-400 border-purple-500/30",
 };
 
-const roleLabels = { admin: "Admin", team_member: "Team Member", client: "Client" };
+const roleLabels = { admin: "Admin", team_member: "Team Member" };
 
 const blank = { user_name: "", user_email: "", role: "team_member" };
 
@@ -170,9 +169,8 @@ export default function ProjectMembersTab({ projectId }) {
                         value={bulkRole}
                         onValueChange={setBulkRole}
                         options={[
-                          { value: "team_member", label: "Team Member — full project access" },
-                          { value: "client", label: "Client — docs & photos only" },
-                          { value: "admin", label: "Admin — manage everything" },
+                          { value: "team_member", label: "Team Member" },
+                          { value: "admin", label: "Admin" },
                         ]}
                       />
                     </div>
@@ -191,9 +189,8 @@ export default function ProjectMembersTab({ projectId }) {
                   value={form.role}
                   onValueChange={v => setForm(f => ({ ...f, role: v }))}
                   options={[
-                    { value: "team_member", label: "Team Member — full project access" },
-                    { value: "client", label: "Client — docs & photos only" },
-                    { value: "admin", label: "Admin — manage everything" },
+                    { value: "team_member", label: "Team Member" },
+                    { value: "admin", label: "Admin" },
                   ]}
                 />
               </div>
@@ -216,7 +213,7 @@ export default function ProjectMembersTab({ projectId }) {
       {members.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-8 text-center">
           <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">No team members yet. Invite your crew or clients.</p>
+          <p className="text-sm text-muted-foreground">No team members yet. Invite your crew.</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -235,7 +232,6 @@ export default function ProjectMembersTab({ projectId }) {
                 options={[
                   { value: "admin", label: "Admin" },
                   { value: "team_member", label: "Team Member" },
-                  { value: "client", label: "Client" },
                 ]}
                 className={`h-8 text-xs w-28 border ${roleStyles[m.role]}`}
               />

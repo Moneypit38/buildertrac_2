@@ -15,8 +15,7 @@
       "type": "string",
       "enum": [
         "admin",
-        "team_member",
-        "client"
+        "team_member"
       ],
       "default": "team_member"
     }

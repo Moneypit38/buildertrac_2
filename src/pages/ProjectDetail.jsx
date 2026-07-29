@@ -11,7 +11,7 @@ import UploadPhotoDialog from "../components/UploadPhotoDialog";
 import CreateProjectDialog from "../components/CreateProjectDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, MapPin, ClipboardList, FileText, Camera, Pencil, DollarSign, Users, MessageSquare, Trash2, CalendarClock } from "lucide-react";
+import { Plus, MapPin, ClipboardList, FileText, Camera, Pencil, DollarSign, Users, MessageSquare, Trash2, CalendarClock } from "lucide-react";
 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
@@ -35,9 +35,6 @@ export default function ProjectDetail() {
   const { data: myMembership = [] } = useQuery({ queryKey: ["membership", projectId], queryFn: () => base44.entities.ProjectMember.filter({ project_id: projectId }), enabled: !!currentUser });
   const myRole = myMembership.find(m => m.user_email === currentUser?.email)?.role;
   const isAdmin = myRole === "admin" || currentUser?.role === "admin";
-  const isTeamMember = myRole === "team_member";
-  const isClient = myRole === "client";
-  const canDelete = !isClient; // clients can upload/download but not delete
 
   const { data: notes = [] } = useQuery({
     queryKey: ["notes", projectId],
@@ -110,7 +107,7 @@ export default function ProjectDetail() {
             </div>
           )}
         </div>
-        {project.budget_total > 0 && !isClient && (
+        {project.budget_total > 0 && (
           <div className="mt-3 pt-3 border-t border-border">
             <div className="flex items-center gap-2 text-sm mb-1.5">
               <DollarSign className="w-4 h-4 text-primary" />
@@ -126,12 +123,12 @@ export default function ProjectDetail() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue={tabParam || (isClient ? "docs" : "tasks")}>
+      <Tabs defaultValue={tabParam || "tasks"}>
         <TabsList className="w-full bg-card border border-border p-0.5 flex">
-          {!isClient && <TabsTrigger value="tasks" className="flex-1 gap-1 text-xs px-1 py-1"><ClipboardList className="w-3 h-3" /><span>Tasks</span></TabsTrigger>}
+          <TabsTrigger value="tasks" className="flex-1 gap-1 text-xs px-1 py-1"><ClipboardList className="w-3 h-3" /><span>Tasks</span></TabsTrigger>
           <TabsTrigger value="docs" className="flex-1 gap-1 text-xs px-1 py-1"><FileText className="w-3 h-3" /><span>Docs</span></TabsTrigger>
           <TabsTrigger value="photos" className="flex-1 gap-1 text-xs px-1 py-1" onClick={() => { markViewed("photos"); window.dispatchEvent(new Event("photos-seen-updated")); }}><Camera className="w-3 h-3" /><span>Photos</span></TabsTrigger>
-          {!isClient && <TabsTrigger value="appointments" className="flex-1 gap-1 text-xs px-1 py-1"><CalendarClock className="w-3 h-3" /><span>Appts</span></TabsTrigger>}
+          <TabsTrigger value="appointments" className="flex-1 gap-1 text-xs px-1 py-1"><CalendarClock className="w-3 h-3" /><span>Appts</span></TabsTrigger>
           {isAdmin && <TabsTrigger value="team" className="flex-1 gap-1 text-xs px-1 py-1"><Users className="w-3 h-3" /><span>Team</span></TabsTrigger>}
           <TabsTrigger value="notes" className="flex-1 gap-1 text-xs px-1 py-1 relative" onClick={markMsgsViewed}>
             <span className="relative">
@@ -142,7 +139,6 @@ export default function ProjectDetail() {
           </TabsTrigger>
         </TabsList>
 
-        {!isClient && (
         <TabsContent value="tasks" className="space-y-4 mt-4">
           <div className="flex gap-2">
             <Button size="sm" onClick={() => { setEditTask(null); setShowTaskDialog(true); }}><Plus className="w-4 h-4 mr-1" /> Add Task</Button>
@@ -161,14 +157,13 @@ export default function ProjectDetail() {
             </div>
           )}
         </TabsContent>
-        )}
 
         <TabsContent value="docs" className="space-y-3 mt-4">
           <Button size="sm" onClick={() => { setEditDoc(null); setShowDocDialog(true); }}><Plus className="w-4 h-4 mr-1" /> Upload Document</Button>
           {docs.length === 0 ? (
             <div className="bg-card border border-border rounded-xl p-8 text-center"><FileText className="w-8 h-8 text-muted-foreground mx-auto mb-2" /><p className="text-sm text-muted-foreground">No documents yet. Upload your first blueprint.</p></div>
           ) : (
-            <div className="space-y-2">{docs.map(d => <DocumentCard key={d.id} doc={d} canDelete={canDelete} />)}</div>
+            <div className="space-y-2">{docs.map(d => <DocumentCard key={d.id} doc={d} canDelete={true} />)}</div>
           )}
         </TabsContent>
 
@@ -177,15 +172,13 @@ export default function ProjectDetail() {
           {photos.length === 0 ? (
             <div className="bg-card border border-border rounded-xl p-8 text-center"><Camera className="w-8 h-8 text-muted-foreground mx-auto mb-2" /><p className="text-sm text-muted-foreground">No site photos yet. Capture the progress.</p></div>
           ) : (
-            <PhotoGrid photos={photos} canDelete={canDelete} />
+            <PhotoGrid photos={photos} canDelete={true} />
           )}
         </TabsContent>
 
-        {!isClient && (
         <TabsContent value="appointments" className="mt-4">
-          <AppointmentsTab projectId={projectId} canDelete={canDelete} highlightApptId={apptParam} />
+          <AppointmentsTab projectId={projectId} canDelete={true} highlightApptId={apptParam} />
         </TabsContent>
-        )}
 
         {isAdmin && (
         <TabsContent value="team" className="mt-4">
