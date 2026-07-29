@@ -9,7 +9,7 @@ import { markViewed, getLastViewed } from "../hooks/useLastViewed";
 import { ViewedContext, isNewItem, getSeenPhotoIds } from "../lib/viewedContext";
 import SubscriptionGate from "./SubscriptionGate";
 import SettingsSheet from "./SettingsSheet";
-import ConstructionCalculator from "./ConstructionCalculator";
+
 
 // Tab page components — rendered persistently to preserve state
 import Dashboard from "../pages/Dashboard";
@@ -162,8 +162,6 @@ export default function Layout() {
           )}
         </SubscriptionGate>
       </main>
-
-      <ConstructionCalculator />
 
       {/* Bottom nav with safe-area bottom inset */}
       <nav
