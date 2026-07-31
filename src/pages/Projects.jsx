@@ -8,6 +8,7 @@ import CreateProjectDialog from "../components/CreateProjectDialog";
 import AssignPortfolioDialog from "../components/AssignPortfolioDialog";
 import { Button } from "@/components/ui/button";
 import { Plus, FolderKanban, Layers } from "lucide-react";
+import TeamMemberGate from "@/components/TeamMemberGate";
 
 
 export default function Projects() {
@@ -41,7 +42,9 @@ export default function Projects() {
       )}
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold font-display">Projects</h1>
-        {!isClientOnly && <Button size="sm" onClick={() => setShowCreate(true)}><Plus className="w-4 h-4 mr-1" /> New Project</Button>}
+        <TeamMemberGate action="create new projects">
+          <Button size="sm" onClick={() => setShowCreate(true)}><Plus className="w-4 h-4 mr-1" /> New Project</Button>
+        </TeamMemberGate>
       </div>
 
       {portfolios.length > 1 && (

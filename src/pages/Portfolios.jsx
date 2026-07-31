@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Layers, FolderKanban, Trash2, Pencil, UserPlus, Users, MoveRight, Sparkles, ImageIcon, Upload } from "lucide-react";
+import TeamMemberGate from "@/components/TeamMemberGate";
 import PortfolioIcon, { PORTFOLIO_ICONS, PORTFOLIO_COLORS, getColor, getIconComponent } from "../components/PortfolioIcon";
 import { useClientAccess } from "../hooks/useClientAccess";
 import { Link, useLocation } from "react-router-dom";
@@ -259,11 +260,11 @@ export default function Portfolios() {
           <p className="text-xs text-muted-foreground font-medium">Your Work /</p>
           <h1 className="text-2xl font-extrabold font-display">Portfolios</h1>
         </div>
-        {!isClientOnly && (
+        <TeamMemberGate action="create new portfolios">
           <Button size="sm" onClick={() => setShowCreate(true)}>
             <Plus className="w-4 h-4 mr-1" /> New
           </Button>
-        )}
+        </TeamMemberGate>
       </div>
 
       {portfolios.length === 0 && unassigned.length === 0 ? (

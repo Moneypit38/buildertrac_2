@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Mail, Lock, Loader2 } from "lucide-react";
+import { UserPlus, Mail, Lock, Loader2, HardHat } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import AuthLayout from "@/components/AuthLayout";
 import { toast } from "@/components/ui/use-toast";
@@ -44,7 +44,8 @@ export default function Register() {
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
       }
-      window.location.href = "/";
+      // Team members (role="user") land on Projects so they see their work immediately
+      window.location.href = "/projects";
     } catch (err) {
       setError(err.message || "Invalid verification code");
     } finally {
@@ -123,7 +124,15 @@ export default function Register() {
     <AuthLayout
       icon={UserPlus}
       title="Create your account"
-      subtitle="Sign up to get started"
+      subtitle={
+        <span>
+          You've been invited to{" "}
+          <span className="font-bold text-foreground">
+            Builder<span style={{ color: "#F5A623" }}>T</span>rac
+          </span>
+          {" "}— sign up to view your project.
+        </span>
+      }
       footer={
         <>
           Already have an account?{" "}
