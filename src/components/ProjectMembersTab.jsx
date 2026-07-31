@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -23,9 +23,16 @@ const roleLabels = { admin: "Admin", team_member: "Team Member" };
 
 const blank = { user_name: "", user_email: "", role: "team_member" };
 
-export default function ProjectMembersTab({ projectId }) {
+export default function ProjectMembersTab({ projectId, autoOpenInvite, onInviteOpened }) {
   const qc = useQueryClient();
   const [inviting, setInviting] = useState(false);
+
+  useEffect(() => {
+    if (autoOpenInvite) {
+      setInviting(true);
+      onInviteOpened?.();
+    }
+  }, [autoOpenInvite]);
   const [mode, setMode] = useState("contact"); // "contact" | "manual"
   const [form, setForm] = useState(blank);
   const [selectedContactIds, setSelectedContactIds] = useState([]);

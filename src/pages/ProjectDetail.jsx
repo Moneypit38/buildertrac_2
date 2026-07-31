@@ -11,7 +11,7 @@ import UploadPhotoDialog from "../components/UploadPhotoDialog";
 import CreateProjectDialog from "../components/CreateProjectDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, MapPin, ClipboardList, FileText, Camera, Pencil, DollarSign, Users, MessageSquare, Trash2, CalendarClock } from "lucide-react";
+import { Plus, MapPin, ClipboardList, FileText, Camera, Pencil, DollarSign, Users, MessageSquare, Trash2, CalendarClock, UserPlus } from "lucide-react";
 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
@@ -57,6 +57,8 @@ export default function ProjectDetail() {
   const [showPhotoDialog, setShowPhotoDialog] = useState(false);
   const [editPhoto, setEditPhoto] = useState(null);
   const [showEditProject, setShowEditProject] = useState(false);
+  const [activeTab, setActiveTab] = useState(tabParam || "tasks");
+  const [openInvite, setOpenInvite] = useState(false);
   const [expandedTasks, setExpandedTasks] = useState({});
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -88,10 +90,7 @@ export default function ProjectDetail() {
           </div>
           <div className="flex items-center gap-1">
             {isAdmin && <Button variant="ghost" size="icon" onClick={() => setShowEditProject(true)}><Pencil className="w-4 h-4" /></Button>}
-            <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => {
-              const tabsTrigger = document.querySelector('[value="team"]');
-              if (tabsTrigger) tabsTrigger.click();
-            }}><Users className="w-3.5 h-3.5" /> Team</Button>
+            {isAdmin && <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => { setActiveTab("team"); setOpenInvite(true); }}><UserPlus className="w-3.5 h-3.5" /> Invite</Button>}
             {isAdmin && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -127,7 +126,7 @@ export default function ProjectDetail() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue={tabParam || "tasks"}>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full bg-card border border-border p-0.5 flex">
           <TabsTrigger value="tasks" className="flex-1 gap-1 text-xs px-1 py-1"><ClipboardList className="w-3 h-3" /><span>Tasks</span></TabsTrigger>
           <TabsTrigger value="docs" className="flex-1 gap-1 text-xs px-1 py-1"><FileText className="w-3 h-3" /><span>Docs</span></TabsTrigger>
@@ -185,7 +184,7 @@ export default function ProjectDetail() {
         </TabsContent>
 
         <TabsContent value="team" className="mt-4">
-          <ProjectMembersTab projectId={projectId} />
+          <ProjectMembersTab projectId={projectId} autoOpenInvite={openInvite} onInviteOpened={() => setOpenInvite(false)} />
         </TabsContent>
 
         <TabsContent value="notes" className="mt-4">
