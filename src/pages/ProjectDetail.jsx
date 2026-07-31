@@ -86,9 +86,13 @@ export default function ProjectDetail() {
             {project.address && <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1"><MapPin className="w-3.5 h-3.5" /> {project.address}</p>}
             {project.portfolio && <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">{project.portfolio}</p>}
           </div>
-          {isAdmin && (
-            <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" onClick={() => setShowEditProject(true)}><Pencil className="w-4 h-4" /></Button>
+          <div className="flex items-center gap-1">
+            {isAdmin && <Button variant="ghost" size="icon" onClick={() => setShowEditProject(true)}><Pencil className="w-4 h-4" /></Button>}
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => {
+              const tabsTrigger = document.querySelector('[value="team"]');
+              if (tabsTrigger) tabsTrigger.click();
+            }}><Users className="w-3.5 h-3.5" /> Team</Button>
+            {isAdmin && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>
@@ -104,8 +108,8 @@ export default function ProjectDetail() {
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-            </div>
-          )}
+            )}
+          </div>
         </div>
         {project.budget_total > 0 && (
           <div className="mt-3 pt-3 border-t border-border">
@@ -129,7 +133,7 @@ export default function ProjectDetail() {
           <TabsTrigger value="docs" className="flex-1 gap-1 text-xs px-1 py-1"><FileText className="w-3 h-3" /><span>Docs</span></TabsTrigger>
           <TabsTrigger value="photos" className="flex-1 gap-1 text-xs px-1 py-1" onClick={() => { markViewed("photos"); window.dispatchEvent(new Event("photos-seen-updated")); }}><Camera className="w-3 h-3" /><span>Photos</span></TabsTrigger>
           <TabsTrigger value="appointments" className="flex-1 gap-1 text-xs px-1 py-1"><CalendarClock className="w-3 h-3" /><span>Appts</span></TabsTrigger>
-          {isAdmin && <TabsTrigger value="team" className="flex-1 gap-1 text-xs px-1 py-1"><Users className="w-3 h-3" /><span>Team</span></TabsTrigger>}
+          <TabsTrigger value="team" className="flex-1 gap-1 text-xs px-1 py-1"><Users className="w-3 h-3" /><span>Team</span></TabsTrigger>
           <TabsTrigger value="notes" className="flex-1 gap-1 text-xs px-1 py-1 relative" onClick={markMsgsViewed}>
             <span className="relative">
               <MessageSquare className="w-3 h-3" />
@@ -180,11 +184,9 @@ export default function ProjectDetail() {
           <AppointmentsTab projectId={projectId} canDelete={true} highlightApptId={apptParam} />
         </TabsContent>
 
-        {isAdmin && (
         <TabsContent value="team" className="mt-4">
           <ProjectMembersTab projectId={projectId} />
         </TabsContent>
-        )}
 
         <TabsContent value="notes" className="mt-4">
           <NotesTab projectId={projectId} />
