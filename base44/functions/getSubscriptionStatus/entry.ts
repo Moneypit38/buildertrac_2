@@ -18,17 +18,16 @@ Deno.serve(async (req) => {
 
     const customerId = customers.data[0].id;
 
-    // Check for a completed one-time payment for this product
-    const sessions = await stripe.checkout.sessions.list({
+    // Check for an active subscription
+    const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
-      limit: 10,
+      status: 'active',
+      limit: 5,
     });
 
-    const hasPaid = sessions.data.some(
-      (s) => s.payment_status === 'paid' && s.mode === 'payment'
-    );
+    const hasActiveSub = subscriptions.data.length > 0;
 
-    return Response.json({ isActive: hasPaid });
+    return Response.json({ isActive: hasActiveSub });
   } catch (error) {
     console.error('Payment status error:', error);
     return Response.json({ error: error.message }, { status: 500 });
