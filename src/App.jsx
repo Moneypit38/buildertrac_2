@@ -12,6 +12,7 @@ import { Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import useTaskReminders from './hooks/useTaskReminders';
 import ProjectDetail from './pages/ProjectDetail';
+import PortfolioDetail from './pages/PortfolioDetail';
 import AppStoreMockups from './pages/AppStoreMockups';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import DeleteAccount from './pages/DeleteAccount';
@@ -56,6 +57,7 @@ const AuthenticatedApp = () => {
           <Route path="/documents" element={<></>} />
           <Route path="/photos" element={<></>} />
           <Route path="/project/:projectId" element={<ProjectDetail />} />
+          <Route path="/portfolio/:portfolioId" element={<PortfolioDetail />} />
           <Route path="/app-store-mockups" element={<AppStoreMockups />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         </Route>

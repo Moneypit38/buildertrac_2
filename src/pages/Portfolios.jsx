@@ -10,7 +10,7 @@ import { Plus, Layers, FolderKanban, Trash2, Pencil, UserPlus, Users, MoveRight,
 import TeamMemberGate from "@/components/TeamMemberGate";
 import PortfolioIcon, { PORTFOLIO_ICONS, PORTFOLIO_COLORS, getColor, getIconComponent } from "../components/PortfolioIcon";
 import { useClientAccess } from "../hooks/useClientAccess";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -186,9 +186,9 @@ export default function Portfolios() {
   const { isClientOnly, allowedProjectIds } = useClientAccess();
   const qc = useQueryClient();
   const location = useLocation();
+  const navigate = useNavigate();
   const portfolioRefs = useRef({});
   const [highlightedId, setHighlightedId] = useState(null);
-  const [expandedPortfolio, setExpandedPortfolio] = useState(null);
 
   useEffect(() => {
     const openId = location.state?.openPortfolioId;
@@ -283,15 +283,14 @@ export default function Portfolios() {
               const completion = getCompletion(pfProjects);
               const statuses = getStatuses(pfProjects);
               const colorDef = getColor(pf.color);
-              const isExpanded = expandedPortfolio === pf.id;
-              return (
-                <div key={pf.id} ref={el => portfolioRefs.current[pf.id] = el}
-                  className={`bg-card border rounded-xl overflow-hidden transition-all duration-500 ${highlightedId === pf.id ? "border-primary ring-2 ring-primary/40" : "border-border"}`}>
-                  {/* Card tap → expand/collapse detail */}
-                  <button
-                    className="w-full text-left p-3 space-y-2"
-                    onClick={() => setExpandedPortfolio(isExpanded ? null : pf.id)}
-                  >
+               return (
+                 <div key={pf.id} ref={el => portfolioRefs.current[pf.id] = el}
+                   className={`bg-card border rounded-xl overflow-hidden transition-all duration-300 hover:border-primary/40 ${highlightedId === pf.id ? "border-primary ring-2 ring-primary/40" : "border-border"}`}>
+                   {/* Card tap → open portfolio detail page */}
+                   <button
+                     className="w-full text-left p-3 space-y-2"
+                     onClick={() => navigate(`/portfolio/${pf.id}`)}
+                   >
                     {/* Icon + actions row */}
                     <div className="flex items-start justify-between">
                       <PortfolioIcon icon={pf.icon} color={pf.color} size="sm" logoUrl={pf.logo_url} />
@@ -356,42 +355,6 @@ export default function Portfolios() {
                     )}
                   </button>
 
-                  {/* Expanded: project list + actions */}
-                  {isExpanded && (
-                    <div className="border-t border-border bg-background/50 p-2 space-y-1.5">
-                      {/* Team/invite actions */}
-                      {!isClientOnly && (
-                        <div className="flex gap-1.5 pb-1.5 border-b border-border/60">
-                          <button onClick={() => setInvitePortfolio({ name: pf.name, projects: pfProjects })}
-                            className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary transition-colors px-2 py-1 rounded hover:bg-accent">
-                            <UserPlus className="w-3 h-3" /> Invite
-                          </button>
-                          <button onClick={() => setTeamPortfolio(pf)}
-                            className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary transition-colors px-2 py-1 rounded hover:bg-accent">
-                            <Users className="w-3 h-3" /> Team
-                          </button>
-                        </div>
-                      )}
-                      {pfProjects.length === 0 ? (
-                        <p className="text-[11px] text-muted-foreground text-center py-2">No projects yet.</p>
-                      ) : (
-                        pfProjects.map(p => (
-                          <Link key={p.id} to={`/project/${p.id}`}
-                            className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-accent transition-colors text-xs">
-                            <FolderKanban className="w-3 h-3 text-primary shrink-0" />
-                            <span className="font-medium flex-1 truncate">{p.name}</span>
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ${statusBadgeStyle(p.status)}`}>{p.status}</span>
-                          </Link>
-                        ))
-                      )}
-                      {!isClientOnly && (
-                        <button onClick={() => setAddProjectToPortfolio(pf.name)}
-                          className="w-full flex items-center justify-center gap-1 py-1.5 text-[11px] text-muted-foreground hover:text-primary border border-dashed border-border hover:border-primary/40 rounded-lg transition-colors mt-1">
-                          <Plus className="w-3 h-3" /> Add Project
-                        </button>
-                      )}
-                    </div>
-                  )}
                 </div>
               );
             })}
