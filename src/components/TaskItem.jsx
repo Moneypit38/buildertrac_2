@@ -97,8 +97,21 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
             position: "relative",
           }}
         >
-          {/* Pop burst animation */}
+          {/* Soft ripple on completion */}
           <AnimatePresence>
+            {burst && (
+              <motion.span
+                key="ripple"
+                initial={{ opacity: 0.5, scale: 0.6 }}
+                animate={{ opacity: 0, scale: 2.2 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.7, ease: "easeOut" }}
+                style={{
+                  position: "absolute", width: 40, height: 40, borderRadius: "50%",
+                  border: "2px solid #f59e0b", pointerEvents: "none",
+                }}
+              />
+            )}
             {burst && PARTICLES.map(p => {
               const rad = (p.angle * Math.PI) / 180;
               const tx = Math.cos(rad) * p.distance;
@@ -106,14 +119,14 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
               return (
                 <motion.span
                   key={p.id}
-                  initial={{ opacity: 1, x: 0, y: 0, scale: 1 }}
-                  animate={{ opacity: 0, x: tx, y: ty, scale: 0 }}
+                  initial={{ opacity: 1, x: 0, y: 0, scale: 1, rotate: 0 }}
+                  animate={{ opacity: 0, x: tx, y: ty, scale: 0.3, rotate: 90 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.55, ease: "easeOut" }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
                   style={{
-                    position: "absolute", width: 7, height: 7,
-                    borderRadius: p.id % 2 === 0 ? "50%" : "2px",
-                    backgroundColor: p.id % 3 === 0 ? "#f5a623" : p.id % 3 === 1 ? "#fbbf24" : "#fde68a",
+                    position: "absolute", width: 6, height: 6, borderRadius: "50%",
+                    backgroundColor: p.id % 2 === 0 ? "#fbbf24" : "#f59e0b",
+                    boxShadow: "0 0 6px rgba(251, 191, 36, 0.6)",
                     pointerEvents: "none",
                   }}
                 />
@@ -122,23 +135,36 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
           </AnimatePresence>
 
           <motion.div
-            animate={burst ? { scale: [1, 1.4, 1] } : {}}
-            transition={{ duration: 0.3 }}
+            animate={burst ? { scale: [1, 1.25, 1] } : { scale: 1 }}
+            transition={burst ? { duration: 0.35 } : { type: "spring", stiffness: 400, damping: 22 }}
             style={{
-              width: 32, height: 32, borderRadius: "50%",
-              border: `2.5px solid ${task.completed ? "hsl(var(--primary-foreground))" : isOverdue ? "#fb923c" : "hsl(var(--muted-foreground) / 0.4)"}`,
+              width: 30, height: 30, borderRadius: "50%",
+              border: `2px solid ${task.completed ? "transparent" : isOverdue ? "#fb923c" : "hsl(var(--muted-foreground) / 0.35)"}`,
               display: "flex", alignItems: "center", justifyContent: "center",
-              backgroundColor: task.completed ? "#f5a623" : "transparent",
+              background: task.completed
+                ? "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)"
+                : "transparent",
+              boxShadow: task.completed ? "0 2px 8px rgba(245, 158, 11, 0.35)" : "none",
             }}
           >
             {task.completed && (
-              <motion.span
-                initial={burst ? { scale: 0 } : { scale: 1 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 500, damping: 20 }}
+              <motion.svg
+                width="16" height="16" viewBox="0 0 16 16" fill="none"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.05 }}
               >
-                <Check size={17} color="#fff" strokeWidth={3} />
-              </motion.span>
+                <motion.path
+                  d="M3.5 8.5L6.5 11.5L12.5 4.5"
+                  stroke="#fff"
+                  strokeWidth="2.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                />
+              </motion.svg>
             )}
           </motion.div>
         </div>
