@@ -12,6 +12,7 @@ export default function Photos() {
   // No-op: marking viewed is handled by Layout when the Photos tab becomes active
   const { refreshing, touchHandlers } = usePullToRefresh(() => qc.invalidateQueries());
   const { data: photos = [], isLoading } = useQuery({ queryKey: ["photos"], queryFn: () => base44.entities.SitePhoto.list() });
+  const { data: projects = [] } = useQuery({ queryKey: ["projects"], queryFn: () => base44.entities.Project.list() });
   const { allowedProjectIds } = useClientAccess();
   const visiblePhotos = allowedProjectIds ? photos.filter(p => allowedProjectIds.includes(p.project_id)) : photos;
 
@@ -30,7 +31,7 @@ export default function Photos() {
           <p className="text-muted-foreground">No site photos yet. Open a project to start capturing progress.</p>
         </div>
       ) : (
-        <PhotoGrid photos={visiblePhotos} />
+        <PhotoGrid photos={visiblePhotos} projects={projects} />
       )}
     </div>
   );

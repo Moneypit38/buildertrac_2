@@ -175,7 +175,7 @@ export default function ProjectDetail() {
           {photos.length === 0 ? (
             <div className="bg-card border border-border rounded-xl p-8 text-center"><Camera className="w-8 h-8 text-muted-foreground mx-auto mb-2" /><p className="text-sm text-muted-foreground">No site photos yet. Capture the progress.</p></div>
           ) : (
-            <PhotoGrid photos={photos} canDelete={true} />
+            <PhotoGrid photos={photos} canDelete={true} projects={project ? [project] : []} />
           )}
         </TabsContent>
 

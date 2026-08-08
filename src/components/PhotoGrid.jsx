@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2, User, CalendarDays, X } from "lucide-react";
+import { Trash2, User, CalendarDays, X, FolderKanban } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
@@ -55,7 +55,7 @@ function PhotoThumbnail({ photo, canDelete, onSelect }) {
   );
 }
 
-function PhotoExpanded({ photo, onClose, canDelete }) {
+function PhotoExpanded({ photo, onClose, canDelete, projectName }) {
   const qc = useQueryClient();
   const remove = useMutation({
     mutationFn: () => base44.entities.SitePhoto.delete(photo.id),
@@ -65,7 +65,7 @@ function PhotoExpanded({ photo, onClose, canDelete }) {
   return (
     <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={onClose}>
       <div
-        className="bg-card border border-border rounded-xl overflow-hidden max-w-lg w-full max-h-[90vh] flex flex-col"
+        className="bg-card border border-border rounded-3xl overflow-hidden max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
         <div className="relative">
@@ -80,6 +80,11 @@ function PhotoExpanded({ photo, onClose, canDelete }) {
         </div>
         <div className="p-4 space-y-2 overflow-y-auto">
           <h3 className="font-semibold text-base">{photo.title}</h3>
+          {projectName && (
+            <div className="flex items-center gap-1.5 text-xs text-primary font-medium">
+              <FolderKanban className="w-3 h-3" /> {projectName}
+            </div>
+          )}
           {photo.description && <p className="text-sm text-muted-foreground">{photo.description}</p>}
           <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
             <span className="flex items-center gap-1"><User className="w-3 h-3" /> {photo.created_by || "—"}</span>
@@ -110,13 +115,15 @@ function PhotoExpanded({ photo, onClose, canDelete }) {
   );
 }
 
-export default function PhotoGrid({ photos = [], canDelete = true }) {
+export default function PhotoGrid({ photos = [], canDelete = true, projects = [] }) {
   const [selected, setSelected] = useState(null);
 
   const handleSelect = (photo) => {
     markPhotoSeen(photo.id);
     setSelected(photo);
   };
+
+  const projectNameFor = (photo) => projects.find(p => p.id === photo.project_id)?.name;
 
   return (
     <>
@@ -125,7 +132,7 @@ export default function PhotoGrid({ photos = [], canDelete = true }) {
           <PhotoThumbnail key={p.id} photo={p} canDelete={canDelete} onSelect={handleSelect} />
         ))}
       </div>
-      {selected && <PhotoExpanded photo={selected} onClose={() => setSelected(null)} canDelete={canDelete} />}
+      {selected && <PhotoExpanded photo={selected} onClose={() => setSelected(null)} canDelete={canDelete} projectName={projectNameFor(selected)} />}
     </>
   );
 }
