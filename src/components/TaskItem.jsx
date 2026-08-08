@@ -93,7 +93,7 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: task.completed ? "hsl(var(--primary))" : "transparent",
+            backgroundColor: task.completed ? "hsl(var(--secondary))" : "transparent",
             position: "relative",
           }}
         >
