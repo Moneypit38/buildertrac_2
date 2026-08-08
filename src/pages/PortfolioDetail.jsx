@@ -76,7 +76,6 @@ export default function PortfolioDetail() {
   const { data: projects = [] } = useQuery({ queryKey: ["projects"], queryFn: () => base44.entities.Project.list() });
   const { data: photos = [] } = useQuery({ queryKey: ["photos"], queryFn: () => base44.entities.SitePhoto.list() });
 
-  const [showDirections, setShowDirections] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [addProject, setAddProject] = useState(false);
@@ -165,7 +164,7 @@ export default function PortfolioDetail() {
           {(portfolio.contact_name || portfolio.contact_email || portfolio.contact_phone || portfolio.business_address) && (
             <div className="border-t border-border pt-3 space-y-1.5 text-xs text-muted-foreground">
               {portfolio.contact_name && <div className="flex items-center gap-2"><span className="font-medium text-foreground">{portfolio.contact_name}</span></div>}
-              {portfolio.business_address && <button onClick={() => setShowDirections(true)} className="flex items-center gap-2 hover:text-primary transition-colors text-left w-full"><MapPin className="w-3 h-3 shrink-0" /><span>{portfolio.business_address}</span></button>}
+              {portfolio.business_address && <a href={`maps://?daddr=${encodeURIComponent(portfolio.business_address)}`} className="flex items-center gap-2 hover:text-primary transition-colors text-left w-full"><MapPin className="w-3 h-3 shrink-0" /><span>{portfolio.business_address}</span></a>}
               {portfolio.contact_email && <a href={`mailto:${portfolio.contact_email}`} className="flex items-center gap-2 hover:text-primary"><Mail className="w-3 h-3 shrink-0" />{portfolio.contact_email}</a>}
               {portfolio.contact_phone && <a href={`tel:${portfolio.contact_phone.replace(/[^0-9+]/g, "")}`} className="flex items-center gap-2 hover:text-primary transition-colors"><Phone className="w-3 h-3 shrink-0" /><span>{portfolio.contact_phone}</span></a>}
             </div>
@@ -227,18 +226,7 @@ export default function PortfolioDetail() {
 
       {/* Dialogs */}
       {showEdit && <PortfolioFormDialog open={showEdit} onClose={() => setShowEdit(false)} portfolio={portfolio} />}
-      <AlertDialog open={showDirections} onOpenChange={setShowDirections}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Get directions?</AlertDialogTitle>
-            <AlertDialogDescription>{portfolio.business_address}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { window.location.href = `https://maps.apple.com/?daddr=${encodeURIComponent(portfolio.business_address)}`; }}>Get Directions</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      
       <AlertDialog open={showDelete} onOpenChange={setShowDelete}>
         <AlertDialogContent>
           <AlertDialogHeader>
