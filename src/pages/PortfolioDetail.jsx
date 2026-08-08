@@ -235,7 +235,7 @@ export default function PortfolioDetail() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { window.location.href = `https://maps.google.com/maps?daddr=${encodeURIComponent(portfolio.business_address)}`; }}>Get Directions</AlertDialogAction>
+            <AlertDialogAction onClick={() => { window.location.href = `maps://?daddr=${encodeURIComponent(portfolio.business_address)}`; }}>Get Directions</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
