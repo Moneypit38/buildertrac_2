@@ -164,9 +164,9 @@ export default function PortfolioDetail() {
           {(portfolio.contact_name || portfolio.contact_email || portfolio.contact_phone || portfolio.business_address) && (
             <div className="border-t border-border pt-3 space-y-1.5 text-xs text-muted-foreground">
               {portfolio.contact_name && <div className="flex items-center gap-2"><span className="font-medium text-foreground">{portfolio.contact_name}</span></div>}
-              {portfolio.business_address && <div className="flex items-center gap-2"><MapPin className="w-3 h-3 shrink-0" /><span>{portfolio.business_address}</span></div>}
-              {portfolio.contact_email && <div className="flex items-center gap-2"><Mail className="w-3 h-3 shrink-0" /><a href={`mailto:${portfolio.contact_email}`} className="hover:text-primary">{portfolio.contact_email}</a></div>}
-              {portfolio.contact_phone && <div className="flex items-center gap-2"><Phone className="w-3 h-3 shrink-0" /><span>{portfolio.contact_phone}</span></div>}
+              {portfolio.business_address && <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(portfolio.business_address)}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-primary transition-colors"><MapPin className="w-3 h-3 shrink-0" /><span>{portfolio.business_address}</span></a>}
+              {portfolio.contact_email && <a href={`mailto:${portfolio.contact_email}`} className="flex items-center gap-2 hover:text-primary"><Mail className="w-3 h-3 shrink-0" />{portfolio.contact_email}</a>}
+              {portfolio.contact_phone && <a href={`tel:${portfolio.contact_phone.replace(/[^0-9+]/g, "")}`} className="flex items-center gap-2 hover:text-primary transition-colors"><Phone className="w-3 h-3 shrink-0" /><span>{portfolio.contact_phone}</span></a>}
             </div>
           )}
 
