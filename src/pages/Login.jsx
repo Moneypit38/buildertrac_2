@@ -17,7 +17,7 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      await base44.auth.loginViaEmailPassword(email, password);
+      await base44.auth.loginViaEmailPassword(email.trim(), password);
       window.location.href = "/";
     } catch (err) {
       setError(err.message || "Invalid email or password");
@@ -55,6 +55,9 @@ export default function Login() {
               id="email"
               type="email"
               autoComplete="email"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck="false"
               autoFocus
               placeholder="you@example.com"
               value={email}
