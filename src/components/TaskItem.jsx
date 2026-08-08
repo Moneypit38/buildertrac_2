@@ -93,7 +93,7 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: task.completed ? "hsl(var(--secondary))" : "transparent",
+            backgroundColor: "transparent",
             position: "relative",
           }}
         >
@@ -141,10 +141,8 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
               width: 30, height: 30, borderRadius: "50%",
               border: `2px solid ${task.completed ? "transparent" : isOverdue ? "#fb923c" : "hsl(var(--muted-foreground) / 0.35)"}`,
               display: "flex", alignItems: "center", justifyContent: "center",
-              background: task.completed
-                ? "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)"
-                : "transparent",
-              boxShadow: task.completed ? "0 2px 8px rgba(245, 158, 11, 0.35)" : "none",
+              background: task.completed ? "#1a1a1a" : "transparent",
+              boxShadow: task.completed ? "0 2px 6px rgba(0, 0, 0, 0.3)" : "none",
             }}
           >
             {task.completed && (
