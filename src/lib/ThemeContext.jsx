@@ -137,6 +137,15 @@ export const COLOR_THEMES = [
     preview: ["#b3590f", "#92400e", "#ca8a04", "#65734e"],
     statColors: ["#b3590f", "#92400e", "#ca8a04", "#65734e"],
   },
+  {
+    id: "halloween",
+    name: "Halloween",
+    description: "Orange & purple",
+    holiday: true,
+    accent: { h: 285, s: 60, l: 52 },
+    preview: ["#f97316", "#7c3aed", "#1c1917", "#d4af37"],
+    statColors: ["#f97316", "#7c3aed", "#1c1917", "#d4af37"],
+  },
 ];
 
 const ThemeColorContext = createContext(null);
