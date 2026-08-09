@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Trash2, User, CalendarDays, X, FolderKanban } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -55,7 +56,7 @@ function PhotoThumbnail({ photo, canDelete, onSelect }) {
   );
 }
 
-function PhotoExpanded({ photo, onClose, canDelete, projectName }) {
+export function PhotoExpanded({ photo, onClose, canDelete, projectName }) {
   const qc = useQueryClient();
   const remove = useMutation({
     mutationFn: () => base44.entities.SitePhoto.delete(photo.id),
@@ -80,7 +81,13 @@ function PhotoExpanded({ photo, onClose, canDelete, projectName }) {
         </div>
         <div className="p-4 space-y-2 overflow-y-auto">
           <h3 className="font-semibold text-base">{photo.title}</h3>
-          {projectName && (
+          {projectName && photo.project_id && (
+            <Link to={`/project/${photo.project_id}`} onClick={onClose}
+              className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline w-fit">
+              <FolderKanban className="w-3 h-3" /> {projectName}
+            </Link>
+          )}
+          {projectName && !photo.project_id && (
             <div className="flex items-center gap-1.5 text-xs text-primary font-medium">
               <FolderKanban className="w-3 h-3" /> {projectName}
             </div>

@@ -21,6 +21,7 @@ import NotesTab from "../components/NotesTab";
 import SubtaskList from "../components/SubtaskList";
 import AITaskGenerator from "../components/AITaskGenerator";
 import AppointmentsTab from "../components/AppointmentsTab";
+import ProjectPhotoStrip from "../components/ProjectPhotoStrip";
 
 export default function ProjectDetail() {
   const { projectId } = useParams();
@@ -123,6 +124,7 @@ export default function ProjectDetail() {
             </div>
           </div>
         )}
+        <ProjectPhotoStrip photos={photos} projectName={project.name} />
       </div>
 
       {/* Tabs */}
