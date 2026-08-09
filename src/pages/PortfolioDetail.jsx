@@ -3,8 +3,9 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { FolderKanban, Plus, Pencil, Trash2, UserPlus, Users, MapPin, Mail, Phone, Layers } from "lucide-react";
+import { FolderKanban, Plus, Pencil, Trash2, UserPlus, Users, Layers } from "lucide-react";
 import PortfolioIcon, { getColor } from "@/components/PortfolioIcon";
+import ContactInfoCard from "@/components/ContactInfoCard";
 import TeamMemberGate from "@/components/TeamMemberGate";
 import { useClientAccess } from "@/hooks/useClientAccess";
 import { toast } from "sonner";
@@ -161,14 +162,7 @@ export default function PortfolioDetail() {
           )}
 
           {/* Contact info */}
-          {(portfolio.contact_name || portfolio.contact_email || portfolio.contact_phone || portfolio.business_address) && (
-            <div className="border-t border-border pt-3 space-y-1.5 text-xs text-muted-foreground">
-              {portfolio.contact_name && <div className="flex items-center gap-2"><span className="font-medium text-foreground">{portfolio.contact_name}</span></div>}
-              {portfolio.business_address && <a href={`https://maps.apple.com/?daddr=${encodeURIComponent(portfolio.business_address)}`} className="flex items-center gap-2 hover:text-primary transition-colors text-left w-full"><MapPin className="w-3 h-3 shrink-0" /><span>{portfolio.business_address}</span></a>}
-              {portfolio.contact_email && <a href={`mailto:${portfolio.contact_email}`} className="flex items-center gap-2 hover:text-primary"><Mail className="w-3 h-3 shrink-0" />{portfolio.contact_email}</a>}
-              {portfolio.contact_phone && <a href={`tel:${portfolio.contact_phone.replace(/[^0-9+]/g, "")}`} className="flex items-center gap-2 hover:text-primary transition-colors"><Phone className="w-3 h-3 shrink-0" /><span>{portfolio.contact_phone}</span></a>}
-            </div>
-          )}
+          <ContactInfoCard portfolio={portfolio} />
 
           {/* Admin actions */}
           {!isClientOnly && (
