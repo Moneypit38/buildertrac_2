@@ -110,19 +110,19 @@ export default function Layout() {
           {isChildRoute ? (
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center gap-1.5 text-primary font-semibold min-h-[44px] min-w-[44px] -ml-1 px-1"
+              className="flex items-center gap-2 text-primary font-semibold min-h-[48px] min-w-[48px] -ml-1.5 px-2 rounded-xl active:bg-accent transition-colors"
             >
-              <ChevronLeft className="w-5 h-5" />
-              <span className="text-sm">Back</span>
+              <ChevronLeft className="w-6 h-6" strokeWidth={2.5} />
+              <span className="text-base">Back</span>
             </button>
           ) : (
-            <Link to="/" className="font-display text-xl font-extrabold text-foreground tracking-tight min-h-[44px] flex items-center">
+            <Link to="/" className="font-display text-xl font-extrabold text-foreground tracking-tight min-h-[48px] flex items-center">
               Builder<span style={{color: "#F5A623"}}>T</span>rac
             </Link>
           )}
 
           {/* Right actions */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             <SettingsSheet user={user} />
           </div>
         </div>
@@ -168,7 +168,7 @@ export default function Layout() {
         className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t-2 border-primary"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
-        <div className="max-w-2xl mx-auto flex justify-around px-2">
+        <div className="max-w-2xl mx-auto flex justify-around px-1.5 gap-0.5">
           {navItems.map(({ path, icon: Icon, label }) => {
             const isActive = path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
             const badgeCount = navBadges[path] || 0;
@@ -176,16 +176,16 @@ export default function Layout() {
               <Link
                 key={path}
                 to={path}
-                className={`flex flex-col items-center gap-1 px-4 min-h-[44px] py-2 rounded-xl transition-all duration-200 relative ${isActive ? "text-primary bg-accent" : "text-muted-foreground hover:text-foreground"}`}
+                className={`flex-1 flex flex-col items-center gap-1 min-h-[56px] py-2.5 rounded-xl transition-all duration-200 relative active:scale-95 ${isActive ? "text-primary bg-accent" : "text-muted-foreground hover:text-foreground"}`}
               >
                 <motion.span
                   className="relative"
-                  animate={isActive ? { scale: 1.2 } : { scale: 1 }}
+                  animate={isActive ? { scale: 1.15 } : { scale: 1 }}
                   transition={{ type: "spring", stiffness: 400, damping: 20 }}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-6 h-6" strokeWidth={2.25} />
                   {badgeCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-yellow-300 ring-2 ring-background animate-pulse" />
+                    <span className="absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full bg-yellow-300 ring-2 ring-background animate-pulse" />
                   )}
                 </motion.span>
                 <span className="text-[11px] font-medium">{label}</span>

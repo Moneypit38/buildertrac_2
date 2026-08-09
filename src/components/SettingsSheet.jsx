@@ -59,9 +59,9 @@ export default function SettingsSheet({ user }) {
     <>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
-          <button className="min-h-[44px] min-w-[44px] flex items-center justify-center" title="Settings">
-            <Avatar className="w-9 h-9 border border-primary cursor-pointer">
-              <AvatarFallback className="bg-card text-primary font-bold text-sm">
+          <button className="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-xl active:scale-95 transition-transform" title="Settings">
+            <Avatar className="w-10 h-10 border-2 border-primary cursor-pointer">
+              <AvatarFallback className="bg-card text-primary font-bold text-base">
                 {user?.full_name?.split(" ").map(n => n[0]).join("").toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
