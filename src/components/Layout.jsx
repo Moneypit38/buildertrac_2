@@ -10,6 +10,7 @@ import { ViewedContext, isNewItem, getSeenPhotoIds } from "../lib/viewedContext"
 import SubscriptionGate from "./SubscriptionGate";
 import SettingsSheet from "./SettingsSheet";
 import PartnerLogo from "./PartnerLogo";
+import HolidayHeader from "./HolidayHeader";
 
 
 // Tab page components — rendered persistently to preserve state
@@ -126,7 +127,8 @@ export default function Layout() {
           )}
 
           {/* Right actions */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
+            <HolidayHeader />
             <SettingsSheet user={user} />
           </div>
         </div>
