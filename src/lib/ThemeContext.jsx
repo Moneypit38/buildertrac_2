@@ -1,106 +1,118 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-// Separate palette for stat card accent colors
-export const CARD_COLORS = [
-  { id: "card-slate",       name: "Slate",       hex: "#64748b" },
-  { id: "card-gray",        name: "Gray",        hex: "#9ca3af" },
-  { id: "card-zinc",        name: "Zinc",        hex: "#71717a" },
-  { id: "card-red",         name: "Red",         hex: "#ef4444" },
-  { id: "card-rose",        name: "Rose",        hex: "#f43f5e" },
-  { id: "card-pink",        name: "Pink",        hex: "#ec4899" },
-  { id: "card-fuchsia",     name: "Fuchsia",     hex: "#d946ef" },
-  { id: "card-purple",      name: "Purple",      hex: "#a855f7" },
-  { id: "card-violet",      name: "Violet",      hex: "#8b5cf6" },
-  { id: "card-indigo",      name: "Indigo",      hex: "#6366f1" },
-  { id: "card-blue",        name: "Blue",        hex: "#3b82f6" },
-  { id: "card-sky",         name: "Sky",         hex: "#0ea5e9" },
-  { id: "card-cyan",        name: "Cyan",        hex: "#06b6d4" },
-  { id: "card-teal",        name: "Teal",        hex: "#14b8a6" },
-  { id: "card-emerald",     name: "Emerald",     hex: "#10b981" },
-  { id: "card-green",       name: "Green",       hex: "#22c55e" },
-  { id: "card-lime",        name: "Lime",        hex: "#84cc16" },
-  { id: "card-yellow",      name: "Yellow",      hex: "#eab308" },
-  { id: "card-amber",       name: "Amber",       hex: "#d97706" },
-  { id: "card-orange",      name: "Orange",      hex: "#f97316" },
-  { id: "card-terracotta",  name: "Terracotta",  hex: "#c2522a" },
-  { id: "card-brown",       name: "Brown",       hex: "#92400e" },
-];
+// 12 cohesive color themes. Each theme carries an accent (applied to
+// primary/ring/chart-1) plus a coordinated 4-color palette for the dashboard
+// stat cards, so picking one theme styles the whole app consistently.
 
-// Each theme only overrides the accent/highlight/ring/chart-1 color.
-// The base mono palette (backgrounds, cards, borders) stays intact from index.css.
 export const COLOR_THEMES = [
   {
-    id: "default",
+    id: "steel",
     name: "Steel",
     description: "Mono grey",
-    preview: ["#64748b", "#94a3b8", "#cbd5e1"],
-    accent: null, // uses the CSS default (no override)
+    accent: null,
+    preview: ["#64748b", "#94a3b8", "#475569", "#cbd5e1"],
+    statColors: ["#64748b", "#94a3b8", "#475569", "#cbd5e1"],
   },
   {
     id: "amber",
     name: "Amber",
     description: "Warm gold",
-    preview: ["#d97706", "#f59e0b", "#fcd34d"],
     accent: { h: 38, s: 92, l: 50 },
+    preview: ["#d97706", "#f59e0b", "#f97316", "#fbbf24"],
+    statColors: ["#d97706", "#f59e0b", "#f97316", "#fbbf24"],
   },
   {
     id: "terracotta",
     name: "Terracotta",
     description: "Earthy red",
-    preview: ["#c2522a", "#e06b40", "#f5a07a"],
     accent: { h: 18, s: 70, l: 52 },
+    preview: ["#c2522a", "#e06b40", "#d97706", "#92400e"],
+    statColors: ["#c2522a", "#e06b40", "#d97706", "#92400e"],
   },
   {
     id: "forest",
     name: "Forest",
     description: "Deep green",
-    preview: ["#2d6a4f", "#3d7a50", "#74c69d"],
     accent: { h: 145, s: 40, l: 42 },
+    preview: ["#2d6a4f", "#10b981", "#14b8a6", "#84cc16"],
+    statColors: ["#2d6a4f", "#10b981", "#14b8a6", "#84cc16"],
   },
   {
-    id: "navy",
-    name: "Navy",
+    id: "ocean",
+    name: "Ocean",
     description: "Deep blue",
-    preview: ["#1e3a5f", "#2d5fa6", "#6daee8"],
     accent: { h: 215, s: 65, l: 55 },
+    preview: ["#1e3a5f", "#3b82f6", "#0ea5e9", "#06b6d4"],
+    statColors: ["#1e3a5f", "#3b82f6", "#0ea5e9", "#06b6d4"],
   },
   {
     id: "dusk",
     name: "Dusk",
-    description: "Purple & gold",
-    preview: ["#7c4db5", "#9b6dd1", "#c9a4e8"],
+    description: "Purple",
     accent: { h: 270, s: 55, l: 58 },
+    preview: ["#7c4db5", "#a855f7", "#8b5cf6", "#d946ef"],
+    statColors: ["#7c4db5", "#a855f7", "#8b5cf6", "#d946ef"],
+  },
+  {
+    id: "sunset",
+    name: "Sunset",
+    description: "Rose & pink",
+    accent: { h: 340, s: 75, l: 58 },
+    preview: ["#f43f5e", "#ec4899", "#f97316", "#ef4444"],
+    statColors: ["#f43f5e", "#ec4899", "#f97316", "#ef4444"],
+  },
+  {
+    id: "mint",
+    name: "Mint",
+    description: "Cool teal",
+    accent: { h: 172, s: 65, l: 42 },
+    preview: ["#14b8a6", "#06b6d4", "#10b981", "#0ea5e9"],
+    statColors: ["#14b8a6", "#06b6d4", "#10b981", "#0ea5e9"],
+  },
+  {
+    id: "violet",
+    name: "Violet",
+    description: "Indigo",
+    accent: { h: 245, s: 60, l: 60 },
+    preview: ["#6366f1", "#8b5cf6", "#a855f7", "#3b82f6"],
+    statColors: ["#6366f1", "#8b5cf6", "#a855f7", "#3b82f6"],
+  },
+  {
+    id: "crimson",
+    name: "Crimson",
+    description: "Bold red",
+    accent: { h: 0, s: 75, l: 56 },
+    preview: ["#ef4444", "#f43f5e", "#dc2626", "#c2522a"],
+    statColors: ["#ef4444", "#f43f5e", "#dc2626", "#c2522a"],
+  },
+  {
+    id: "golden",
+    name: "Golden",
+    description: "Yellow gold",
+    accent: { h: 45, s: 90, l: 50 },
+    preview: ["#eab308", "#f59e0b", "#84cc16", "#d97706"],
+    statColors: ["#eab308", "#f59e0b", "#84cc16", "#d97706"],
+  },
+  {
+    id: "slate",
+    name: "Slate",
+    description: "Industrial blue-grey",
+    accent: { h: 210, s: 28, l: 50 },
+    preview: ["#475569", "#64748b", "#334155", "#94a3b8"],
+    statColors: ["#475569", "#64748b", "#334155", "#94a3b8"],
   },
 ];
 
 const ThemeColorContext = createContext(null);
 
-// Keys for per-stat card colors (4 cards on the dashboard)
-export const STAT_CARD_KEYS = ["stat-0", "stat-1", "stat-2", "stat-3"];
-
 export function ThemeColorProvider({ children }) {
-  const [themeId, setThemeId] = useState(() => localStorage.getItem("color-theme") || "default");
-  const [cardColorId, setCardColorId] = useState(() => localStorage.getItem("card-color") || "card-orange");
-
-  // Per-stat-card color: { "stat-0": "card-orange", "stat-1": "card-blue", ... }
-  const [statCardColors, setStatCardColors] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("stat-card-colors") || "{}"); } catch { return {}; }
-  });
-
-  const setStatCardColor = (key, colorId) => {
-    setStatCardColors(prev => {
-      const next = { ...prev, [key]: colorId };
-      localStorage.setItem("stat-card-colors", JSON.stringify(next));
-      return next;
-    });
-  };
+  const [themeId, setThemeId] = useState(() => localStorage.getItem("color-theme") || "steel");
 
   useEffect(() => {
     const theme = COLOR_THEMES.find(t => t.id === themeId) || COLOR_THEMES[0];
     const root = document.documentElement;
 
     if (!theme.accent) {
-      // Reset to CSS defaults — remove any overrides
       root.style.removeProperty("--primary");
       root.style.removeProperty("--primary-foreground");
       root.style.removeProperty("--ring");
@@ -108,25 +120,19 @@ export function ThemeColorProvider({ children }) {
     } else {
       const { h, s, l } = theme.accent;
       const hsl = `${h} ${s}% ${l}%`;
-      // In dark mode: primary = the accent color
-      // In light mode: primary stays dark (foreground), but we push the accent into ring + chart
       root.style.setProperty("--primary", hsl);
       root.style.setProperty("--ring", hsl);
       root.style.setProperty("--chart-1", hsl);
-      // foreground on colored primary should be white or very dark depending on lightness
       root.style.setProperty("--primary-foreground", l > 55 ? "0 0% 5%" : "0 0% 98%");
     }
-
     localStorage.setItem("color-theme", themeId);
   }, [themeId]);
 
-  const handleSetCardColorId = (id) => {
-    setCardColorId(id);
-    localStorage.setItem("card-color", id);
-  };
+  const theme = COLOR_THEMES.find(t => t.id === themeId) || COLOR_THEMES[0];
+  const statColors = theme.statColors;
 
   return (
-    <ThemeColorContext.Provider value={{ themeId, setThemeId, cardColorId, setCardColorId: handleSetCardColorId, statCardColors, setStatCardColor }}>
+    <ThemeColorContext.Provider value={{ themeId, setThemeId, theme, statColors }}>
       {children}
     </ThemeColorContext.Provider>
   );

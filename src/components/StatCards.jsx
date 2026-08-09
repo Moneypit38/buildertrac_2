@@ -1,18 +1,11 @@
 import { Link } from "react-router-dom";
 import { ClipboardList, MessageSquare, FileText, Camera } from "lucide-react";
-import { useColorTheme, CARD_COLORS } from "@/lib/ThemeContext";
+import { useColorTheme } from "@/lib/ThemeContext";
 
 const ICONS = [ClipboardList, MessageSquare, FileText, Camera];
-const STAT_KEYS = ["stat-0", "stat-1", "stat-2", "stat-3"];
 
 export default function StatCards({ stats }) {
-  const { statCardColors, cardColorId } = useColorTheme();
-
-  const getCardHex = (i) => {
-    const key = STAT_KEYS[i];
-    const colorId = statCardColors[key] || cardColorId;
-    return (CARD_COLORS.find(c => c.id === colorId) || CARD_COLORS[0]).hex;
-  };
+  const { statColors } = useColorTheme();
 
   return (
     <div className="grid grid-cols-2 gap-3">
@@ -20,9 +13,7 @@ export default function StatCards({ stats }) {
         const Wrapper = stat.href ? Link : "div";
         const hasAlert = stat.value > 0;
         const Icon = ICONS[i] || ICONS[0];
-        const accentHex = getCardHex(i);
-        const key = STAT_KEYS[i];
-        const colorId = statCardColors[key] || cardColorId;
+        const accentHex = statColors[i] || statColors[0];
 
         return (
           <Wrapper
