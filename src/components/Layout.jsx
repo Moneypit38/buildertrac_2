@@ -9,6 +9,7 @@ import { markViewed, getLastViewed } from "../hooks/useLastViewed";
 import { ViewedContext, isNewItem, getSeenPhotoIds } from "../lib/viewedContext";
 import SubscriptionGate from "./SubscriptionGate";
 import SettingsSheet from "./SettingsSheet";
+import PartnerLogo from "./PartnerLogo";
 
 
 // Tab page components — rendered persistently to preserve state
@@ -116,9 +117,12 @@ export default function Layout() {
               <span className="text-base">Back</span>
             </button>
           ) : (
-            <Link to="/" className="font-display text-xl font-extrabold text-foreground tracking-tight min-h-[48px] flex items-center">
-              Builder<span style={{color: "#F5A623"}}>T</span>rac
-            </Link>
+            <div className="flex items-center gap-2 min-h-[48px]">
+              <Link to="/" className="font-display text-xl font-extrabold text-foreground tracking-tight flex items-center">
+                Builder<span style={{color: "#F5A623"}}>T</span>rac
+              </Link>
+              <PartnerLogo />
+            </div>
           )}
 
           {/* Right actions */}

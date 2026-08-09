@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { LogOut, Trash2, Sun, Moon, Database, AlertTriangle, ChevronRight } from "lucide-react";
 import ColorThemePicker from "@/components/ColorThemePicker";
+import PartnerLogoSettings from "@/components/PartnerLogoSettings";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useTheme } from "next-themes";
 import { useQueryClient } from "@tanstack/react-query";
@@ -82,6 +83,7 @@ export default function SettingsSheet({ user }) {
 
             {/* Color theme picker */}
             <ColorThemePicker />
+            <PartnerLogoSettings />
 
             <div className="border-t border-border" />
 

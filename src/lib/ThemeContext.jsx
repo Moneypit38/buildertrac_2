@@ -101,6 +101,42 @@ export const COLOR_THEMES = [
     preview: ["#475569", "#64748b", "#334155", "#94a3b8"],
     statColors: ["#475569", "#64748b", "#334155", "#94a3b8"],
   },
+  {
+    id: "christmas",
+    name: "Christmas",
+    description: "Red & green",
+    holiday: true,
+    accent: { h: 350, s: 72, l: 42 },
+    preview: ["#c8102e", "#0f5132", "#d4af37", "#16a34a"],
+    statColors: ["#c8102e", "#0f5132", "#d4af37", "#16a34a"],
+  },
+  {
+    id: "newyear",
+    name: "New Year's",
+    description: "Midnight & gold",
+    holiday: true,
+    accent: { h: 230, s: 55, l: 48 },
+    preview: ["#1e293b", "#d4af37", "#6366f1", "#cbd5e1"],
+    statColors: ["#1e293b", "#d4af37", "#6366f1", "#94a3b8"],
+  },
+  {
+    id: "fourth",
+    name: "Fourth of July",
+    description: "Red, white & blue",
+    holiday: true,
+    accent: { h: 224, s: 80, l: 48 },
+    preview: ["#b22234", "#3c3b6e", "#dc2626", "#3b82f6"],
+    statColors: ["#b22234", "#3c3b6e", "#dc2626", "#3b82f6"],
+  },
+  {
+    id: "thanksgiving",
+    name: "Thanksgiving",
+    description: "Autumn harvest",
+    holiday: true,
+    accent: { h: 25, s: 70, l: 45 },
+    preview: ["#b3590f", "#92400e", "#ca8a04", "#65734e"],
+    statColors: ["#b3590f", "#92400e", "#ca8a04", "#65734e"],
+  },
 ];
 
 const ThemeColorContext = createContext(null);
