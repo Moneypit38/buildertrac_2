@@ -51,33 +51,47 @@ function PortfolioFormDialog({ open, onClose, portfolio }) {
     setLogoSearching(true);
     try {
       const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `A user wants the logo for the company "${form.name}". Use web search to find this company's OFFICIAL website domain (for example "apple.com", "hammonddev.com"). Then return that domain and a direct logo image URL. A reliable logo URL is https://logo.clearbit.com/<domain>. Respond with JSON only.`,
+        prompt: `A user typed a company name: "${form.name}". Use web search to identify this real company and gather its public details. Return JSON with: the official website domain (bare, like "hammonddev.com"), the general/office phone number, a public contact email, and the business/office street address. Use an empty string for anything you cannot confidently find.`,
         add_context_from_internet: true,
         model: "gemini_3_flash",
         response_json_schema: {
           type: "object",
           properties: {
+            company_name: { type: "string" },
             website: { type: "string" },
-            logo_url: { type: "string" },
+            contact_phone: { type: "string" },
+            contact_email: { type: "string" },
+            business_address: { type: "string" },
           },
-          required: ["website", "logo_url"],
+          required: ["company_name", "website", "contact_phone", "contact_email", "business_address"],
         },
       });
-      const website = (res?.website || "").trim();
-      let url = (res?.logo_url || "").trim();
-      // Prefer a Clearbit URL built from the discovered official domain — reliable for real companies
-      if (website) {
-        const domain = website.replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0];
-        if (domain) url = `https://logo.clearbit.com/${domain}`;
-      }
-      if (url && /^https?:\/\//.test(url)) {
-        setForm(f => ({ ...f, logo_url: url }));
-        toast.success("Logo found!");
+
+      const website = (res?.website || "").trim().replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0];
+      const phone = (res?.contact_phone || "").trim();
+      const email = (res?.contact_email || "").trim();
+      const address = (res?.business_address || "").trim();
+
+      const enrich = {};
+      // A favicon pulled from the company's OWN website domain reliably returns an image for real companies
+      if (website) enrich.logo_url = `https://www.google.com/s2/favicons?domain=${website}&sz=128`;
+      if (phone) enrich.contact_phone = phone;
+      if (email) enrich.contact_email = email;
+      if (address) enrich.business_address = address;
+
+      if (Object.keys(enrich).length === 0) {
+        toast.error("Couldn't find info for that company. Try entering details manually.");
       } else {
-        toast.error("Couldn't find a logo. Try entering a URL manually.");
+        setForm(f => ({ ...f, ...enrich }));
+        const tags = [];
+        if (enrich.logo_url) tags.push("logo");
+        if (phone) tags.push("phone");
+        if (email) tags.push("email");
+        if (address) tags.push("address");
+        toast.success(`Auto-filled: ${tags.join(", ")}`);
       }
     } catch {
-      toast.error("Logo search failed");
+      toast.error("Look-up failed");
     } finally {
       setLogoSearching(false);
     }
@@ -145,7 +159,7 @@ function PortfolioFormDialog({ open, onClose, portfolio }) {
               </div>
             ) : (
               <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-                <ImageIcon className="w-3 h-3" /> Type a company name above then click "Find Logo"
+                <ImageIcon className="w-3 h-3" /> Enter the company name above, then tap Find to auto-fill the logo & contact info
               </div>
             )}
           </div>
