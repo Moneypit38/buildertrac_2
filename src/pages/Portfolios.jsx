@@ -51,12 +51,26 @@ function PortfolioFormDialog({ open, onClose, portfolio }) {
     setLogoSearching(true);
     try {
       const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Find the official logo URL for the company: "${form.name}". Return a direct PNG or SVG image URL from the company's official website or a trusted CDN (like Clearbit, Brandfetch, etc.). Try: https://logo.clearbit.com/${form.name.toLowerCase().replace(/\s+/g, "")}.com first. Return ONLY the image URL, nothing else.`,
+        prompt: `A user wants the logo for the company "${form.name}". Use web search to find this company's OFFICIAL website domain (for example "apple.com", "hammonddev.com"). Then return that domain and a direct logo image URL. A reliable logo URL is https://logo.clearbit.com/<domain>. Respond with JSON only.`,
         add_context_from_internet: true,
         model: "gemini_3_flash",
+        response_json_schema: {
+          type: "object",
+          properties: {
+            website: { type: "string" },
+            logo_url: { type: "string" },
+          },
+          required: ["website", "logo_url"],
+        },
       });
-      const url = res?.trim();
-      if (url && url.startsWith("http")) {
+      const website = (res?.website || "").trim();
+      let url = (res?.logo_url || "").trim();
+      // Prefer a Clearbit URL built from the discovered official domain — reliable for real companies
+      if (website) {
+        const domain = website.replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0];
+        if (domain) url = `https://logo.clearbit.com/${domain}`;
+      }
+      if (url && /^https?:\/\//.test(url)) {
         setForm(f => ({ ...f, logo_url: url }));
         toast.success("Logo found!");
       } else {
