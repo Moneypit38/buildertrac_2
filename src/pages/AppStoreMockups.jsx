@@ -141,7 +141,7 @@ export default function AppStoreMockups() {
         {MOCKUPS.map((m) => (
           <div key={m.id} className="bg-card border border-border rounded-xl overflow-hidden">
             <div className="w-full bg-muted" style={{ aspectRatio: `${TARGET_W} / ${TARGET_H}` }}>
-              <img src={m.url} alt={m.title} className="w-full h-full object-cover" />
+              <img src={m.url} alt={m.title} className="w-full h-full object-contain" />
             </div>
             <div className="px-4 py-3 flex items-center justify-between gap-3">
               <div>
