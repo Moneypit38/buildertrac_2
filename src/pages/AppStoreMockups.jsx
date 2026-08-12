@@ -73,7 +73,7 @@ export default function AppStoreMockups() {
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, TARGET_W, TARGET_H);
 
-      const scale = Math.max(TARGET_W / img.width, TARGET_H / img.height);
+      const scale = Math.min(TARGET_W / img.width, TARGET_H / img.height);
       const w = img.width * scale;
       const h = img.height * scale;
       ctx.drawImage(img, (TARGET_W - w) / 2, (TARGET_H - h) / 2, w, h);
