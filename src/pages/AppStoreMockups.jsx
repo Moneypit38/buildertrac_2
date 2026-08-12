@@ -42,7 +42,7 @@ const MOCKUPS = [
 
 // 6.9" iPhone 16 Pro Max — the slot the user is uploading into
 const TARGET_W = 1320;
-const TARGET_H = 2862;
+const TARGET_H = 2868;
 
 const SPECS = [
   { label: "Primary (required)", device: "iPhone 16 Pro Max / 6.9\"", size: `${TARGET_W} × ${TARGET_H} px`, slots: "Up to 10" },
