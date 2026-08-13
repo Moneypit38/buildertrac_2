@@ -32,6 +32,10 @@
     "image": {
       "type": "string",
       "format": "uri"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

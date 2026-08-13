@@ -10,6 +10,7 @@ import { ViewedContext, isNewItem, getSeenPhotoIds } from "../lib/viewedContext"
 import SubscriptionGate from "./SubscriptionGate";
 import SettingsSheet from "./SettingsSheet";
 import PartnerLogo from "./PartnerLogo";
+import SiteFooter from "./SiteFooter";
 
 
 // Tab page components — rendered persistently to preserve state
@@ -165,6 +166,7 @@ export default function Layout() {
             </AnimatePresence>
           )}
         </SubscriptionGate>
+        {!isChildRoute && <SiteFooter />}
       </main>
 
       {/* Bottom nav with safe-area bottom inset */}

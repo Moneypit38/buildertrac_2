@@ -17,6 +17,8 @@ import AppStoreMockups from './pages/AppStoreMockups';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import DeleteAccount from './pages/DeleteAccount';
 import Support from './pages/Support';
+import About from './pages/About';
+import Contact from './pages/Contact';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
@@ -64,6 +66,8 @@ const AuthenticatedApp = () => {
       </Route>
       <Route path="/delete-account" element={<DeleteAccount />} />
       <Route path="/support" element={<Support />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

@@ -18,6 +18,10 @@
         "team_member"
       ],
       "default": "team_member"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [

@@ -32,12 +32,19 @@ export default function Login() {
       title="Welcome back"
       subtitle="Log in to your account"
       footer={
-        <>
-          Don't have an account?{" "}
-          <Link to="/register" className="text-primary font-medium hover:underline">
-            Create one
-          </Link>
-        </>
+        <div className="space-y-1">
+          <div>
+            Don't have an account?{" "}
+            <Link to="/register" className="text-primary font-medium hover:underline">
+              Create one
+            </Link>
+          </div>
+          <div className="text-xs">
+            <Link to="/about" className="text-primary hover:underline">About</Link>
+            {" · "}
+            <Link to="/contact" className="text-primary hover:underline">Contact</Link>
+          </div>
+        </div>
       }
     >
       {error && (
