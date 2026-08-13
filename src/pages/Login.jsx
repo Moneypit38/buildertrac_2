@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LogIn, Mail, Lock, Loader2 } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
+import { safeReturnTo } from "@/lib/authReturnTo";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,7 +19,7 @@ export default function Login() {
     setLoading(true);
     try {
       await base44.auth.loginViaEmailPassword(email.trim(), password);
-      window.location.href = "/";
+      window.location.href = safeReturnTo();
     } catch (err) {
       setError(err.message || "Invalid email or password");
     } finally {

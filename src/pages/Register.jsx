@@ -8,6 +8,7 @@ import { UserPlus, Mail, Lock, Loader2, HardHat } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import AuthLayout from "@/components/AuthLayout";
 import { toast } from "@/components/ui/use-toast";
+import { safeReturnTo } from "@/lib/authReturnTo";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -44,8 +45,9 @@ export default function Register() {
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
       }
+      const dest = safeReturnTo();
       // Team members (role="user") land on Projects so they see their work immediately
-      window.location.href = "/projects";
+      window.location.href = dest === "/" ? "/projects" : dest;
     } catch (err) {
       setError(err.message || "Invalid verification code");
     } finally {
