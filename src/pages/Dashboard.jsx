@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useClientAccess } from "../hooks/useClientAccess";
 import StatCards from "../components/StatCards";
 import ProjectCard from "../components/ProjectCard";
-import { HardHat, Layers } from "lucide-react";
+import { HardHat, Layers, Smartphone, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import { useViewedTimes, isNewItem, getSeenPhotoIds } from "../lib/viewedContext";
@@ -100,6 +100,25 @@ export default function Dashboard() {
           { value: newDocs, label: "New Documents", href: "/documents" },
           { value: newPhotos, label: "New Photos", href: "/photos" },
         ]} />
+      </motion.div>
+
+      {/* App Store Mockups shortcut */}
+      <motion.div {...fadeUp(0.1)}>
+        <Link
+          to="/app-store-mockups"
+          className="flex items-center justify-between bg-card border border-border rounded-xl p-4 hover:border-primary/40 transition-all min-h-[56px]"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <Smartphone className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold">App Store Mockups</p>
+              <p className="text-xs text-muted-foreground">View & download your 5 screenshots</p>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-muted-foreground" />
+        </Link>
       </motion.div>
 
       {/* Task Calendar */}

@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { LogOut, Trash2, Sun, Moon, Database, AlertTriangle, ChevronRight, Smartphone } from "lucide-react";
+import { LogOut, Trash2, Sun, Moon, Database, AlertTriangle, ChevronRight } from "lucide-react";
 import ColorThemePicker from "@/components/ColorThemePicker";
 import PartnerLogoSettings from "@/components/PartnerLogoSettings";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -102,24 +101,6 @@ export default function SettingsSheet({ user }) {
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </button>
-
-              <div className="border-t border-border" />
-
-              {/* App Store Mockups */}
-              <Link
-                to="/app-store-mockups"
-                onClick={() => setOpen(false)}
-                className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-accent transition-colors min-h-[52px]"
-              >
-                <div className="flex items-center gap-3">
-                  <Smartphone className="w-4 h-4 text-muted-foreground" />
-                  <div className="text-left">
-                    <p className="text-sm font-medium">App Store Mockups</p>
-                    <p className="text-xs text-muted-foreground">View & download your screenshots</p>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
-              </Link>
 
               <div className="border-t border-border" />
 
