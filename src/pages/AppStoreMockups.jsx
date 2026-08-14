@@ -58,12 +58,18 @@ export default function AppStoreMockups() {
   const saveAt69 = async (m) => {
     setBusyId(m.id);
     try {
+      // Fetch as blob -> same-origin object URL, so the canvas is not tainted
+      // and canvas.toBlob() actually works (cross-origin <img> throws SecurityError).
+      const resp = await fetch(m.url, { mode: "cors" });
+      if (!resp.ok) throw new Error("fetch failed");
+      const blob = await resp.blob();
+      const objUrl = URL.createObjectURL(blob);
+
       const img = new Image();
-      img.crossOrigin = "anonymous";
       await new Promise((resolve, reject) => {
         img.onload = resolve;
         img.onerror = reject;
-        img.src = m.url;
+        img.src = objUrl;
       });
 
       const canvas = document.createElement("canvas");
@@ -77,6 +83,7 @@ export default function AppStoreMockups() {
       const w = img.width * scale;
       const h = img.height * scale;
       ctx.drawImage(img, (TARGET_W - w) / 2, (TARGET_H - h) / 2, w, h);
+      URL.revokeObjectURL(objUrl);
 
       await new Promise((resolve, reject) => {
         canvas.toBlob((blob) => {
@@ -93,7 +100,7 @@ export default function AppStoreMockups() {
         }, "image/png");
       });
       toast.success(`Saved at ${TARGET_W}×${TARGET_H}` + " (6.1\")");
-    } catch {
+    } catch (e) {
       toast.error("Resize blocked — opening original instead");
       window.open(m.url, "_blank");
     } finally {
