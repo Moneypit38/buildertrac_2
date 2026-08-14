@@ -40,14 +40,14 @@ const MOCKUPS = [
   },
 ];
 
-// 6.9" iPhone 16 Pro Max — the slot the user is uploading into
-const TARGET_W = 1320;
-const TARGET_H = 2868;
+// iPhone 12/13/14/15 Pro (6.1") — App Store Connect primary slot
+const TARGET_W = 1284;
+const TARGET_H = 2778;
 
 const SPECS = [
-  { label: "Primary (required)", device: "iPhone 16 Pro Max / 6.9\"", size: `${TARGET_W} × ${TARGET_H} px`, slots: "Up to 10" },
+  { label: "Primary (required)", device: "iPhone 6.1\" (12/13/14/15 Pro)", size: `${TARGET_W} × ${TARGET_H} px`, slots: "Up to 10" },
+  { label: "Also accepted", device: "iPhone 16 Pro Max / 6.9\"", size: "1320 × 2868 px", slots: "Up to 10" },
   { label: "Also accepted", device: "iPhone 15 Pro Max / 6.7\"", size: "1290 × 2796 px", slots: "Up to 10" },
-  { label: "Also accepted", device: "iPhone 14 Pro Max / 6.5\"", size: "1242 × 2688 px", slots: "Up to 10" },
 ];
 
 export default function AppStoreMockups() {
@@ -84,7 +84,7 @@ export default function AppStoreMockups() {
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url;
-          a.download = `buildertrac-69-${m.id}.png`;
+          a.download = `buildertrac-61-${m.id}.png`;
           document.body.appendChild(a);
           a.click();
           a.remove();
@@ -92,7 +92,7 @@ export default function AppStoreMockups() {
           resolve();
         }, "image/png");
       });
-      toast.success(`Saved at ${TARGET_W}×${TARGET_H}`);
+      toast.success(`Saved at ${TARGET_W}×${TARGET_H}` + " (6.1\")");
     } catch {
       toast.error("Resize blocked — opening original instead");
       window.open(m.url, "_blank");
@@ -107,7 +107,7 @@ export default function AppStoreMockups() {
         <Apple className="w-6 h-6 text-primary" />
         <div>
           <h1 className="text-xl font-bold font-display">App Store Mockups</h1>
-          <p className="text-xs text-muted-foreground">5 screenshots sized for the 6.9" iPhone slot</p>
+          <p className="text-xs text-muted-foreground">5 screenshots sized for the 6.1" iPhone slot</p>
         </div>
       </div>
 
@@ -158,7 +158,7 @@ export default function AppStoreMockups() {
                 ) : (
                   <Download className="w-3.5 h-3.5" />
                 )}
-                {busyId === m.id ? "…" : "Save 6.9\""}
+                {busyId === m.id ? "…" : "Save 6.1\""}
               </button>
             </div>
           </div>
@@ -170,7 +170,7 @@ export default function AppStoreMockups() {
         <ul className="list-disc list-inside space-y-1 mt-1">
           <li>Log in at <span className="font-mono">appstoreconnect.apple.com</span></li>
           <li>Select your app → iOS App → Version Information</li>
-          <li>Scroll to the <span className="font-medium text-foreground">iPhone 6.9-inch Display</span> slot → upload all 5 PNGs</li>
+          <li>Scroll to the <span className="font-medium text-foreground">iPhone 6.1-inch Display</span> slot → upload all 5 PNGs</li>
           <li>Each file is pre-sized to {TARGET_W}×{TARGET_H}, so it will pass the dimension check</li>
           <li>Add iPad screenshots separately if supporting iPad</li>
         </ul>
