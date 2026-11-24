@@ -137,7 +137,7 @@ export default function Dashboard() {
 
       {!isNewUser && (<>
       <motion.div {...fadeUp(0.07)}>
-        <StatCards stats=[
+        <StatCards stats={[
           { value: urgentTasks, label: "Tasks Due / Overdue", href: "/projects" },
           { value: newNotes, label: "New Messages", href: "/projects" },
           { value: newDocs, label: "New Documents", href: "/documents" },
