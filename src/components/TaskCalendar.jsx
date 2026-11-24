@@ -37,7 +37,7 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
   const { year, month } = viewDate;
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfMonth(year, month);
-  const todayStr = today.toISOString().split("T")[0];
+  const todayStr = today.toLocaleDateString("en-CA"); // local date, YYYY-MM-DD
 
   const projectMap = useMemo(() => {
     const map = {};
