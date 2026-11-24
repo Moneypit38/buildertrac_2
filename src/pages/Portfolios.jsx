@@ -230,6 +230,11 @@ export default function Portfolios() {
   }, [location.state?.openPortfolioId, portfolios]);
 
   const [showCreate, setShowCreate] = useState(false);
+
+  // Opened from the home screen's welcome card ("Create your first portfolio")
+  useEffect(() => {
+    if (location.state?.openCreate) setShowCreate(true);
+  }, [location.state?.openCreate]);
   const [editPortfolio, setEditPortfolio] = useState(null);
   const [addProjectToPortfolio, setAddProjectToPortfolio] = useState(null);
   const [assignProject, setAssignProject] = useState(null);
