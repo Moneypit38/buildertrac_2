@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useClientAccess } from "../hooks/useClientAccess";
 import StatCards from "../components/StatCards";
 import ProjectCard from "../components/ProjectCard";
-import { HardHat, Layers, FolderPlus, Sparkles, UserPlus } from "lucide-react";
+import { HardHat, Layers, FolderPlus, Sparkles, UserPlus, Building2, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import { useViewedTimes, isNewItem, getSeenPhotoIds } from "../lib/viewedContext";
@@ -72,6 +72,7 @@ export default function Dashboard() {
 
   // Brand-new account (not a client view) with nothing created yet
   const isNewUser = !allowedProjectIds && visibleProjects.length === 0;
+  const hasPortfolio = portfolios.length > 0;
 
   if (accessLoading) return (
     <div className="flex items-center justify-center h-64">
@@ -105,32 +106,43 @@ export default function Dashboard() {
           <p className="text-sm text-muted-foreground mt-1">Set up your first job in about two minutes.</p>
           <ol className="mt-5 space-y-4">
             <li className="flex gap-3">
+              {hasPortfolio
+                ? <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                : <Building2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />}
+              <div>
+                <p className="font-semibold text-sm">1. Create a portfolio</p>
+                <p className="text-xs text-muted-foreground">A portfolio is a company, contractor, or customer you do work for. Every project lives under one. Example: Rodger's Contracting.</p>
+              </div>
+            </li>
+            <li className="flex gap-3">
               <FolderPlus className="w-5 h-5 text-primary shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-sm">1. Create a project</p>
-                <p className="text-xs text-muted-foreground">Add a job name and site address.</p>
+                <p className="font-semibold text-sm">2. Add a project</p>
+                <p className="text-xs text-muted-foreground">Create each job under its portfolio, with a name and site address.</p>
               </div>
             </li>
             <li className="flex gap-3">
               <Sparkles className="w-5 h-5 text-primary shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-sm">2. Add your tasks</p>
+                <p className="font-semibold text-sm">3. Add your tasks</p>
                 <p className="text-xs text-muted-foreground">Type them in, or let AI generate a task list for the job.</p>
               </div>
             </li>
             <li className="flex gap-3">
               <UserPlus className="w-5 h-5 text-primary shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-sm">3. Invite your crew</p>
+                <p className="font-semibold text-sm">4. Invite your crew</p>
                 <p className="text-xs text-muted-foreground">Bring in subs and customers so everyone sees the same job.</p>
               </div>
             </li>
           </ol>
           <Link
-            to="/projects"
+            to={hasPortfolio ? "/projects" : "/portfolios"}
+            state={hasPortfolio ? undefined : { openCreate: true }}
             className="mt-6 flex items-center justify-center gap-2 w-full rounded-xl bg-primary text-primary-foreground font-semibold text-sm py-3 hover:opacity-90 transition-opacity"
           >
-            <FolderPlus className="w-4 h-4" /> Create your first project
+            {hasPortfolio ? <FolderPlus className="w-4 h-4" /> : <Building2 className="w-4 h-4" />}
+            {hasPortfolio ? "Create your first project" : "Create your first portfolio"}
           </Link>
         </motion.div>
       )}
