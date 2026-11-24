@@ -52,7 +52,7 @@ export default function ProjectCard({ project, onDelete, allTasks, allNotes, all
     return new Date(ph.created_date) > cutoff72h && !seenPhotoIds.has(ph.id);
   });
 
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = new Date().toLocaleDateString("en-CA"); // local date, YYYY-MM-DD
   const overdueTasks = projectTasks.filter(t => !t.completed && t.status !== "Done" && t.due_date && t.due_date < todayStr);
   const overdueCount = overdueTasks.length;
 
