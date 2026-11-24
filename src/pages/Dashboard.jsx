@@ -33,12 +33,12 @@ export default function Dashboard() {
   const visibleDocs = allowedProjectIds ? docs.filter(d => allowedProjectIds.includes(d.project_id)) : docs;
   const visiblePhotos = allowedProjectIds ? photos.filter(ph => allowedProjectIds.includes(ph.project_id)) : photos;
 
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = new Date().toLocaleDateString("en-CA"); // local date, YYYY-MM-DD
 
   // Count all overdue tasks — only for existing projects
   const visibleProjectIds = new Set(visibleProjects.map(p => p.id));
   const urgentTasks = visibleTasks.filter(t =>
-    !t.completed && t.status !== "Done" && t.due_date && t.due_date < todayStr && visibleProjectIds.has(t.project_id)
+    !t.completed && t.status !== "Done" && t.due_date && t.due_date <= todayStr && visibleProjectIds.has(t.project_id)
   ).length;
 
   // Docs uploaded in last 72h and not yet viewed
