@@ -102,7 +102,7 @@ export default function Layout() {
 
   return (
     <ViewedContext.Provider value={lastViewedTimes}>
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--background))', backgroundImage: 'var(--decor-bg, none)', backgroundSize: '120px 120px' }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--background))', backgroundImage: 'var(--decor-bg, none)', backgroundSize: '160px 160px' }}>
       {/* Header with safe-area top inset */}
       <header
         className="sticky top-0 z-50 bg-card border-b-2 border-primary"
