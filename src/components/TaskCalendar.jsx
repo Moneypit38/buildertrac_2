@@ -28,7 +28,7 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
   const [viewDate, setViewDate] = useState({ year: today.getFullYear(), month: today.getMonth() });
   const [selectedDate, setSelectedDate] = useState(null);
   const [showApptDialog, setShowApptDialog] = useState(false);
-  const { themeId } = useColorTheme();
+  const { effectiveThemeId: themeId } = useColorTheme();
   const theme = COLOR_THEMES.find(t => t.id === themeId) || COLOR_THEMES[0];
   const accentHsl = theme.accent
     ? `hsl(${theme.accent.h}, ${theme.accent.s}%, ${theme.accent.l}%)`
