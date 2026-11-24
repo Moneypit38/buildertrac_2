@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useClientAccess } from "../hooks/useClientAccess";
 import StatCards from "../components/StatCards";
 import ProjectCard from "../components/ProjectCard";
-import { HardHat, Layers } from "lucide-react";
+import { HardHat, Layers, FolderPlus, Sparkles, UserPlus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import { useViewedTimes, isNewItem, getSeenPhotoIds } from "../lib/viewedContext";
@@ -70,6 +70,9 @@ export default function Dashboard() {
     ? portfolios.filter(pf => visibleProjects.some(p => p.portfolio === pf.name))
     : portfolios;
 
+  // Brand-new account (not a client view) with nothing created yet
+  const isNewUser = !allowedProjectIds && visibleProjects.length === 0;
+
   if (accessLoading) return (
     <div className="flex items-center justify-center h-64">
       <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -93,8 +96,48 @@ export default function Dashboard() {
         <h1 className="text-2xl font-extrabold font-display mt-0.5">Everything at a glance</h1>
       </motion.div>
 
+      {isNewUser && (
+        <motion.div {...fadeUp(0.07)} className="bg-card border border-border rounded-2xl p-6">
+          <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center mb-4">
+            <HardHat className="w-6 h-6 text-primary" />
+          </div>
+          <h2 className="text-xl font-extrabold font-display">Welcome to BuilderTrac</h2>
+          <p className="text-sm text-muted-foreground mt-1">Set up your first job in about two minutes.</p>
+          <ol className="mt-5 space-y-4">
+            <li className="flex gap-3">
+              <FolderPlus className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-sm">1. Create a project</p>
+                <p className="text-xs text-muted-foreground">Add a job name and site address.</p>
+              </div>
+            </li>
+            <li className="flex gap-3">
+              <Sparkles className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-sm">2. Add your tasks</p>
+                <p className="text-xs text-muted-foreground">Type them in, or let AI generate a task list for the job.</p>
+              </div>
+            </li>
+            <li className="flex gap-3">
+              <UserPlus className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-sm">3. Invite your crew</p>
+                <p className="text-xs text-muted-foreground">Bring in subs and customers so everyone sees the same job.</p>
+              </div>
+            </li>
+          </ol>
+          <Link
+            to="/projects"
+            className="mt-6 flex items-center justify-center gap-2 w-full rounded-xl bg-primary text-primary-foreground font-semibold text-sm py-3 hover:opacity-90 transition-opacity"
+          >
+            <FolderPlus className="w-4 h-4" /> Create your first project
+          </Link>
+        </motion.div>
+      )}
+
+      {!isNewUser && (<>
       <motion.div {...fadeUp(0.07)}>
-        <StatCards stats={[
+        <StatCards stats=[
           { value: urgentTasks, label: "Tasks Due / Overdue", href: "/projects" },
           { value: newNotes, label: "New Messages", href: "/projects" },
           { value: newDocs, label: "New Documents", href: "/documents" },
@@ -109,6 +152,7 @@ export default function Dashboard() {
         </h2>
         <TaskCalendar tasks={visibleTasks} projects={visibleProjects} appointments={appointments} />
       </motion.div>
+      </>)}
 
       {/* Portfolios */}
       {visiblePortfolios.length > 0 && (
@@ -158,6 +202,7 @@ export default function Dashboard() {
       )}
 
       {/* Projects */}
+      {!isNewUser && (
       <motion.div {...fadeUp(0.26)}>
         <h2 className="text-primary font-bold text-sm uppercase tracking-wider mb-3">Your Projects</h2>
         {visibleProjects.length === 0 ? (
@@ -175,6 +220,7 @@ export default function Dashboard() {
           </div>
         )}
       </motion.div>
+      )}
     </div>
   );
 }
