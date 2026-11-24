@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, FolderKanban, FileText, Camera, Layers, ChevronLeft } from "lucide-react";
+import HolidayOrnament from "./HolidayOrnament";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { base44 } from "@/api/base44Client";
@@ -101,12 +102,13 @@ export default function Layout() {
 
   return (
     <ViewedContext.Provider value={lastViewedTimes}>
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--background))' }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--background))', backgroundImage: 'var(--decor-bg, none)', backgroundSize: '120px 120px' }}>
       {/* Header with safe-area top inset */}
       <header
         className="sticky top-0 z-50 bg-card border-b-2 border-primary"
         style={{ paddingTop: `max(0.75rem, env(safe-area-inset-top))`, paddingBottom: "0.75rem" }}
       >
+        <div aria-hidden="true" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 'var(--decor-strip-h, 0px)', background: 'var(--decor-strip, none)', pointerEvents: 'none' }} />
         <div className="max-w-2xl mx-auto px-4 flex items-center justify-between">
           {/* Brand or Back button */}
           {isChildRoute ? (
@@ -120,7 +122,7 @@ export default function Layout() {
           ) : (
             <div className="flex items-center gap-2 min-h-[48px]">
               <Link to="/" className="font-display text-xl font-extrabold text-foreground tracking-tight flex items-center">
-                Builder<span style={{color: "#F5A623"}}>T</span>rac
+                Builder<span style={{color: "#F5A623"}}>T</span>rac<HolidayOrnament />
               </Link>
               <PartnerLogo />
             </div>
