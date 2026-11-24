@@ -26,7 +26,7 @@ function ThemeChip({ theme, isSelected, onSelect }) {
 }
 
 export default function ColorThemePicker() {
-  const { themeId, setThemeId } = useColorTheme();
+  const { themeId, setThemeId, holidayAuto, setHolidayAuto, autoHolidayId } = useColorTheme();
   const standard = COLOR_THEMES.filter(t => !t.holiday);
   const holidays = COLOR_THEMES.filter(t => t.holiday);
 
@@ -42,6 +42,18 @@ export default function ColorThemePicker() {
       {holidays.length > 0 && (
         <>
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pt-1">Holiday Themes</p>
+          <label className="flex items-start gap-2 text-xs text-muted-foreground cursor-pointer">
+            <input
+              type="checkbox"
+              className="mt-0.5"
+              checked={holidayAuto}
+              onChange={(e) => setHolidayAuto(e.target.checked)}
+            />
+            <span>
+              Switch to holiday looks automatically around each holiday
+              {autoHolidayId ? " (on now)" : ""}
+            </span>
+          </label>
           <div className="grid grid-cols-3 gap-2">
             {holidays.map(theme => (
               <ThemeChip key={theme.id} theme={theme} isSelected={themeId === theme.id} onSelect={setThemeId} />
