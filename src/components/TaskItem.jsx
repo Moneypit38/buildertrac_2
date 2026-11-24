@@ -37,8 +37,8 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
   const [burst, setBurst] = useState(false);
 
   const isNewTask = isNew(task.created_date, "tasks");
-  const todayStr = new Date().toISOString().split("T")[0];
-  const isOverdue = !task.completed && task.due_date && task.due_date <= todayStr;
+  const todayStr = new Date().toLocaleDateString("en-CA"); // local date, YYYY-MM-DD
+  const isOverdue = !task.completed && task.due_date && task.due_date < todayStr;
   const currentPriority = task.priority || "medium";
   const pCfg = priorityConfig[currentPriority] || priorityConfig.medium;
 
