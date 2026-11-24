@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { getActiveHolidayId, applyDecor } from "./holidayDecor";
 
 // 12 cohesive color themes. Each theme carries an accent (applied to
 // primary/ring/chart-1) plus a coordinated 4-color palette for the dashboard
@@ -151,10 +152,21 @@ export const COLOR_THEMES = [
 const ThemeColorContext = createContext(null);
 
 export function ThemeColorProvider({ children }) {
-  const [themeId, setThemeId] = useState(() => localStorage.getItem("color-theme") || "steel");
+  const [themeId, setThemeId] = useState(() => localStorage.getItem("color-theme") || "amber");
+
+  // Holiday looks switch on by themselves near each holiday, unless the person
+  // turned that off or has already picked a holiday theme by hand.
+  const [holidayAuto, setHolidayAutoState] = useState(() => localStorage.getItem("holiday-auto") !== "off");
+  const setHolidayAuto = (on) => {
+    localStorage.setItem("holiday-auto", on ? "on" : "off");
+    setHolidayAutoState(on);
+  };
+  const pickedHoliday = COLOR_THEMES.find(t => t.id === themeId)?.holiday;
+  const autoHolidayId = holidayAuto && !pickedHoliday ? getActiveHolidayId(new Date()) : null;
+  const effectiveThemeId = autoHolidayId || themeId;
 
   useEffect(() => {
-    const theme = COLOR_THEMES.find(t => t.id === themeId) || COLOR_THEMES[0];
+    const theme = COLOR_THEMES.find(t => t.id === effectiveThemeId) || COLOR_THEMES[0];
     const root = document.documentElement;
 
     if (!theme.accent) {
@@ -171,13 +183,14 @@ export function ThemeColorProvider({ children }) {
       root.style.setProperty("--primary-foreground", l > 55 ? "0 0% 5%" : "0 0% 98%");
     }
     localStorage.setItem("color-theme", themeId);
-  }, [themeId]);
+    applyDecor(root, theme.holiday ? theme.id : null);
+  }, [themeId, effectiveThemeId]);
 
-  const theme = COLOR_THEMES.find(t => t.id === themeId) || COLOR_THEMES[0];
+  const theme = COLOR_THEMES.find(t => t.id === effectiveThemeId) || COLOR_THEMES[0];
   const statColors = theme.statColors;
 
   return (
-    <ThemeColorContext.Provider value={{ themeId, setThemeId, theme, statColors }}>
+    <ThemeColorContext.Provider value={{ themeId, setThemeId, effectiveThemeId, holidayAuto, setHolidayAuto, autoHolidayId, theme, statColors }}>
       {children}
     </ThemeColorContext.Provider>
   );
