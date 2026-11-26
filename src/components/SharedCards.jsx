@@ -47,8 +47,8 @@ export function SharedPortfolioCards({ shared, refs, highlightedId }) {
               <div className="flex gap-0.5" onClick={(e) => e.stopPropagation()}>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <button className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-accent transition-colors" aria-label="Remove from my app">
-                      <X className="w-3 h-3" />
+                    <button className="inline-flex items-center justify-center h-11 w-11 -m-2 rounded-xl text-muted-foreground hover:text-destructive active:bg-accent transition-colors" aria-label="Remove from my app">
+                      <X className="w-4 h-4" />
                     </button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
