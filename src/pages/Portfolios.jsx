@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { useSharedJobs } from "@/hooks/useSharedJobs";
+import { SharedPortfolioCards } from "@/components/SharedCards";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -208,6 +210,7 @@ function PortfolioFormDialog({ open, onClose, portfolio }) {
 
 // ── Main Page ───────────────────────────────────────────────────────────────
 export default function Portfolios() {
+  const shared = useSharedJobs();
   const { data: portfolios = [], isLoading } = useQuery({ queryKey: ["portfolios"], queryFn: () => base44.entities.Portfolio.list() });
   const { data: projects = [] } = useQuery({ queryKey: ["projects"], queryFn: () => base44.entities.Project.list() });
   const { data: photos = [] } = useQuery({ queryKey: ["photos"], queryFn: () => base44.entities.SitePhoto.list() });
@@ -300,7 +303,7 @@ export default function Portfolios() {
         </TeamMemberGate>
       </div>
 
-      {portfolios.length === 0 && unassigned.length === 0 ? (
+      {portfolios.length === 0 && unassigned.length === 0 && shared.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-10 text-center">
           <Layers className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground">No portfolios yet. Group your projects into portfolios.</p>
@@ -391,6 +394,7 @@ export default function Portfolios() {
                 </div>
               );
             })}
+            <SharedPortfolioCards shared={shared} />
           </div>
 
           {unassigned.length > 0 && (
