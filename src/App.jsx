@@ -1,4 +1,6 @@
 import { Toaster } from "@/components/ui/toaster"
+import { Toaster as SonnerToaster } from "@/components/ui/sonner"
+import GuestPortal from './pages/GuestPortal';
 import { ThemeProvider } from 'next-themes'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -37,7 +39,10 @@ const AuthenticatedApp = () => {
     );
   }
 
-  if (authError) {
+  // Guest links (/g/<token>) are for people without accounts, so they skip every sign-in check.
+  const isGuestLink = window.location.pathname.startsWith('/g/');
+
+  if (authError && !isGuestLink) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
@@ -48,6 +53,7 @@ const AuthenticatedApp = () => {
 
   return (
     <Routes>
+      <Route path="/g/:token" element={<GuestPortal />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -86,6 +92,7 @@ function App() {
               <AuthenticatedApp />
             </Router>
             <Toaster />
+            <SonnerToaster />
           </QueryClientProvider>
         </AuthProvider>
       </ThemeColorProvider>
