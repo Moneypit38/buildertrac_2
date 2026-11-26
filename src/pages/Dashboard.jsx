@@ -6,6 +6,7 @@ import StatCards from "../components/StatCards";
 import ProjectCard from "../components/ProjectCard";
 import { HardHat, Layers, FolderPlus, Sparkles, UserPlus, Building2, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import SharedWithMe from "@/components/SharedWithMe";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import { isUnseenRecent, useSeenIds } from "../lib/viewedContext";
 import { motion } from "framer-motion";
@@ -89,6 +90,8 @@ export default function Dashboard() {
         <p className="text-xs text-muted-foreground font-medium">Your Site Overview /</p>
         <h1 className="text-2xl font-extrabold font-display mt-0.5">Everything at a glance</h1>
       </motion.div>
+
+      <motion.div {...fadeUp(0.05)}><SharedWithMe /></motion.div>
 
       {isNewUser && (
         <motion.div {...fadeUp(0.07)} className="bg-card border border-border rounded-2xl p-6">
