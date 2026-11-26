@@ -48,7 +48,7 @@ export function AddTaskForm({ onAdd, placeholder = "Add a task…" }) {
   return (
     <form onSubmit={submit} className="flex gap-2 items-center bg-accent/40 border border-border rounded-xl p-2">
       <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={placeholder} className="h-9 text-sm flex-1 min-w-0" />
-      <DateInput value={due} onChange={(e) => setDue(e.target.value)} className="h-9 text-xs" wrapperClassName="w-[150px] shrink-0" />
+      <DateInput value={due} onChange={(e) => setDue(e.target.value)} className="h-9 text-xs" wrapperClassName="w-[140px] shrink-0" />
       <Button type="submit" size="icon" className="h-9 w-9 shrink-0" disabled={!title.trim() || busy}>
         {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
       </Button>
@@ -70,7 +70,7 @@ export function TaskEditor({ task, onSave, onCancel }) {
       <Input value={form.assigned_to} onChange={set("assigned_to")} className="h-9 text-sm" placeholder="Assigned to (name or email)" />
       <div className="flex gap-2">
         <DateInput value={form.due_date} onChange={set("due_date")} className="h-9 text-xs" wrapperClassName="flex-1" />
-        <select value={form.priority} onChange={set("priority")} className="h-9 text-xs rounded-md border border-border bg-background px-2">
+        <select value={form.priority} onChange={set("priority")} className="h-9 w-[92px] shrink-0 text-xs rounded-md border border-border bg-background px-2">
           <option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
         </select>
       </div>
