@@ -7,7 +7,7 @@ import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
 import { markViewed, getLastViewed } from "../hooks/useLastViewed";
-import { ViewedContext, isNewItem, getSeenPhotoIds } from "../lib/viewedContext";
+import { ViewedContext, isUnseenRecent, useSeenIds } from "../lib/viewedContext";
 import SubscriptionGate from "./SubscriptionGate";
 import SettingsSheet from "./SettingsSheet";
 import PartnerLogo from "./PartnerLogo";
@@ -91,13 +91,11 @@ export default function Layout() {
   }, [activeTab, onTab]); // onTab included so navigating back to a tab from a child route also triggers
 
   // Badge counts per nav path
-  const seenPhotoIds = getSeenPhotoIds();
+  // Re-renders when a photo/doc is opened, so the dot clears right away
+  const { seenPhotoIds, seenDocIds } = useSeenIds();
   const navBadges = {
-    "/documents": docs.filter(d => isNewItem(d.created_date, lastViewedTimes.docs)).length,
-    "/photos": photos.filter(ph => {
-      const cutoff72h = new Date(Date.now() - 72 * 60 * 60 * 1000);
-      return new Date(ph.created_date) > cutoff72h && !seenPhotoIds.has(ph.id);
-    }).length,
+    "/documents": docs.filter(d => isUnseenRecent(d.created_date, seenDocIds, d.id)).length,
+    "/photos": photos.filter(ph => isUnseenRecent(ph.created_date, seenPhotoIds, ph.id)).length,
   };
 
   return (
