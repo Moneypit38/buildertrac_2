@@ -13,15 +13,15 @@ export function DeleteButton({ onConfirm, className = "" }) {
     return (
       <span className={`inline-flex items-center gap-1 ${className}`}>
         <Button type="button" size="sm" variant="destructive" className="h-7 text-xs px-2" disabled={busy}
-          onClick={async (e) => { e.stopPropagation(); setBusy(true); await onConfirm(); setBusy(false); setSure(false); }}>
+          onClick={async (e) => { e.preventDefault(); e.stopPropagation(); setBusy(true); await onConfirm(); setBusy(false); setSure(false); }}>
           {busy ? <Loader2 className="w-3 h-3 animate-spin" /> : "Delete"}
         </Button>
-        <Button type="button" size="sm" variant="ghost" className="h-7 text-xs px-2" onClick={(e) => { e.stopPropagation(); setSure(false); }}>No</Button>
+        <Button type="button" size="sm" variant="ghost" className="h-7 text-xs px-2" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSure(false); }}>No</Button>
       </span>
     );
   }
   return (
-    <button type="button" aria-label="Delete" onClick={(e) => { e.stopPropagation(); setSure(true); }}
+    <button type="button" aria-label="Delete" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSure(true); }}
       className={`p-1 text-muted-foreground hover:text-destructive transition-colors ${className}`}>
       <Trash2 className="w-3.5 h-3.5" />
     </button>
