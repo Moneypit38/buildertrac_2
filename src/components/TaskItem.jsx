@@ -216,27 +216,23 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
 
           {/* Edit / Expand / Delete row */}
           <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
-            {onEdit && (
-              <div
-                onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                style={{ ...tapStyle, width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center" }}
-              >
-                <Pencil size={13} color="hsl(var(--muted-foreground))" />
-              </div>
-            )}
             {onExpand && (
               <div
                 onClick={(e) => { e.stopPropagation(); onExpand(); }}
-                style={{ ...tapStyle, width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center", transform: expanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}
+                style={{ ...tapStyle, width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", transform: expanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}
               >
-                <ChevronDown size={13} color="hsl(var(--muted-foreground))" />
+                <ChevronDown size={18} color="hsl(var(--muted-foreground))" />
               </div>
             )}
-            <div
-              onClick={(e) => { e.stopPropagation(); setShowDelete(true); }}
-              style={{ ...tapStyle, width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center" }}
-            >
-              <Trash2 size={13} color="hsl(var(--muted-foreground))" />
+            <div style={{ width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <RowMenu
+                onEdit={onEdit ? () => onEdit() : undefined}
+                onDelete={() => remove.mutate()}
+                editLabel="Edit task"
+                deleteLabel="Delete task"
+                deleteTitle="Delete task?"
+                deleteText={`This will permanently remove "${task.title}".`}
+              />
             </div>
           </div>
         </div>
