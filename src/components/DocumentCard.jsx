@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { markDocSeen, isUnseenRecent, useSeenIds } from "../lib/viewedContext";
 import { FileText, Download, Trash2, X, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -18,6 +19,7 @@ function getFileType(url = "") {
 
 function DocViewer({ doc, onClose }) {
   const type = getFileType(doc.file_url);
+  useEffect(() => { markDocSeen(doc.id); }, [doc.id]);
   return (
     <div className="fixed inset-0 z-[100] flex flex-col bg-background">
       {/* Header */}
@@ -61,6 +63,8 @@ function DocViewer({ doc, onClose }) {
 
 export default function DocumentCard({ doc, showProject, canDelete = true }) {
   const [viewing, setViewing] = useState(false);
+  const { seenDocIds } = useSeenIds();
+  const isUnseen = isUnseenRecent(doc.created_date, seenDocIds, doc.id);
   const qc = useQueryClient();
   const remove = useMutation({
     mutationFn: () => base44.entities.Document.delete(doc.id),
@@ -81,6 +85,7 @@ export default function DocumentCard({ doc, showProject, canDelete = true }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <p className="font-semibold text-sm truncate">{doc.name}</p>
+              {isUnseen && <span className="w-2 h-2 rounded-full bg-yellow-300 ring-2 ring-background animate-pulse shrink-0" aria-label="New" />}
               <Badge variant="outline" className="text-[10px] text-primary border-primary/30 shrink-0">v{doc.version || 1}</Badge>
             </div>
             <p className="text-[11px] text-muted-foreground mt-0.5">
