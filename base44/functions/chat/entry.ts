@@ -123,6 +123,29 @@ Deno.serve(async (req) => {
       return json({ messages: out });
     }
 
+    // One message to several people: each person gets it as their own private direct message.
+    if (action === 'send' && body.kind === 'dm_many') {
+      const ids = Array.from(new Set((Array.isArray(body.with_many) ? body.with_many : []).map((x: any) => clean(x, 80)))).slice(0, 50);
+      const targets = ids.map((id) => people.find((p: any) => p.id === id)).filter((p: any) => p && p.id !== me.id);
+      const content = clean(body.content, 2000);
+      if (!targets.length || !content) return json({ error: 'empty' }, 400);
+      const category = screen(content);
+      for (const t of targets as any[]) {
+        await db.ChatMessage.create({
+          owner_id: ownerId, kind: 'dm', room: '', thread: dmThread(me.id, t.id),
+          sender_id: me.id, sender_name: me.name, sender_role: me.role,
+          recipient_id: t.id, content, flagged: !!category,
+        });
+      }
+      if (category) {
+        await db.ChatFlag.create({
+          owner_id: ownerId, source: 'auto', category, thread_kind: 'dm', room: '',
+          sender_id: me.id, sender_name: me.name, recipient_name: (targets as any[]).map((t) => t.name).join(', ').slice(0, 200), resolved: false,
+        });
+      }
+      return json({ ok: true, sent: targets.length });
+    }
+
     if (action === 'send') {
       const t = resolveThread();
       if (!t) return json({ error: 'not_allowed' }, 403);
