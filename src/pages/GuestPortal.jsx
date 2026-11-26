@@ -8,6 +8,7 @@ import {
   CheckCircle2, X, ExternalLink, Send, Link2Off, ArrowRight, HardHat,
 } from "lucide-react";
 import { toast } from "sonner";
+import { DeleteButton, AddTaskForm, TaskEditor, ProjectEditor, AddProjectForm } from "@/components/GuestAdminParts";
 
 const STATUSES = ["Not Started", "In Progress", "Pending Approval", "Blocked", "Done"];
 const statusStyle = {
@@ -49,6 +50,20 @@ async function call(token, action, extra = {}) {
   return res.data;
 }
 
+// Portfolio-admin actions: returns true when saved.
+async function adminDo(token, action, extra, okMsg, reload) {
+  try {
+    const r = await call(token, action, extra);
+    if (r?.error) throw new Error(r.error);
+    if (okMsg) toast.success(okMsg);
+    await reload();
+    return true;
+  } catch {
+    toast.error("That didn't save. Please try again.");
+    return false;
+  }
+}
+
 const errorText = {
   file_too_large: "That file is too large (10 MB max).",
   images_only: "Please choose an image.",
@@ -57,7 +72,7 @@ const errorText = {
 };
 
 // ---------- small pieces ----------
-function Lightbox({ photo, onClose }) {
+function Lightbox({ photo, onClose, onDelete }) {
   return (
     <div className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-card border border-border rounded-2xl overflow-hidden max-w-lg w-full max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
@@ -68,6 +83,7 @@ function Lightbox({ photo, onClose }) {
         <div className="p-4 space-y-1 overflow-y-auto">
           <p className="font-semibold">{photo.title}</p>
           {photo.description && <p className="text-sm text-muted-foreground">{photo.description}</p>}
+          {onDelete && <DeleteButton onConfirm={onDelete} className="-ml-1" />}
           <p className="text-xs text-muted-foreground">
             {photo.created_date?.slice(0, 10)}{photo.uploaded_by_guest ? ` · ${photo.uploaded_by_guest}` : ""}
           </p>
@@ -77,8 +93,9 @@ function Lightbox({ photo, onClose }) {
   );
 }
 
-function TasksPanel({ project, canEdit, token, reload }) {
+function TasksPanel({ project, canEdit, isAdmin, token, reload }) {
   const [busy, setBusy] = useState(null);
+  const [editingId, setEditingId] = useState(null);
   const roots = project.tasks.filter((t) => !t.parent_task_id);
   const kids = (id) => project.tasks.filter((t) => t.parent_task_id === id);
   roots.sort((a, b) => Number(a.completed) - Number(b.completed) || (a.due_date || "9999").localeCompare(b.due_date || "9999"));
@@ -96,7 +113,7 @@ function TasksPanel({ project, canEdit, token, reload }) {
     }
   };
 
-  if (roots.length === 0) return <p className="text-sm text-muted-foreground text-center py-8">No tasks yet.</p>;
+  if (roots.length === 0 && !isAdmin) return <p className="text-sm text-muted-foreground text-center py-8">No tasks yet.</p>;
 
   const Row = ({ t, child }) => (
     <div className={`bg-card border border-border rounded-xl px-3 py-2.5 ${child ? "ml-5" : ""}`}>
