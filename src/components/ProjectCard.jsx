@@ -15,7 +15,7 @@ const statusColors = {
   "Completed": "bg-green-500/20 text-green-400",
 };
 
-export default function ProjectCard({ project, onDelete, allTasks, allNotes, allPhotos }) {
+export default function ProjectCard({ project, onDelete, allTasks, allNotes, allPhotos, to }) {
   const { data: projectTasksData = [] } = useQuery({
     queryKey: ["tasks", project.id],
     queryFn: () => base44.entities.Task.filter({ project_id: project.id }),
@@ -76,7 +76,7 @@ export default function ProjectCard({ project, onDelete, allTasks, allNotes, all
   const hasUnreadMsgs = seenCount !== null && projectNotes.length > seenCount;
 
   return (
-    <Link to={`/project/${project.id}`}
+    <Link to={to || `/project/${project.id}`}
       className={`block bg-card border rounded-xl p-4 hover:border-primary/50 transition-all duration-200 group ${hasUnseenOverdue ? "border-orange-400/60 border-t-2 border-t-orange-400" : "border-border"}`}>
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
