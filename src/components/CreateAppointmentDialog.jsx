@@ -3,6 +3,7 @@ import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import DateInput from "@/components/DateInput";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -71,7 +72,7 @@ export default function CreateAppointmentDialog({ open, onClose, projectId, appo
           </div>
           <div>
             <Label>Date *</Label>
-            <Input type="date" value={form.date} onChange={set("date")} />
+            <DateInput value={form.date} onChange={set("date")} className="text-sm" />
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
