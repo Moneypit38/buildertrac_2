@@ -1,41 +1,44 @@
 {
   "name": "Project",
-  "type": "object",
   "properties": {
+    "address": {
+      "type": "string"
+    },
+    "budget_spent": {
+      "default": 0,
+      "type": "number"
+    },
+    "budget_total": {
+      "default": 0,
+      "type": "number"
+    },
+    "description": {
+      "maxLength": 1000,
+      "type": "string"
+    },
+    "image": {
+      "format": "uri",
+      "type": "string"
+    },
     "name": {
       "type": "string"
     },
-    "address": {
+    "owner_id": {
+      "description": "Account owner's user id; set when a portfolio admin adds a project via a share link",
       "type": "string"
     },
     "portfolio": {
       "type": "string"
     },
     "status": {
-      "type": "string",
+      "default": "Planning",
       "enum": [
         "Planning",
         "In Progress",
         "On Hold",
         "Completed"
       ],
-      "default": "Planning"
-    },
-    "budget_total": {
-      "type": "number",
-      "default": 0
-    },
-    "budget_spent": {
-      "type": "number",
-      "default": 0
-    },
-    "image": {
-      "type": "string",
-      "format": "uri"
-    },
-    "description": {
-      "type": "string",
-      "maxLength": 1000
+      "type": "string"
     }
   },
   "required": [
@@ -45,14 +48,36 @@
     "create": {
       "created_by_id": "{{user.id}}"
     },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
+    },
     "read": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
     },
     "update": {
-      "created_by_id": "{{user.id}}"
-    },
-    "delete": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
     }
-  }
+  },
+  "type": "object"
 }
