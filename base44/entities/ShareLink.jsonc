@@ -15,7 +15,15 @@
     "guest_name": {
       "type": "string"
     },
+    "invited_by": {
+      "description": "Name of the project manager who created this link, if not the owner",
+      "type": "string"
+    },
     "last_opened": {
+      "type": "string"
+    },
+    "owner_id": {
+      "description": "Account owner's user id. Set when a project manager creates the link, so it still belongs to the owner's account",
       "type": "string"
     },
     "owner_name": {
@@ -63,13 +71,34 @@
       "created_by_id": "{{user.id}}"
     },
     "delete": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
     },
     "read": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
     },
     "update": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
     }
   },
   "type": "object"
