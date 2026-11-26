@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link2, Copy, Share2, Mail, Trash2, Power, Eye, Wrench, Check, ShieldCheck, MessageSquare } from "lucide-react";
 
-const smsHref = (url) => `sms:?&body=${encodeURIComponent(`Here's your BuilderTrac link (no account needed): ${url}`)}`;
+const smsHref = (url) => `sms:?&body=${encodeURIComponent(`Here's your BuilderTrac link (no account needed): ${url}\n\nIf it opens the BuilderTrac app instead, press and hold the link and choose Open in Safari.`)}`;
 import { toast } from "sonner";
 
 // Guest links always point at the published web app, even when this screen
@@ -158,6 +158,7 @@ export default function GuestLinkDialog({ open, onClose, scope }) {
               `Hi${values.guest_name.trim() ? " " + values.guest_name.trim() : ""},\n\n` +
               `${ownerName || "Your contractor"} has shared ${scope.label || "a project"} with you on BuilderTrac.\n\n` +
               `Open it here — no account or sign-up needed:\n${url}\n\n` +
+              `If it opens the BuilderTrac app instead, press and hold the link and choose Open in Safari.\n\n` +
               `Keep this link private. Anyone who has it can open the project.\n\n— BuilderTrac`,
           });
           emailed = true;
