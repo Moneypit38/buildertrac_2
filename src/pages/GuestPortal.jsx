@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   ClipboardList, Camera, FileText, MessageSquare, MapPin, ChevronLeft, Upload, Loader2,
-  CheckCircle2, X, ExternalLink, Send, Link2Off, ArrowRight, HardHat,
+  CheckCircle2, X, ExternalLink, Send, Link2Off, ArrowRight, HardHat, Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
 import { DeleteButton, AddTaskForm, TaskEditor, ProjectEditor, AddProjectForm } from "@/components/GuestAdminParts";
@@ -135,12 +135,23 @@ function TasksPanel({ project, canEdit, isAdmin, token, reload }) {
         ) : (
           <span className={`text-[10px] font-semibold px-2 py-1 rounded-full shrink-0 ${statusStyle[t.status] || statusStyle["Not Started"]}`}>{t.status || "Not Started"}</span>
         )}
+        {isAdmin && (
+          <>
+            <button type="button" aria-label="Edit task" onClick={() => setEditingId(editingId === t.id ? null : t.id)} className="p-1 text-muted-foreground hover:text-primary"><Pencil className="w-3.5 h-3.5" /></button>
+            <DeleteButton onConfirm={() => adminDo(token, "deleteTask", { task_id: t.id }, "Task deleted", reload)} />
+          </>
+        )}
       </div>
+      {isAdmin && editingId === t.id && (
+        <TaskEditor task={t} onCancel={() => setEditingId(null)} onSave={(v) => adminDo(token, "editTask", { task_id: t.id, ...v }, "Task saved", reload)} />
+      )}
     </div>
   );
 
   return (
     <div className="space-y-2">
+      {isAdmin && <AddTaskForm onAdd={(v) => adminDo(token, "addTask", { project_id: project.id, ...v }, "Task added", reload)} />}
+      {roots.length === 0 && <p className="text-sm text-muted-foreground text-center py-6">No tasks yet.</p>}
       {roots.map((t) => (
         <div key={t.id} className="space-y-1.5">
           <Row t={t} />
