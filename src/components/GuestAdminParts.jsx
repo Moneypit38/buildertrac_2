@@ -6,6 +6,7 @@ import { Trash2, Pencil, Plus, Loader2, CalendarClock, MapPin, UserPlus, Copy, S
 
 const smsHref = (url) => `sms:?&body=${encodeURIComponent(`Here's your BuilderTrac link (no account needed): ${url}\n\nIf it opens the BuilderTrac app instead, press and hold the link and choose Open in Safari.`)}`;
 import { toast } from "sonner";
+import DateInput from "@/components/DateInput";
 
 // Building blocks used only by project managers on the /g/<token> page.
 
@@ -47,7 +48,7 @@ export function AddTaskForm({ onAdd, placeholder = "Add a task…" }) {
   return (
     <form onSubmit={submit} className="flex gap-2 items-center bg-accent/40 border border-border rounded-xl p-2">
       <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={placeholder} className="h-9 text-sm flex-1 min-w-0" />
-      <Input type="date" value={due} onChange={(e) => setDue(e.target.value)} className="h-9 text-xs w-[130px] shrink-0" />
+      <DateInput value={due} onChange={(e) => setDue(e.target.value)} className="h-9 text-xs" wrapperClassName="w-[150px] shrink-0" />
       <Button type="submit" size="icon" className="h-9 w-9 shrink-0" disabled={!title.trim() || busy}>
         {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
       </Button>
@@ -68,7 +69,7 @@ export function TaskEditor({ task, onSave, onCancel }) {
       <Textarea value={form.description} onChange={set("description")} rows={2} className="text-sm" placeholder="Details (optional)" />
       <Input value={form.assigned_to} onChange={set("assigned_to")} className="h-9 text-sm" placeholder="Assigned to (name or email)" />
       <div className="flex gap-2">
-        <Input type="date" value={form.due_date} onChange={set("due_date")} className="h-9 text-xs flex-1" />
+        <DateInput value={form.due_date} onChange={set("due_date")} className="h-9 text-xs" wrapperClassName="flex-1" />
         <select value={form.priority} onChange={set("priority")} className="h-9 text-xs rounded-md border border-border bg-background px-2">
           <option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
         </select>
@@ -314,7 +315,7 @@ export function AppointmentsPanel({ project, canManage, onAdd, onDelete }) {
         >
           <Input value={form.title} onChange={set("title")} placeholder="Appointment title" className="h-9 text-sm" />
           <div className="flex gap-2">
-            <Input type="date" value={form.date} onChange={set("date")} className="h-9 text-xs flex-1" />
+            <DateInput value={form.date} onChange={set("date")} className="h-9 text-xs" wrapperClassName="flex-1" />
             <Input type="time" value={form.start_time} onChange={set("start_time")} className="h-9 text-xs w-[110px]" />
           </div>
           <Input value={form.location} onChange={set("location")} placeholder="Location (optional)" className="h-9 text-sm" />
