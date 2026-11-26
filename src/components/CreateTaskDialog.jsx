@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import DateInput from "@/components/DateInput";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ResponsiveSelect from "@/components/ResponsiveSelect";
@@ -52,7 +53,7 @@ export default function CreateTaskDialog({ open, onClose, projectId, task, initi
               options={[{ value: "high", label: "High" }, { value: "medium", label: "Medium" }, { value: "low", label: "Low" }]}
             />
           </div>
-          <div><Label>Due Date</Label><Input type="date" value={form.due_date} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} className="min-h-[44px]" /></div>
+          <div><Label>Due Date</Label><DateInput value={form.due_date} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} className="min-h-[44px] text-sm" /></div>
           <div><Label>Assigned To</Label><Input value={form.assigned_to} onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))} placeholder="Name" /></div>
           <Button type="submit" className="w-full" disabled={mutation.isPending}>{mutation.isPending ? "Saving..." : isEdit ? "Save Changes" : "Create Task"}</Button>
         </form>
