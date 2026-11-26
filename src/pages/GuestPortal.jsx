@@ -6,8 +6,10 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   ClipboardList, Camera, FileText, MessageSquare, MapPin, ChevronLeft, Upload, Loader2,
   CheckCircle2, X, ExternalLink, Send, Link2Off, ArrowRight, HardHat, Pencil, Plus, CalendarClock,
+  MessageCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import ChatHub from "@/components/ChatHub";
 import { DeleteButton, AddTaskForm, TaskEditor, ProjectEditor, AddProjectForm, PortfolioEditor, AppointmentsPanel, ShareSection } from "@/components/GuestAdminParts";
 
 const STATUSES = ["Not Started", "In Progress", "Pending Approval", "Blocked", "Done"];
@@ -425,6 +427,7 @@ export default function GuestPortal({ embedded = false }) {
   const navigate = useNavigate();
   const [state, setState] = useState({ loading: true, error: null, data: null });
   const [selectedId, setSelectedId] = useState(() => new URLSearchParams(window.location.search).get("project"));
+  const [showChat, setShowChat] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -482,6 +485,17 @@ export default function GuestPortal({ embedded = false }) {
   const single = projects.length === 1 && !data.portfolio_name ? projects[0] : null;
   const selected = single || projects.find((p) => p.id === selectedId) || null;
 
+  if (showChat) {
+    return (
+      <div className={embedded ? "flex flex-col" : "min-h-screen flex flex-col"}>
+        <div className="max-w-2xl mx-auto w-full p-4 space-y-3" style={embedded ? undefined : { paddingTop: "max(1rem, env(safe-area-inset-top))" }}>
+          <Button variant="ghost" size="sm" onClick={() => setShowChat(false)} className="gap-1 text-primary"><ChevronLeft className="w-4 h-4" /> Back to project</Button>
+          <ChatHub token={token} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={embedded ? "flex flex-col" : "min-h-screen flex flex-col"}>
       {embedded && (
@@ -513,6 +527,11 @@ export default function GuestPortal({ embedded = false }) {
 
       <main className="flex-1 max-w-2xl w-full mx-auto p-4 space-y-4">
         {!embedded && <AddToMyApp token={token} data={data} />}
+        {data.role !== "customer" && (
+          <Button variant="outline" className="w-full gap-2" onClick={() => setShowChat(true)}>
+            <MessageCircle className="w-4 h-4" /> Team chat &amp; messages
+          </Button>
+        )}
         {projects.length === 0 && data.role === "project_manager" && (
           <div className="space-y-3">
             {data.portfolio_name && <h1 className="text-xl font-bold font-display">{data.portfolio_name}</h1>}
