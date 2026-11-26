@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, FolderKanban, FileText, Camera, Layers, ChevronLeft } from "lucide-react";
+import { LayoutDashboard, FolderKanban, FileText, Camera, Layers, ChevronLeft, MessageCircle } from "lucide-react";
+import { useChatBadge } from "@/hooks/useChatBadge";
 import HolidayOrnament from "./HolidayOrnament";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
@@ -50,6 +51,7 @@ function getActiveTab(pathname) {
 export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const chatBadge = useChatBadge();
   const { data: user } = useQuery({ queryKey: ["me"], queryFn: () => base44.auth.me() });
   const queryClient = useQueryClient();
   const { refreshing, touchHandlers } = usePullToRefresh(() => queryClient.invalidateQueries());
@@ -128,6 +130,10 @@ export default function Layout() {
 
           {/* Right actions */}
           <div className="flex items-center gap-1.5">
+            <Link to="/chat" aria-label="Chat" className="relative inline-flex items-center justify-center h-11 w-11 rounded-xl text-muted-foreground hover:text-foreground active:bg-accent transition-colors">
+              <MessageCircle className="w-6 h-6" />
+              {chatBadge && <span className="absolute top-2 right-2 w-3 h-3 rounded-full bg-yellow-300 ring-2 ring-background animate-pulse" />}
+            </Link>
             <SettingsSheet user={user} />
           </div>
         </div>
