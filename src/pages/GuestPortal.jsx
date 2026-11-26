@@ -478,7 +478,8 @@ export default function GuestPortal({ embedded = false }) {
     onToggle: (l) => adminDo(token, "setLinkActive", { link_id: l.id, active: !l.active }, l.active ? "Link turned off" : "Link turned on", load),
     onDelete: (l) => adminDo(token, "deleteLink", { link_id: l.id }, "Link removed", load),
   } : null;
-  const single = projects.length === 1 ? projects[0] : null;
+  // A portfolio always shows its project list first, even with one project. Only a single-project link skips it.
+  const single = projects.length === 1 && !data.portfolio_name ? projects[0] : null;
   const selected = single || projects.find((p) => p.id === selectedId) || null;
 
   return (
@@ -495,7 +496,7 @@ export default function GuestPortal({ embedded = false }) {
             <Button variant="ghost" size="sm" onClick={() => setSelectedId(null)} className="gap-1 text-primary"><ChevronLeft className="w-4 h-4" /> All projects</Button>
           )}
           {embedded && (!selected || single) && (
-            <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-1 text-primary"><ChevronLeft className="w-4 h-4" /> My app</Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/portfolios")} className="gap-1 text-primary"><ChevronLeft className="w-4 h-4" /> Portfolios</Button>
           )}
         </div>
       </header>
