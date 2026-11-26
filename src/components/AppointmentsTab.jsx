@@ -6,6 +6,7 @@ import { Plus, CalendarClock, Clock, MapPin, Users, Trash2, Pencil } from "lucid
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import CreateAppointmentDialog from "./CreateAppointmentDialog";
 import { toast } from "sonner";
+import RowMenu from "@/components/RowMenu";
 import { format } from "date-fns";
 
 function formatTime(t) {
@@ -85,29 +86,15 @@ export default function AppointmentsTab({ projectId, canDelete, highlightApptId 
               {appt.notes && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{appt.notes}</p>}
             </div>
           </div>
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <button onClick={() => { setEditAppt(appt); setShowDialog(true); }} className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors">
-              <Pencil className="w-3.5 h-3.5" />
-            </button>
-            {canDelete && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <button className="p-1 rounded text-muted-foreground hover:text-destructive transition-colors">
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete appointment?</AlertDialogTitle>
-                    <AlertDialogDescription>This cannot be undone.</AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => deleteAppt.mutate(appt.id)} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
+          <div className="flex items-center flex-shrink-0 pr-1">
+            <RowMenu
+              onEdit={() => { setEditAppt(appt); setShowDialog(true); }}
+              onDelete={canDelete ? () => deleteAppt.mutate(appt.id) : undefined}
+              editLabel="Edit appointment"
+              deleteLabel="Delete appointment"
+              deleteTitle="Delete appointment?"
+              deleteText="This cannot be undone."
+            />
           </div>
         </div>
       </div>
