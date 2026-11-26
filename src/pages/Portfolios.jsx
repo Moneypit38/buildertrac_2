@@ -224,14 +224,14 @@ export default function Portfolios() {
 
   useEffect(() => {
     const openId = location.state?.openPortfolioId;
-    if (!openId || portfolios.length === 0) return;
+    if (!openId || (portfolios.length === 0 && shared.length === 0)) return;
     setHighlightedId(openId);
     setTimeout(() => {
       portfolioRefs.current[openId]?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 100);
     const timer = setTimeout(() => setHighlightedId(null), 2000);
     return () => clearTimeout(timer);
-  }, [location.state?.openPortfolioId, portfolios]);
+  }, [location.state?.openPortfolioId, portfolios, shared.length]);
 
   const [showCreate, setShowCreate] = useState(false);
   const [showAddShared, setShowAddShared] = useState(false);
@@ -399,7 +399,7 @@ export default function Portfolios() {
                 </div>
               );
             })}
-            <SharedPortfolioCards shared={shared} />
+            <SharedPortfolioCards shared={shared} refs={portfolioRefs} highlightedId={highlightedId} />
           </div>
 
           {unassigned.length > 0 && (
