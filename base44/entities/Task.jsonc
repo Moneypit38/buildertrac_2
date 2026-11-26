@@ -1,24 +1,54 @@
 {
   "name": "Task",
-  "type": "object",
   "properties": {
-    "title": {
+    "assigned_to": {
       "type": "string"
+    },
+    "completed": {
+      "default": false,
+      "type": "boolean"
     },
     "description": {
       "type": "string"
     },
+    "due_date": {
+      "format": "date",
+      "type": "string"
+    },
+    "owner_id": {
+      "description": "Account owner's user id; set when a guest admin adds a task via a share link",
+      "type": "string"
+    },
+    "parent_task_id": {
+      "type": "string"
+    },
     "priority": {
-      "type": "string",
+      "default": "medium",
       "enum": [
         "high",
         "medium",
         "low"
       ],
-      "default": "medium"
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "reminder_sent": {
+      "default": false,
+      "type": "boolean"
+    },
+    "section": {
+      "default": "today",
+      "enum": [
+        "today",
+        "upcoming",
+        "later"
+      ],
+      "type": "string"
     },
     "status": {
-      "type": "string",
+      "default": "Not Started",
       "enum": [
         "Not Started",
         "In Progress",
@@ -26,36 +56,9 @@
         "Blocked",
         "Done"
       ],
-      "default": "Not Started"
-    },
-    "due_date": {
-      "type": "string",
-      "format": "date"
-    },
-    "section": {
-      "type": "string",
-      "enum": [
-        "today",
-        "upcoming",
-        "later"
-      ],
-      "default": "today"
-    },
-    "completed": {
-      "type": "boolean",
-      "default": false
-    },
-    "project_id": {
       "type": "string"
     },
-    "assigned_to": {
-      "type": "string"
-    },
-    "reminder_sent": {
-      "type": "boolean",
-      "default": false
-    },
-    "parent_task_id": {
+    "title": {
       "type": "string"
     }
   },
@@ -67,14 +70,36 @@
     "create": {
       "created_by_id": "{{user.id}}"
     },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
+    },
     "read": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
     },
     "update": {
-      "created_by_id": "{{user.id}}"
-    },
-    "delete": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
     }
-  }
+  },
+  "type": "object"
 }
