@@ -34,6 +34,7 @@ const PARTICLES = Array.from({ length: 8 }, (_, i) => ({
 export default function TaskItem({ task, onExpand, expanded, onEdit }) {
   const qc = useQueryClient();
   const [showDelete, setShowDelete] = useState(false);
+  const [showActions, setShowActions] = useState(false);
   const [burst, setBurst] = useState(false);
 
   const isNewTask = isNew(task.created_date, "tasks");
@@ -224,7 +225,7 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
               color: pCfg.text,
               fontSize: 10, fontWeight: 700,
               borderRadius: 6,
-              minWidth: 44, minHeight: 30,
+              minWidth: 52, minHeight: 36,
               display: "flex", alignItems: "center", justifyContent: "center",
               padding: "0 8px",
             }}
