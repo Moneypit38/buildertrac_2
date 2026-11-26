@@ -34,6 +34,18 @@ export default function ProjectMembersTab({ projectId, autoOpenInvite, onInviteO
     },
   });
 
+  // People invited to this project's whole portfolio also have access to this project
+  const { data: portfolioLinks = [] } = useQuery({
+    queryKey: ["share-links", "portfolio", project?.portfolio],
+    enabled: !!project?.portfolio,
+    queryFn: async () => {
+      const rows = await base44.entities.ShareLink.filter({ portfolio_name: project.portfolio });
+      return rows.filter((l) => l.scope === "portfolio");
+    },
+  });
+  const everyone = [...links, ...portfolioLinks];
+  const roleLabel = (r) => (r === "project_manager" ? "Project manager" : r === "team_member" ? "Team member" : "Customer");
+
   // Older-style member records (kept so they can still be cleaned up)
   const { data: members = [] } = useQuery({
     queryKey: ["members", projectId],
@@ -49,7 +61,7 @@ export default function ProjectMembersTab({ projectId, autoOpenInvite, onInviteO
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Users className="w-4 h-4" /> {links.length} guest{links.length !== 1 ? "s" : ""} with access
+          <Users className="w-4 h-4" /> {everyone.length} guest{everyone.length !== 1 ? "s" : ""} with access
         </div>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={() => setShowContacts(true)}>
@@ -65,15 +77,15 @@ export default function ProjectMembersTab({ projectId, autoOpenInvite, onInviteO
         Customers and team members open a private link — no account and no purchase needed.
       </p>
 
-      {links.length === 0 ? (
+      {everyone.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-8 text-center">
           <Link2 className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
           <p className="text-sm text-muted-foreground">No one has been given access yet. Tap Share to send a link.</p>
         </div>
       ) : (
         <div className="space-y-2">
-          {links.map((l) => (
-            <button key={l.id} onClick={() => setShowShare(true)}
+          {everyone.map((l) => (
+            <button key={l.id} onClick={() => l.scope === "project" && setShowShare(true)}
               className={`w-full text-left bg-card border border-border rounded-xl px-4 py-3 flex items-center gap-3 ${l.active === false ? "opacity-60" : ""}`}>
               <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-sm font-bold text-primary shrink-0">
                 {(l.guest_name || l.guest_email || "?")[0]?.toUpperCase()}
@@ -81,10 +93,10 @@ export default function ProjectMembersTab({ projectId, autoOpenInvite, onInviteO
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{l.guest_name || l.guest_email}</p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {l.role === "team_member" ? "Team member" : "Customer"}{l.active === false ? " · link off" : l.last_opened ? ` · opened ${l.last_opened.slice(0, 10)}` : " · not opened yet"}
+                  {roleLabel(l.role)}{l.scope === "portfolio" ? " · whole portfolio" : ""}{l.active === false ? " · link off" : l.last_opened ? ` · opened ${l.last_opened.slice(0, 10)}` : " · not opened yet"}
                 </p>
               </div>
-              {l.role === "team_member" ? <Wrench className="w-4 h-4 text-blue-400 shrink-0" /> : <Eye className="w-4 h-4 text-purple-400 shrink-0" />}
+              {l.role !== "customer" ? <Wrench className="w-4 h-4 text-blue-400 shrink-0" /> : <Eye className="w-4 h-4 text-purple-400 shrink-0" />}
             </button>
           ))}
         </div>
