@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
+import { safeFileUrl } from "@/lib/safeUrl";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
@@ -20,7 +21,8 @@ function getFileType(url = "") {
 import IconButton from "./IconButton";
 
 function DocViewer({ doc, onClose }) {
-  const type = getFileType(doc.file_url);
+  const fileUrl = safeFileUrl(doc.file_url);
+  const type = fileUrl ? getFileType(fileUrl) : "other";
   useEffect(() => { markDocSeen(doc.id); }, [doc.id]);
   return (
     <div className="fixed inset-0 z-[100] flex flex-col bg-background">
@@ -31,10 +33,12 @@ function DocViewer({ doc, onClose }) {
           <p className="text-[11px] text-muted-foreground">{doc.category}</p>
         </div>
         <div className="flex items-center gap-2 ml-2">
-          <a href={doc.file_url} download target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center justify-center h-11 w-11 rounded-xl text-muted-foreground hover:text-primary active:bg-accent transition-colors">
-            <Download className="w-5 h-5" />
-          </a>
+          {fileUrl && (
+            <a href={fileUrl} download target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center justify-center h-11 w-11 rounded-xl text-muted-foreground hover:text-primary active:bg-accent transition-colors">
+              <Download className="w-5 h-5" />
+            </a>
+          )}
           <button onClick={onClose} aria-label="Close" className="inline-flex items-center justify-center h-11 w-11 rounded-xl text-muted-foreground hover:text-foreground active:bg-accent transition-colors">
             <X className="w-6 h-6" />
           </button>
@@ -43,19 +47,21 @@ function DocViewer({ doc, onClose }) {
       {/* Content */}
       <div className="flex-1 overflow-auto flex items-center justify-center bg-black/10 p-2">
         {type === "image" && (
-          <img src={doc.file_url} alt={doc.name} className="max-w-full max-h-full object-contain rounded-lg shadow-lg" />
+          <img src={fileUrl} alt={doc.name} className="max-w-full max-h-full object-contain rounded-lg shadow-lg" />
         )}
         {type === "pdf" && (
-          <iframe src={doc.file_url} title={doc.name} className="w-full h-full rounded-lg border border-border" />
+          <iframe src={fileUrl} title={doc.name} className="w-full h-full rounded-lg border border-border" />
         )}
         {type === "other" && (
           <div className="text-center space-y-4">
             <FileText className="w-16 h-16 text-muted-foreground mx-auto" />
             <p className="text-sm text-muted-foreground">Preview not available for this file type.</p>
-            <a href={doc.file_url} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm text-primary underline">
-              <ExternalLink className="w-4 h-4" /> Open file
-            </a>
+            {fileUrl && (
+              <a href={fileUrl} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-primary underline">
+                <ExternalLink className="w-4 h-4" /> Open file
+              </a>
+            )}
           </div>
         )}
       </div>
@@ -78,7 +84,7 @@ export default function DocumentCard({ doc, showProject, canDelete = true }) {
       {viewing && <DocViewer doc={doc} onClose={() => setViewing(false)} />}
       <div
         className="bg-background rounded-xl p-3 border border-border/50 group hover:border-primary/30 transition-all cursor-pointer"
-        onClick={() => doc.file_url && setViewing(true)}
+        onClick={() => safeFileUrl(doc.file_url) && setViewing(true)}
       >
         <div className="flex items-start gap-3">
           <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">

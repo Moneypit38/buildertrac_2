@@ -203,6 +203,8 @@ Deno.serve(async (req) => {
 
     return json({ error: 'unknown_action' }, 400);
   } catch (e) {
-    return json({ error: 'server_error', detail: String((e as any)?.message || e) }, 500);
+    // Log the real reason server-side; callers (including guests) only ever get a fixed code.
+    console.error('chat error:', e);
+    return json({ error: 'server_error' }, 500);
   }
 });

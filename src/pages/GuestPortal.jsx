@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import ChatHub from "@/components/ChatHub";
+import { safeFileUrl } from "@/lib/safeUrl";
 import { DeleteButton, AddTaskForm, TaskEditor, ProjectEditor, AddProjectForm, PortfolioEditor, AppointmentsPanel, ShareSection } from "@/components/GuestAdminParts";
 
 const STATUSES = ["Not Started", "In Progress", "Pending Approval", "Blocked", "Done"];
@@ -271,7 +272,7 @@ function DocsPanel({ project, isAdmin, token, reload }) {
       ) : (
         <div className="space-y-2">
           {project.docs.map((d) => (
-            <a key={d.id} href={d.file_url} target="_blank" rel="noopener noreferrer"
+            <a key={d.id} href={safeFileUrl(d.file_url) || undefined} target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-3 bg-card border border-border rounded-xl p-3 hover:border-primary/40 transition-colors">
               <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0"><FileText className="w-4 h-4 text-primary" /></div>
               <div className="flex-1 min-w-0">

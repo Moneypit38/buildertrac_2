@@ -28,9 +28,6 @@ const MAX_BASE64 = 14_000_000; // ~10 MB file
 const DOC_EXT = /\.(pdf|png|jpe?g|heic|gif|webp|docx?|xlsx?|pptx?|txt|csv|dwg|zip)$/i;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const EMAIL_RE = /^[^\s@,;<>"]{1,64}@[^\s@,;<>"]{1,190}\.[a-z]{2,24}$/i;
-// A share link is a bearer secret, so it must not double as a free email relay.
-// Only invite mail is allowed, to an address not already invited, a few times a day per account.
-const MAX_INVITE_EMAILS_PER_DAY = 10;
 const PUBLIC_URL = 'https://mybuildertrac.base44.app';
 const makeToken = () => {
   const bytes = new Uint8Array(24);
@@ -259,13 +256,11 @@ Deno.serve(async (req) => {
         if (email && !EMAIL_RE.test(email)) return json({ error: 'bad_email' }, 400);
         let scope = 'portfolio';
         let pid: string | undefined;
-        let label = link.portfolio_name;
         if (body.project_id) {
           const proj = projects.find((p: any) => p.id === clean(body.project_id, 64));
           if (!proj) return json({ error: 'not_allowed' }, 403);
           scope = 'project';
           pid = proj.id;
-          label = proj.name;
         }
         const newToken = makeToken();
         const rec = await db.ShareLink.create({
@@ -282,36 +277,11 @@ Deno.serve(async (req) => {
           invited_by: guestLabel,
         });
         const url = `${PUBLIC_URL}/g/${newToken}`;
-        let emailed = false;
-
-        // Only mail a genuinely new invite, and never more than a handful a day for the account,
-        // so a leaked project-manager link cannot be used to send mail to arbitrary addresses.
-        let mayEmail = false;
-        if (email) {
-          const owned = await db.ShareLink.filter({ owner_id: ownerId });
-          const alreadyInvited = owned.some((l: any) => l.active !== false &&
-            String(l.guest_email || '').toLowerCase() === email &&
-            ((l.scope === 'portfolio' && l.portfolio_name === link.portfolio_name) ||
-             (l.scope === 'project' && l.project_id === pid)));
-          if (!alreadyInvited) {
-            const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-            const sentLastDay = owned.filter((l: any) =>
-              l.guest_email && String(l.created_date || '') >= since).length;
-            mayEmail = sentLastDay < MAX_INVITE_EMAILS_PER_DAY;
-          }
-        }
-
-        if (mayEmail) {
-          try {
-            await base44.asServiceRole.integrations.Core.SendEmail({
-              to: email,
-              subject: `${guestLabel} shared ${label} with you on BuilderTrac`,
-              body: `Hi${name ? ' ' + name : ''},\n\n${guestLabel}${link.owner_name ? ' (' + link.owner_name + ')' : ''} has shared ${label} with you on BuilderTrac.\n\nOpen it here — no account or sign-up needed:\n${url}\n\nIf it opens the BuilderTrac app instead, press and hold the link and choose Open in Safari.\n\nKeep this link private. Anyone who has it can open the project.\n\n— BuilderTrac`,
-            });
-            emailed = true;
-          } catch (_e) { /* fall back to copying the link */ }
-        }
-        return json({ ok: true, id: rec.id, url, emailed });
+        // No mail is sent from here on purpose. This endpoint is opened with a share-link token,
+        // not an account, so an address taken from the request must never become a recipient.
+        // The project manager copies the link and shares it themselves; the account owner can
+        // still email invites from inside the app, where the link's ownership is checked.
+        return json({ ok: true, id: rec.id, url, emailed: false });
       }
 
       if (action === 'setLinkActive' || action === 'deleteLink') {
