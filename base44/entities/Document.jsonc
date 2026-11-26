@@ -5,9 +5,9 @@
       "default": "Plans",
       "enum": [
         "Plans",
-        "RFI",
+        "Invoices",
         "Change Order",
-        "Report",
+        "Permits",
         "Contract"
       ],
       "type": "string"
