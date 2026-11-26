@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, MessageSquare, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import IconButton from "./IconButton";
 import { cn } from "@/lib/utils";
 
 export default function NotesTab({ projectId }) {
@@ -113,15 +114,14 @@ export default function NotesTab({ projectId }) {
                     <div className="flex items-end gap-1">
                       {/* Delete button for own messages or admin */}
                       {(isMe || currentUser?.role === "admin") && (
-                        <button
+                        <IconButton
+                          destructive
+                          aria-label="Delete message"
                           onClick={() => deleteNote.mutate(note.id)}
-                          className={cn(
-                            "opacity-0 group-hover:opacity-100 transition-opacity p-1 text-muted-foreground hover:text-destructive",
-                            isMe ? "order-first" : "order-last"
-                          )}
+                          className={cn("-m-1.5", isMe ? "order-first" : "order-last")}
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                          <Trash2 className="w-4 h-4" />
+                        </IconButton>
                       )}
                       <div className={cn(
                         "rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words",
