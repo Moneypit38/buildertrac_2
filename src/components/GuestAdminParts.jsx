@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Trash2, Pencil, Plus, Loader2, CalendarClock, MapPin, UserPlus, Copy, Share2, Power, Check, MessageSquare } from "lucide-react";
 
-const smsHref = (url) => `sms:?&body=${encodeURIComponent(`Here's your BuilderTrac link (no account needed): ${url}`)}`;
+const smsHref = (url) => `sms:?&body=${encodeURIComponent(`Here's your BuilderTrac link (no account needed): ${url}\n\nIf it opens the BuilderTrac app instead, press and hold the link and choose Open in Safari.`)}`;
 import { toast } from "sonner";
 
 // Building blocks used only by project managers on the /g/<token> page.
