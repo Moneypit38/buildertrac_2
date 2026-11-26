@@ -118,10 +118,10 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
           >
             Today
           </button>
-          <button onClick={prevMonth} className="p-1 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground">
+          <button onClick={prevMonth} aria-label="Previous month" className="inline-flex items-center justify-center h-11 w-11 -m-2 rounded-xl hover:bg-accent active:bg-accent transition-colors text-muted-foreground hover:text-foreground">
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <button onClick={nextMonth} className="p-1 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground">
+          <button onClick={nextMonth} aria-label="Next month" className="inline-flex items-center justify-center h-11 w-11 -m-2 rounded-xl hover:bg-accent active:bg-accent transition-colors text-muted-foreground hover:text-foreground">
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
