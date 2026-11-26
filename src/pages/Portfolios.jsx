@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSharedJobs } from "@/hooks/useSharedJobs";
 import { SharedPortfolioCards } from "@/components/SharedCards";
 import AddSharedJobDialog from "@/components/SharedWithMe";
+import RowMenu from "@/components/RowMenu";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -336,28 +337,14 @@ export default function Portfolios() {
                     <div className="flex items-start justify-between">
                       <PortfolioIcon icon={pf.icon} color={pf.color} size="sm" logoUrl={pf.logo_url} />
                       {!isClientOnly && (
-                        <div className="flex gap-0.5" onClick={e => e.stopPropagation()}>
-                          <button onClick={() => setEditPortfolio(pf)} className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
-                            <Pencil className="w-3 h-3" />
-                          </button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <button className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-accent transition-colors">
-                                <Trash2 className="w-3 h-3" />
-                              </button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete portfolio?</AlertDialogTitle>
-                                <AlertDialogDescription>This only removes the portfolio label — projects won't be deleted.</AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => deletePortfolio.mutate(pf.id)} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
+                        <RowMenu
+                          onEdit={() => setEditPortfolio(pf)}
+                          onDelete={() => deletePortfolio.mutate(pf.id)}
+                          editLabel="Edit portfolio"
+                          deleteLabel="Delete portfolio"
+                          deleteTitle="Delete portfolio?"
+                          deleteText="This only removes the portfolio label — projects won't be deleted."
+                        />
                       )}
                     </div>
 
