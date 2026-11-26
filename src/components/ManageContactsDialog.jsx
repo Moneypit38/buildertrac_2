@@ -126,7 +126,7 @@ export default function ManageContactsDialog({ open, onClose }) {
                     <button onClick={() => handleEdit(c)} className="text-muted-foreground hover:text-foreground transition-colors shrink-0 text-xs underline">Edit</button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <button className="text-muted-foreground hover:text-destructive transition-colors shrink-0"><Trash2 className="w-3.5 h-3.5" /></button>
+                        <button aria-label="Delete contact" className="inline-flex items-center justify-center h-11 w-11 -m-2 rounded-xl text-muted-foreground hover:text-destructive active:bg-accent transition-colors shrink-0"><Trash2 className="w-4 h-4" /></button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader><AlertDialogTitle>Delete contact?</AlertDialogTitle><AlertDialogDescription>Remove {c.name} from your contacts list?</AlertDialogDescription></AlertDialogHeader>

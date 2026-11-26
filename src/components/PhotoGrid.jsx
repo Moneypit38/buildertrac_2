@@ -35,9 +35,9 @@ function PhotoThumbnail({ photo, canDelete, onSelect }) {
           <AlertDialogTrigger asChild>
             <button
               onClick={e => e.stopPropagation()}
-              className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 bg-black/50 backdrop-blur rounded p-1 text-white hover:text-destructive transition-all"
+              className="absolute top-1 right-1 h-11 w-11 flex items-center justify-center bg-black/50 backdrop-blur rounded-xl text-white hover:text-destructive transition-all"
             >
-              <Trash2 className="w-3 h-3" />
+              <Trash2 className="w-4 h-4" />
             </button>
           </AlertDialogTrigger>
           <AlertDialogContent>
@@ -102,8 +102,8 @@ export function PhotoExpanded({ photo, onClose, canDelete, projectName }) {
           {canDelete && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <button className="text-xs text-destructive flex items-center gap-1 mt-1 hover:underline">
-                  <Trash2 className="w-3 h-3" /> Delete photo
+                <button className="text-sm text-destructive flex items-center gap-1.5 mt-1 min-h-[44px] hover:underline">
+                  <Trash2 className="w-4 h-4" /> Delete photo
                 </button>
               </AlertDialogTrigger>
               <AlertDialogContent>

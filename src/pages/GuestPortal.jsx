@@ -367,8 +367,8 @@ function ProjectView({ project, role, token, reload, guestName, shareProps }) {
       <div className="flex bg-card border border-border rounded-lg p-0.5">
         {tabs.map((t) => (
           <button key={t.id} onClick={() => setTab(t.id)}
-            className={`flex-1 flex items-center justify-center gap-1 text-xs font-medium py-2 rounded-md transition-colors ${tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
-            <t.icon className="w-3.5 h-3.5" /> {t.label}
+            className={`flex-1 flex items-center justify-center gap-1.5 text-[13px] font-medium min-h-[44px] rounded-md transition-colors ${tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
+            <t.icon className="w-4 h-4" /> {t.label}
           </button>
         ))}
       </div>

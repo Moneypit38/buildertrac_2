@@ -101,7 +101,7 @@ export default function ProjectMembersTab({ projectId, autoOpenInvite, onInviteO
               </div>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                  <button aria-label="Remove" className="inline-flex items-center justify-center h-11 w-11 -m-2 rounded-xl text-muted-foreground hover:text-destructive active:bg-accent transition-colors"><Trash2 className="w-4 h-4" /></button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader><AlertDialogTitle>Remove?</AlertDialogTitle><AlertDialogDescription>Remove {m.user_name || m.user_email} from this project's earlier invites?</AlertDialogDescription></AlertDialogHeader>
