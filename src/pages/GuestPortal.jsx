@@ -441,7 +441,7 @@ export default function GuestPortal({ embedded = false }) {
   const { loading, error, data } = state;
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-7 h-7 animate-spin text-primary" /></div>;
+    return <div className={`${embedded ? "h-64" : "min-h-screen"} flex items-center justify-center`}><Loader2 className="w-7 h-7 animate-spin text-primary" /></div>;
   }
 
   if (error || !data) {
@@ -483,8 +483,18 @@ export default function GuestPortal({ embedded = false }) {
   const selected = single || projects.find((p) => p.id === selectedId) || null;
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="bg-card border-b-2 border-primary" style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))", paddingBottom: "0.75rem" }}>
+    <div className={embedded ? "flex flex-col" : "min-h-screen flex flex-col"}>
+      {embedded && (
+        <div className="max-w-2xl mx-auto w-full px-4 pt-3 flex items-center justify-between gap-3">
+          <p className="text-[11px] text-muted-foreground truncate">
+            {data.owner_name ? `Shared by ${data.owner_name}` : "Shared with you"}
+          </p>
+          {!single && selected && (
+            <Button variant="ghost" size="sm" onClick={() => setSelectedId(null)} className="gap-1 text-primary h-7"><ChevronLeft className="w-4 h-4" /> All projects</Button>
+          )}
+        </div>
+      )}
+      {!embedded && <header className="bg-card border-b-2 border-primary" style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))", paddingBottom: "0.75rem" }}>
         <div className="max-w-2xl mx-auto px-4 flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="font-display text-lg font-extrabold tracking-tight">Builder<span style={{ color: "#F5A623" }}>T</span>rac</p>
@@ -499,7 +509,7 @@ export default function GuestPortal({ embedded = false }) {
             <Button variant="ghost" size="sm" onClick={() => navigate("/portfolios")} className="gap-1 text-primary"><ChevronLeft className="w-4 h-4" /> Portfolios</Button>
           )}
         </div>
-      </header>
+      </header>}
 
       <main className="flex-1 max-w-2xl w-full mx-auto p-4 space-y-4">
         {!embedded && <AddToMyApp token={token} data={data} />}
