@@ -51,7 +51,7 @@ export default function UploadDocDialog({ open, onClose, projectId, doc }) {
               <ResponsiveSelect
                 value={form.category}
                 onValueChange={v => setForm(f => ({ ...f, category: v }))}
-                options={["Plans", "RFI", "Change Order", "Report", "Contract"].map(c => ({ value: c, label: c }))}
+                options={["Plans", "Invoices", "Change Order", "Permits", "Contract"].map(c => ({ value: c, label: c }))}
               /></div>
             <div><Label>Version</Label><Input type="number" min={1} value={form.version} onChange={e => setForm(f => ({ ...f, version: Number(e.target.value) }))} /></div>
           </div>

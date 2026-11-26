@@ -23,7 +23,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const TASK_STATUSES = ['Not Started', 'In Progress', 'Pending Approval', 'Blocked', 'Done'];
 const PROJECT_STATUSES = ['Planning', 'In Progress', 'On Hold', 'Completed'];
-const DOC_CATEGORIES = ['Plans', 'RFI', 'Change Order', 'Report', 'Contract'];
+const DOC_CATEGORIES = ['Plans', 'Invoices', 'Change Order', 'Permits', 'Contract'];
 const MAX_BASE64 = 14_000_000; // ~10 MB file
 const DOC_EXT = /\.(pdf|png|jpe?g|heic|gif|webp|docx?|xlsx?|pptx?|txt|csv|dwg|zip)$/i;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;

@@ -21,7 +21,7 @@ const MOCKUPS = [
     id: 3,
     title: "Documents",
     caption: "ALL YOUR DOCS. ALWAYS HANDY.",
-    subtitle: "Plans, RFIs, contracts — organized by project",
+    subtitle: "Plans, permits, contracts — organized by project",
     url: "https://media.base44.com/images/public/6a1c6a3340e642df44a0130d/5f672aa2b_generated_image.png",
   },
   {

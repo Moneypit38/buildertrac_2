@@ -6,7 +6,7 @@ import DocumentCard from "../components/DocumentCard";
 import { FileText } from "lucide-react";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 
-const categories = ["All", "Plans", "RFI", "Change Order", "Report", "Contract"];
+const categories = ["All", "Plans", "Invoices", "Change Order", "Permits", "Contract"];
 
 export default function Documents() {
   const qc = useQueryClient();
