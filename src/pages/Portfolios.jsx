@@ -10,16 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Layers, FolderKanban, Trash2, Pencil, Sparkles, ImageIcon, Upload } from "lucide-react";
+import { Plus, Layers, FolderKanban, Sparkles, ImageIcon, Upload } from "lucide-react";
 import TeamMemberGate from "@/components/TeamMemberGate";
 import PortfolioIcon, { PORTFOLIO_ICONS, PORTFOLIO_COLORS, getColor } from "../components/PortfolioIcon";
 import { useClientAccess } from "../hooks/useClientAccess";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
-} from "@/components/ui/alert-dialog";
+
 import InviteToPortfolioDialog from "../components/InviteToPortfolioDialog";
 import CreateProjectDialog from "../components/CreateProjectDialog";
 import PortfolioMembersDialog from "../components/PortfolioMembersDialog";

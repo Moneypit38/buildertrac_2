@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import RowMenu from "@/components/RowMenu";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -12,9 +12,8 @@ import UploadPhotoDialog from "../components/UploadPhotoDialog";
 import CreateProjectDialog from "../components/CreateProjectDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, MapPin, ClipboardList, FileText, Camera, Pencil, DollarSign, Users, MessageSquare, Trash2, CalendarClock, UserPlus } from "lucide-react";
+import { Plus, MapPin, ClipboardList, FileText, Camera, DollarSign, Users, MessageSquare, CalendarClock, UserPlus } from "lucide-react";
 
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { markViewed } from "../hooks/useLastViewed";
 import ProjectMembersTab from "../components/ProjectMembersTab";

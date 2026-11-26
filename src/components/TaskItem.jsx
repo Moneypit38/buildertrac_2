@@ -1,7 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Calendar, ChevronDown, Pencil, Trash2, Check, MoreHorizontal } from "lucide-react";
+import { Calendar, ChevronDown, Pencil, Trash2, MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { isNew } from "../hooks/useLastViewed";
