@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Trash2, Pencil, Plus, Loader2, CalendarClock, MapPin } from "lucide-react";
+import { Trash2, Pencil, Plus, Loader2, CalendarClock, MapPin, UserPlus, Copy, Share2, Power, Check } from "lucide-react";
+import { toast } from "sonner";
 
 // Building blocks used only by project managers on the /g/<token> page.
 
@@ -191,6 +192,99 @@ export function PortfolioEditor({ portfolio, onSave }) {
         </Button>
         <Button type="button" size="sm" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
       </div>
+    </div>
+  );
+}
+
+const roleName = (r) => (r === "team_member" ? "Team member" : "Customer");
+
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); toast.success("Link copied"); }
+  catch { toast.error("Couldn't copy. Press and hold the link to copy it."); }
+}
+
+// Invite customers and team members (never other project managers) and manage their links.
+export function ShareSection({ links = [], projects = [], defaultProjectId = "", onCreate, onToggle, onDelete, baseUrl }) {
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ guest_name: "", guest_email: "", role: "customer", project_id: defaultProjectId });
+  const [busy, setBusy] = useState(false);
+  const [created, setCreated] = useState(null);
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  const url = (t) => `${baseUrl}/g/${t}`;
+  const shown = defaultProjectId ? links.filter((l) => l.scope === "portfolio" || l.project_id === defaultProjectId) : links;
+  const projectName = (id) => projects.find((p) => p.id === id)?.name || "a project";
+
+  if (!open) {
+    return (
+      <Button type="button" size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setOpen(true)}>
+        <UserPlus className="w-3 h-3" /> Invite people{shown.length ? ` (${shown.length})` : ""}
+      </Button>
+    );
+  }
+
+  return (
+    <div className="bg-accent/40 border border-border rounded-xl p-3 space-y-3 w-full">
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-semibold">Invite customers &amp; team members</p>
+        <Button type="button" size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setOpen(false); setCreated(null); }}>Close</Button>
+      </div>
+
+      {created && (
+        <div className="bg-primary/10 border border-primary/30 rounded-lg p-2.5 space-y-1.5">
+          <p className="text-xs font-semibold flex items-center gap-1"><Check className="w-3.5 h-3.5 text-primary" /> {created.emailed ? "Link emailed" : "Link ready — copy it and send it yourself"}</p>
+          <p className="text-[11px] break-all bg-background rounded p-1.5 select-all">{created.url}</p>
+          <Button type="button" size="sm" className="h-7 text-xs gap-1" onClick={() => copyText(created.url)}><Copy className="w-3 h-3" /> Copy</Button>
+        </div>
+      )}
+
+      <form
+        className="space-y-2"
+        onSubmit={async (e) => {
+          e.preventDefault();
+          if (!form.guest_name.trim() && !form.guest_email.trim()) return toast.error("Add a name or an email");
+          setBusy(true);
+          const res = await onCreate({ ...form, guest_name: form.guest_name.trim(), guest_email: form.guest_email.trim() });
+          setBusy(false);
+          if (res) { setCreated(res); setForm((f) => ({ ...f, guest_name: "", guest_email: "" })); }
+        }}
+      >
+        <div className="grid grid-cols-2 gap-2">
+          <Input value={form.guest_name} onChange={set("guest_name")} placeholder="Name" className="h-9 text-sm" />
+          <Input type="email" value={form.guest_email} onChange={set("guest_email")} placeholder="Email (optional)" className="h-9 text-sm" />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <select value={form.role} onChange={set("role")} className="h-9 text-sm rounded-md border border-border bg-background px-2">
+            <option value="customer">Customer — view + upload</option>
+            <option value="team_member">Team member</option>
+          </select>
+          <select value={form.project_id} onChange={set("project_id")} className="h-9 text-sm rounded-md border border-border bg-background px-2">
+            <option value="">Whole portfolio</option>
+            {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+        </div>
+        <Button type="submit" size="sm" disabled={busy} className="w-full">{busy ? "Creating…" : form.guest_email.trim() ? "Create link & email it" : "Create link"}</Button>
+      </form>
+
+      {shown.length > 0 && (
+        <div className="space-y-1.5">
+          {shown.map((l) => (
+            <div key={l.id} className={`bg-card border border-border rounded-lg px-2.5 py-2 ${l.active ? "" : "opacity-60"}`}>
+              <p className="text-sm font-medium truncate">{l.guest_name || l.guest_email}</p>
+              <p className="text-[11px] text-muted-foreground truncate">
+                {roleName(l.role)} · {l.scope === "portfolio" ? "whole portfolio" : projectName(l.project_id)}{l.active ? (l.last_opened ? ` · opened ${l.last_opened.slice(0, 10)}` : " · not opened yet") : " · off"}
+              </p>
+              <div className="flex flex-wrap items-center gap-1 mt-1.5">
+                <Button type="button" size="sm" variant="outline" className="h-6 text-[11px] px-2 gap-1" onClick={() => copyText(url(l.token))}><Copy className="w-3 h-3" /> Copy</Button>
+                {typeof navigator !== "undefined" && navigator.share && (
+                  <Button type="button" size="sm" variant="outline" className="h-6 text-[11px] px-2 gap-1" onClick={() => navigator.share({ title: "BuilderTrac", url: url(l.token) }).catch(() => {})}><Share2 className="w-3 h-3" /> Send</Button>
+                )}
+                <Button type="button" size="sm" variant="outline" className="h-6 text-[11px] px-2 gap-1" onClick={() => onToggle(l)}><Power className="w-3 h-3" /> {l.active ? "Turn off" : "Turn on"}</Button>
+                <DeleteButton onConfirm={() => onDelete(l)} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
