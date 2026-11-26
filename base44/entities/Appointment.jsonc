@@ -1,15 +1,11 @@
 {
   "name": "Appointment",
-  "type": "object",
   "properties": {
-    "title": {
+    "attendees": {
       "type": "string"
     },
     "date": {
-      "type": "string",
-      "format": "date"
-    },
-    "start_time": {
+      "format": "date",
       "type": "string"
     },
     "end_time": {
@@ -21,15 +17,22 @@
     "notes": {
       "type": "string"
     },
+    "owner_id": {
+      "description": "Account owner's user id; set when a project manager adds one via a share link",
+      "type": "string"
+    },
     "project_id": {
       "type": "string"
     },
-    "attendees": {
+    "reminder_sent": {
+      "default": false,
+      "type": "boolean"
+    },
+    "start_time": {
       "type": "string"
     },
-    "reminder_sent": {
-      "type": "boolean",
-      "default": false
+    "title": {
+      "type": "string"
     }
   },
   "required": [
@@ -40,14 +43,36 @@
     "create": {
       "created_by_id": "{{user.id}}"
     },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
+    },
     "read": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
     },
     "update": {
-      "created_by_id": "{{user.id}}"
-    },
-    "delete": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
     }
-  }
+  },
+  "type": "object"
 }
