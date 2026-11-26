@@ -424,7 +424,7 @@ export default function GuestPortal({ embedded = false }) {
   const token = params.token;
   const navigate = useNavigate();
   const [state, setState] = useState({ loading: true, error: null, data: null });
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedId, setSelectedId] = useState(() => new URLSearchParams(window.location.search).get("project"));
 
   const load = useCallback(async () => {
     try {
