@@ -138,8 +138,8 @@ function TasksPanel({ project, canEdit, isAdmin, token, reload }) {
         )}
         {isAdmin && (
           <>
-            {!child && <button type="button" aria-label="Add subtask" onClick={() => setSubFor(subFor === t.id ? null : t.id)} className="p-1 text-muted-foreground hover:text-primary"><Plus className="w-3.5 h-3.5" /></button>}
-            <button type="button" aria-label="Edit task" onClick={() => setEditingId(editingId === t.id ? null : t.id)} className="p-1 text-muted-foreground hover:text-primary"><Pencil className="w-3.5 h-3.5" /></button>
+            {!child && <button type="button" aria-label="Add subtask" onClick={() => setSubFor(subFor === t.id ? null : t.id)} className="inline-flex items-center justify-center h-11 w-11 -m-1.5 rounded-xl text-muted-foreground hover:text-primary active:bg-accent"><Plus className="w-4 h-4" /></button>}
+            <button type="button" aria-label="Edit task" onClick={() => setEditingId(editingId === t.id ? null : t.id)} className="inline-flex items-center justify-center h-11 w-11 -m-1.5 rounded-xl text-muted-foreground hover:text-primary active:bg-accent"><Pencil className="w-4 h-4" /></button>
             <DeleteButton onConfirm={() => adminDo(token, "deleteTask", { task_id: t.id }, "Task deleted", reload)} />
           </>
         )}
