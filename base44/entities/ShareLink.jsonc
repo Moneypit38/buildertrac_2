@@ -32,11 +32,11 @@
     },
     "role": {
       "default": "customer",
-      "description": "admin = portfolio manager, limited to the one portfolio on the link",
+      "description": "project_manager = runs one portfolio and its projects, limited to the portfolio on the link",
       "enum": [
         "customer",
         "team_member",
-        "admin"
+        "project_manager"
       ],
       "type": "string"
     },
