@@ -14,11 +14,7 @@ export default function DeleteAccount() {
     e.preventDefault();
     if (!email.trim()) return;
     setLoading(true);
-    await base44.integrations.Core.SendEmail({
-      to: "support@buildertrac.app",
-      subject: "Account Deletion Request",
-      body: `A user has requested account deletion.\n\nEmail: ${email}\nDate: ${new Date().toISOString()}\n\nPlease delete this user's account and all associated data within 30 days.`,
-    });
+    await base44.functions.invoke("sendAppEmail", { action: "account_deletion", email: email.trim() });
     setSubmitted(true);
     setLoading(false);
   };

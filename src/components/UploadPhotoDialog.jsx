@@ -41,19 +41,8 @@ export default function UploadPhotoDialog({ open, onClose, projectId, photo }) {
     if (!file) return;
     setAnalyzing(true);
     const uploaded = await base44.integrations.Core.UploadFile({ file });
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt: "You are a construction site inspector. Analyze this construction site photo. Provide a concise title (5-8 words) and a detailed description (2-3 sentences) of what you see — construction activity, materials, equipment, progress stage, and any notable conditions. Be specific and professional.",
-      file_urls: [uploaded.file_url],
-      response_json_schema: {
-        type: "object",
-        properties: {
-          title: { type: "string" },
-          description: { type: "string" },
-        },
-        required: ["title", "description"],
-      },
-    });
-    setForm(f => ({ ...f, title: result.title || f.title, description: result.description || f.description }));
+    const { data } = await base44.functions.invoke("aiAssist", { action: "photo", file_url: uploaded.file_url });
+    setForm(f => ({ ...f, title: data?.title || f.title, description: data?.description || f.description }));
     setAnalyzing(false);
     toast.success("Photo analyzed!");
   };

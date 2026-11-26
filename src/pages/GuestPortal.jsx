@@ -469,6 +469,7 @@ export default function GuestPortal({ embedded = false }) {
     onCreate: async (v) => {
       try {
         const r = await call(token, "createLink", v);
+        if (r?.error === "bad_email") { toast.error("Enter a valid email address."); return null; }
         if (r?.error) throw new Error(r.error);
         await load();
         toast.success(r.emailed ? "Link emailed" : "Link created");

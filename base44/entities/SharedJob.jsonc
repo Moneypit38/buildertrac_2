@@ -1,0 +1,41 @@
+{
+  "name": "SharedJob",
+  "properties": {
+    "label": {
+      "type": "string"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "role": {
+      "enum": [
+        "customer",
+        "team_member",
+        "project_manager"
+      ],
+      "type": "string"
+    },
+    "token": {
+      "description": "Guest link token for a job someone shared with this user",
+      "type": "string"
+    }
+  },
+  "required": [
+    "token"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    }
+  },
+  "type": "object"
+}

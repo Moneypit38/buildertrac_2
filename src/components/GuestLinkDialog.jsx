@@ -151,16 +151,7 @@ export default function GuestLinkDialog({ open, onClose, scope }) {
       let emailed = false;
       if (values.guest_email.trim()) {
         try {
-          await base44.integrations.Core.SendEmail({
-            to: values.guest_email.trim(),
-            subject: `${ownerName || "Your contractor"} shared ${scope.label || "a project"} with you on BuilderTrac`,
-            body:
-              `Hi${values.guest_name.trim() ? " " + values.guest_name.trim() : ""},\n\n` +
-              `${ownerName || "Your contractor"} has shared ${scope.label || "a project"} with you on BuilderTrac.\n\n` +
-              `Open it here — no account or sign-up needed:\n${url}\n\n` +
-              `If it opens the BuilderTrac app instead, press and hold the link and choose Open in Safari.\n\n` +
-              `Keep this link private. Anyone who has it can open the project.\n\n— BuilderTrac`,
-          });
+          await base44.functions.invoke("sendAppEmail", { action: "share_invite", token });
           emailed = true;
         } catch { /* fall back to copy/share below */ }
       }

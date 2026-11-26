@@ -1,0 +1,64 @@
+{
+  "name": "ChatFlag",
+  "properties": {
+    "category": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "recipient_name": {
+      "type": "string"
+    },
+    "reported_text": {
+      "description": "Only filled when a recipient reports a message. Automatic flags never store message text.",
+      "type": "string"
+    },
+    "reporter_name": {
+      "type": "string"
+    },
+    "resolved": {
+      "default": false,
+      "type": "boolean"
+    },
+    "room": {
+      "type": "string"
+    },
+    "sender_id": {
+      "type": "string"
+    },
+    "sender_name": {
+      "type": "string"
+    },
+    "source": {
+      "description": "auto = system detected, report = a recipient reported a message",
+      "enum": [
+        "auto",
+        "report"
+      ],
+      "type": "string"
+    },
+    "thread_kind": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "owner_id",
+    "source"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "__none__"
+    },
+    "delete": {
+      "data.owner_id": "{{user.id}}"
+    },
+    "read": {
+      "data.owner_id": "{{user.id}}"
+    },
+    "update": {
+      "data.owner_id": "{{user.id}}"
+    }
+  },
+  "type": "object"
+}

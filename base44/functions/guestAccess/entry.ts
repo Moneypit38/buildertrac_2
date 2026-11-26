@@ -27,6 +27,10 @@ const DOC_CATEGORIES = ['Plans', 'Invoices', 'Change Order', 'Permits', 'Contrac
 const MAX_BASE64 = 14_000_000; // ~10 MB file
 const DOC_EXT = /\.(pdf|png|jpe?g|heic|gif|webp|docx?|xlsx?|pptx?|txt|csv|dwg|zip)$/i;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const EMAIL_RE = /^[^\s@,;<>"]{1,64}@[^\s@,;<>"]{1,190}\.[a-z]{2,24}$/i;
+// A share link is a bearer secret, so it must not double as a free email relay.
+// Only invite mail is allowed, to an address not already invited, a few times a day per account.
+const MAX_INVITE_EMAILS_PER_DAY = 10;
 const PUBLIC_URL = 'https://mybuildertrac.base44.app';
 const makeToken = () => {
   const bytes = new Uint8Array(24);
@@ -250,8 +254,9 @@ Deno.serve(async (req) => {
       if (action === 'createLink') {
         const inviteRole = body.role === 'team_member' ? 'team_member' : 'customer';
         const name = clean(body.guest_name, 80);
-        const email = clean(body.guest_email, 200);
+        const email = clean(body.guest_email, 200).toLowerCase();
         if (!name && !email) return json({ error: 'empty' }, 400);
+        if (email && !EMAIL_RE.test(email)) return json({ error: 'bad_email' }, 400);
         let scope = 'portfolio';
         let pid: string | undefined;
         let label = link.portfolio_name;
@@ -278,7 +283,25 @@ Deno.serve(async (req) => {
         });
         const url = `${PUBLIC_URL}/g/${newToken}`;
         let emailed = false;
+
+        // Only mail a genuinely new invite, and never more than a handful a day for the account,
+        // so a leaked project-manager link cannot be used to send mail to arbitrary addresses.
+        let mayEmail = false;
         if (email) {
+          const owned = await db.ShareLink.filter({ owner_id: ownerId });
+          const alreadyInvited = owned.some((l: any) => l.active !== false &&
+            String(l.guest_email || '').toLowerCase() === email &&
+            ((l.scope === 'portfolio' && l.portfolio_name === link.portfolio_name) ||
+             (l.scope === 'project' && l.project_id === pid)));
+          if (!alreadyInvited) {
+            const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+            const sentLastDay = owned.filter((l: any) =>
+              l.guest_email && String(l.created_date || '') >= since).length;
+            mayEmail = sentLastDay < MAX_INVITE_EMAILS_PER_DAY;
+          }
+        }
+
+        if (mayEmail) {
           try {
             await base44.asServiceRole.integrations.Core.SendEmail({
               to: email,

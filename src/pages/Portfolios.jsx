@@ -51,22 +51,7 @@ function PortfolioFormDialog({ open, onClose, portfolio }) {
     if (!form.name.trim()) return toast.error("Enter a company name first");
     setLogoSearching(true);
     try {
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `A user typed a company name: "${form.name}". Use web search to identify this real company and gather its public details. Return JSON with: the official website domain (bare, like "hammonddev.com"), the general/office phone number, a public contact email, and the business/office street address. Use an empty string for anything you cannot confidently find.`,
-        add_context_from_internet: true,
-        model: "gemini_3_flash",
-        response_json_schema: {
-          type: "object",
-          properties: {
-            company_name: { type: "string" },
-            website: { type: "string" },
-            contact_phone: { type: "string" },
-            contact_email: { type: "string" },
-            business_address: { type: "string" },
-          },
-          required: ["company_name", "website", "contact_phone", "contact_email", "business_address"],
-        },
-      });
+      const { data: res } = await base44.functions.invoke("aiAssist", { action: "company", name: form.name });
 
       const website = (res?.website || "").trim().replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0];
       const phone = (res?.contact_phone || "").trim();

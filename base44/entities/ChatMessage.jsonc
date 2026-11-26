@@ -1,0 +1,65 @@
+{
+  "name": "ChatMessage",
+  "properties": {
+    "content": {
+      "type": "string"
+    },
+    "flagged": {
+      "default": false,
+      "type": "boolean"
+    },
+    "kind": {
+      "enum": [
+        "team",
+        "dm"
+      ],
+      "type": "string"
+    },
+    "owner_id": {
+      "description": "Account owner's user id (the team this chat belongs to)",
+      "type": "string"
+    },
+    "recipient_id": {
+      "type": "string"
+    },
+    "room": {
+      "description": "Portfolio name for team chats",
+      "type": "string"
+    },
+    "sender_id": {
+      "type": "string"
+    },
+    "sender_name": {
+      "type": "string"
+    },
+    "sender_role": {
+      "type": "string"
+    },
+    "thread": {
+      "description": "Thread key",
+      "type": "string"
+    }
+  },
+  "required": [
+    "owner_id",
+    "kind",
+    "thread",
+    "sender_id",
+    "content"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "__none__"
+    },
+    "delete": {
+      "created_by_id": "__none__"
+    },
+    "read": {
+      "created_by_id": "__none__"
+    },
+    "update": {
+      "created_by_id": "__none__"
+    }
+  },
+  "type": "object"
+}
