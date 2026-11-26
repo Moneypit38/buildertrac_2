@@ -1,17 +1,20 @@
 {
   "name": "Note",
-  "type": "object",
   "properties": {
-    "project_id": {
-      "type": "string"
-    },
-    "content": {
+    "author_email": {
       "type": "string"
     },
     "author_name": {
       "type": "string"
     },
-    "author_email": {
+    "content": {
+      "type": "string"
+    },
+    "owner_id": {
+      "description": "Account owner's user id; set when a guest posts via a share link",
+      "type": "string"
+    },
+    "project_id": {
       "type": "string"
     }
   },
@@ -23,14 +26,36 @@
     "create": {
       "created_by_id": "{{user.id}}"
     },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
+    },
     "read": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
     },
     "update": {
-      "created_by_id": "{{user.id}}"
-    },
-    "delete": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
     }
-  }
+  },
+  "type": "object"
 }
