@@ -17,6 +17,8 @@ function getFileType(url = "") {
   return "other";
 }
 
+import IconButton from "./IconButton";
+
 function DocViewer({ doc, onClose }) {
   const type = getFileType(doc.file_url);
   useEffect(() => { markDocSeen(doc.id); }, [doc.id]);
@@ -30,11 +32,11 @@ function DocViewer({ doc, onClose }) {
         </div>
         <div className="flex items-center gap-2 ml-2">
           <a href={doc.file_url} download target="_blank" rel="noopener noreferrer"
-            className="text-muted-foreground hover:text-primary transition-colors p-1">
-            <Download className="w-4 h-4" />
+            className="inline-flex items-center justify-center h-11 w-11 rounded-xl text-muted-foreground hover:text-primary active:bg-accent transition-colors">
+            <Download className="w-5 h-5" />
           </a>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors p-1">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} aria-label="Close" className="inline-flex items-center justify-center h-11 w-11 rounded-xl text-muted-foreground hover:text-foreground active:bg-accent transition-colors">
+            <X className="w-6 h-6" />
           </button>
         </div>
       </div>
@@ -97,7 +99,7 @@ export default function DocumentCard({ doc, showProject, canDelete = true }) {
             {canDelete && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <button className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all p-1"><Trash2 className="w-3.5 h-3.5" /></button>
+                  <IconButton destructive aria-label="Delete document"><Trash2 className="w-4 h-4" /></IconButton>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader><AlertDialogTitle>Delete document?</AlertDialogTitle>
