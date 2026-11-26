@@ -278,7 +278,7 @@ Deno.serve(async (req) => {
             await base44.asServiceRole.integrations.Core.SendEmail({
               to: email,
               subject: `${guestLabel} shared ${label} with you on BuilderTrac`,
-              body: `Hi${name ? ' ' + name : ''},\n\n${guestLabel}${link.owner_name ? ' (' + link.owner_name + ')' : ''} has shared ${label} with you on BuilderTrac.\n\nOpen it here — no account or sign-up needed:\n${url}\n\nKeep this link private. Anyone who has it can open the project.\n\n— BuilderTrac`,
+              body: `Hi${name ? ' ' + name : ''},\n\n${guestLabel}${link.owner_name ? ' (' + link.owner_name + ')' : ''} has shared ${label} with you on BuilderTrac.\n\nOpen it here — no account or sign-up needed:\n${url}\n\nIf it opens the BuilderTrac app instead, press and hold the link and choose Open in Safari.\n\nKeep this link private. Anyone who has it can open the project.\n\n— BuilderTrac`,
             });
             emailed = true;
           } catch (_e) { /* fall back to copying the link */ }
