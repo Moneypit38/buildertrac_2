@@ -59,8 +59,8 @@ const AuthenticatedApp = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
-        <Route path="/shared/:token" element={<GuestPortal embedded />} />
         <Route element={<Layout />}>
+          <Route path="/shared/:token" element={<GuestPortal embedded />} />
           <Route path="/" element={<></>} />
           <Route path="/projects" element={<></>} />
           <Route path="/portfolios" element={<></>} />
