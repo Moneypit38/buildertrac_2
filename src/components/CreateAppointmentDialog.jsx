@@ -61,44 +61,44 @@ export default function CreateAppointmentDialog({ open, onClose, projectId, appo
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-w-sm w-[calc(100vw-2rem)] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit Appointment" : "New Appointment"}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-3 [&_label]:mb-1.5 [&_label]:block">
           <div>
             <Label>Title *</Label>
-            <Input value={form.title} onChange={set("title")} placeholder="e.g. Site inspection" />
+            <Input value={form.title} onChange={set("title")} placeholder="e.g. Site inspection" className="h-11 text-sm" />
           </div>
           <div>
             <Label>Date *</Label>
-            <DateInput value={form.date} onChange={set("date")} className="text-sm" />
+            <DateInput value={form.date} onChange={set("date")} className="h-11 text-sm" />
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="min-w-0">
               <Label>Start time</Label>
-              <Input type="time" value={form.start_time} onChange={set("start_time")} />
+              <Input type="time" value={form.start_time} onChange={set("start_time")} className="h-11 w-full min-w-0 max-w-full appearance-none text-sm" />
             </div>
-            <div>
+            <div className="min-w-0">
               <Label>End time</Label>
-              <Input type="time" value={form.end_time} onChange={set("end_time")} />
+              <Input type="time" value={form.end_time} onChange={set("end_time")} className="h-11 w-full min-w-0 max-w-full appearance-none text-sm" />
             </div>
           </div>
           <div>
             <Label>Location</Label>
-            <Input value={form.location} onChange={set("location")} placeholder="Address or room" />
+            <Input value={form.location} onChange={set("location")} placeholder="Address or room" className="h-11 text-sm" />
           </div>
           <div>
             <Label>Attendees</Label>
-            <Input value={form.attendees} onChange={set("attendees")} placeholder="Names or emails" />
+            <Input value={form.attendees} onChange={set("attendees")} placeholder="Names or emails" className="h-11 text-sm" />
           </div>
           <div>
             <Label>Notes</Label>
             <Textarea value={form.notes} onChange={set("notes")} placeholder="Any additional details..." rows={2} />
           </div>
-          <div className="flex justify-end gap-2 pt-1">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit" disabled={mutation.isPending}>
+          <div className="grid grid-cols-2 gap-3 pt-1">
+            <Button type="button" variant="outline" className="h-11" onClick={onClose}>Cancel</Button>
+            <Button type="submit" className="h-11" disabled={mutation.isPending}>
               {mutation.isPending ? "Saving..." : isEdit ? "Save" : "Create"}
             </Button>
           </div>
