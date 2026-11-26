@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSharedJobs } from "@/hooks/useSharedJobs";
 import { SharedPortfolioCards } from "@/components/SharedCards";
+import AddSharedJobDialog from "@/components/SharedWithMe";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Layers, FolderKanban, Trash2, Pencil, UserPlus, Users, MoveRight, Sparkles, ImageIcon, Upload } from "lucide-react";
+import { Plus, Layers, FolderKanban, Trash2, Pencil, __X__, Sparkles, ImageIcon, Upload } from "lucide-react";
 import TeamMemberGate from "@/components/TeamMemberGate";
 import PortfolioIcon, { PORTFOLIO_ICONS, PORTFOLIO_COLORS, getColor, getIconComponent } from "../components/PortfolioIcon";
 import { useClientAccess } from "../hooks/useClientAccess";
@@ -233,6 +234,7 @@ export default function Portfolios() {
   }, [location.state?.openPortfolioId, portfolios]);
 
   const [showCreate, setShowCreate] = useState(false);
+  const [showAddShared, setShowAddShared] = useState(false);
 
   // Opened from the home screen's welcome card ("Create your first portfolio")
   useEffect(() => {
@@ -296,11 +298,14 @@ export default function Portfolios() {
           <p className="text-xs text-muted-foreground font-medium">Your Work /</p>
           <h1 className="text-2xl font-extrabold font-display">Portfolios</h1>
         </div>
-        <TeamMemberGate action="create new portfolios">
-          <Button size="sm" onClick={() => setShowCreate(true)}>
-            <Plus className="w-4 h-4 mr-1" /> New
-          </Button>
-        </TeamMemberGate>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={() => setShowAddShared(true)}>Add invite</Button>
+          <TeamMemberGate action="create new portfolios">
+            <Button size="sm" onClick={() => setShowCreate(true)}>
+              <Plus className="w-4 h-4 mr-1" /> New
+            </Button>
+          </TeamMemberGate>
+        </div>
       </div>
 
       {portfolios.length === 0 && unassigned.length === 0 && shared.length === 0 ? (
@@ -423,6 +428,7 @@ export default function Portfolios() {
       )}
 
       {/* Dialogs */}
+      <AddSharedJobDialog open={showAddShared} onClose={() => setShowAddShared(false)} />
       <PortfolioFormDialog key={showCreate ? "new" : "closed"} open={showCreate} onClose={() => setShowCreate(false)} />
       {addProjectToPortfolio && (
         <CreateProjectDialog key={addProjectToPortfolio} open={!!addProjectToPortfolio} onClose={() => setAddProjectToPortfolio(null)} defaultPortfolio={addProjectToPortfolio} />
