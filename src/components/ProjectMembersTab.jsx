@@ -2,70 +2,42 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import ResponsiveSelect from "../components/ResponsiveSelect";
-import { Badge } from "@/components/ui/badge";
-import { UserPlus, Trash2, Users, BookUser } from "lucide-react";
+import { UserPlus, Trash2, Users, BookUser, Link2, Eye, Wrench } from "lucide-react";
 import { toast } from "sonner";
 import ManageContactsDialog from "./ManageContactsDialog";
+import GuestLinkDialog from "./GuestLinkDialog";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
 
-const roleStyles = {
-  admin: "bg-primary/15 text-primary border-primary/30",
-  team_member: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-};
-
-const roleLabels = { admin: "Admin", team_member: "Team Member" };
-
-const blank = { user_name: "", user_email: "", role: "team_member" };
-
 export default function ProjectMembersTab({ projectId, autoOpenInvite, onInviteOpened }) {
   const qc = useQueryClient();
-  const [inviting, setInviting] = useState(false);
+  const [showShare, setShowShare] = useState(false);
+  const [showContacts, setShowContacts] = useState(false);
 
   useEffect(() => {
     if (autoOpenInvite) {
-      setInviting(true);
+      setShowShare(true);
       onInviteOpened?.();
     }
   }, [autoOpenInvite]);
-  const [mode, setMode] = useState("contact"); // "contact" | "manual"
-  const [form, setForm] = useState(blank);
-  const [selectedContactIds, setSelectedContactIds] = useState([]);
-  const [bulkRole, setBulkRole] = useState("team_member");
-  const [showContacts, setShowContacts] = useState(false);
 
+  const { data: project } = useQuery({ queryKey: ["project", projectId], queryFn: () => base44.entities.Project.get(projectId) });
+
+  // Guests who have a private link to this project
+  const { data: links = [] } = useQuery({
+    queryKey: ["share-links", "project", projectId],
+    queryFn: async () => {
+      const rows = await base44.entities.ShareLink.filter({ project_id: projectId });
+      return rows.filter((l) => l.scope === "project");
+    },
+  });
+
+  // Older-style member records (kept so they can still be cleaned up)
   const { data: members = [] } = useQuery({
     queryKey: ["members", projectId],
     queryFn: () => base44.entities.ProjectMember.filter({ project_id: projectId }),
-  });
-
-  const { data: contacts = [] } = useQuery({
-    queryKey: ["contacts"],
-    queryFn: () => base44.entities.Contact.list(),
-  });
-
-  const addMember = useMutation({
-    mutationFn: async (data) => {
-      await base44.entities.ProjectMember.create({ ...data, project_id: projectId });
-      await base44.users.inviteUser(data.user_email, data.role === "admin" ? "admin" : "user");
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["members", projectId] });
-      toast.success("Member invited! They'll receive an email to join.");
-      setForm(blank);
-      setSelectedContactIds([]);
-      setInviting(false);
-    },
-  });
-
-  const updateRole = useMutation({
-    mutationFn: ({ id, role }) => base44.entities.ProjectMember.update(id, { role }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["members", projectId] }); toast.success("Role updated"); },
   });
 
   const removeMember = useMutation({
@@ -73,181 +45,66 @@ export default function ProjectMembersTab({ projectId, autoOpenInvite, onInviteO
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["members", projectId] }); toast.success("Member removed"); },
   });
 
-  const toggleContact = (contactId) => {
-    setSelectedContactIds(prev =>
-      prev.includes(contactId) ? prev.filter(id => id !== contactId) : [...prev, contactId]
-    );
-  };
-
-  const handleInvite = async (e) => {
-    e.preventDefault();
-    if (mode === "contact") {
-      if (selectedContactIds.length === 0) return toast.error("Select at least one contact");
-      for (const cid of selectedContactIds) {
-        const c = contacts.find(x => x.id === cid);
-        if (c) await addMember.mutateAsync({ user_name: c.name, user_email: c.email, role: bulkRole });
-      }
-    } else {
-      if (!form.user_email.trim()) return toast.error("Email is required");
-      addMember.mutate(form);
-    }
-  };
-
-  // Already-added member emails
-  const addedEmails = new Set(members.map(m => m.user_email));
-  const availableContacts = contacts.filter(c => !addedEmails.has(c.email));
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Users className="w-4 h-4" /> {members.length} member{members.length !== 1 ? "s" : ""}
+          <Users className="w-4 h-4" /> {links.length} guest{links.length !== 1 ? "s" : ""} with access
         </div>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={() => setShowContacts(true)}>
             <BookUser className="w-4 h-4 mr-1" /> Contacts
           </Button>
-          <Button size="sm" onClick={() => { setInviting(v => !v); setForm(blank); setSelectedContactIds([]); }}>
-            <UserPlus className="w-4 h-4 mr-1" /> Invite
+          <Button size="sm" onClick={() => setShowShare(true)}>
+            <UserPlus className="w-4 h-4 mr-1" /> Share
           </Button>
         </div>
       </div>
 
-      {inviting && (
-        <form onSubmit={handleInvite} className="bg-accent/50 border border-border rounded-xl p-4 space-y-3">
-          <p className="text-sm font-medium">Add to project</p>
+      <p className="text-xs text-muted-foreground">
+        Customers and team members open a private link — no account and no purchase needed.
+      </p>
 
-          {/* Mode toggle */}
-          <div className="flex gap-1 bg-accent rounded-lg p-0.5 w-fit">
-            <button type="button"
-              onClick={() => { setMode("contact"); setForm(blank); setSelectedContactIds([]); }}
-              className={`text-xs px-3 py-1 rounded-md font-medium transition-colors ${mode === "contact" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
-              From Contacts
-            </button>
-            <button type="button"
-              onClick={() => { setMode("manual"); setForm(blank); setSelectedContactIds([]); }}
-              className={`text-xs px-3 py-1 rounded-md font-medium transition-colors ${mode === "manual" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
-              Enter Manually
-            </button>
-          </div>
-
-          {mode === "contact" ? (
-            <div className="space-y-3">
-              {availableContacts.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  {contacts.length === 0
-                    ? "No contacts yet. Use the Contacts button to add people first."
-                    : "All your contacts are already on this project."}
-                </p>
-              ) : (
-                <>
-                  <div className="space-y-1.5 max-h-52 overflow-y-auto">
-                    {availableContacts.map(c => {
-                      const checked = selectedContactIds.includes(c.id);
-                      return (
-                        <button
-                          key={c.id}
-                          type="button"
-                          onClick={() => toggleContact(c.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg border text-left transition-colors
-                            ${checked ? "border-primary bg-primary/10" : "border-border bg-card hover:bg-accent"}`}
-                        >
-                          <div className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${checked ? "bg-primary border-primary" : "border-muted-foreground"}`}>
-                            {checked && <span className="text-primary-foreground text-[10px] font-bold">✓</span>}
-                          </div>
-                          <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center text-xs font-bold text-primary shrink-0">
-                            {c.name?.[0]?.toUpperCase()}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{c.name}</p>
-                            <p className="text-xs text-muted-foreground truncate">{c.email}{c.company ? ` · ${c.company}` : ""}</p>
-                          </div>
-                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground shrink-0">
-                            {roleLabels[c.default_role] || c.default_role}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {selectedContactIds.length > 0 && (
-                    <div>
-                      <Label>Role for selected ({selectedContactIds.length})</Label>
-                      <ResponsiveSelect
-                        value={bulkRole}
-                        onValueChange={setBulkRole}
-                        options={[
-                          { value: "team_member", label: "Team Member" },
-                          { value: "admin", label: "Admin" },
-                        ]}
-                      />
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>Name</Label><Input value={form.user_name} onChange={e => setForm(f => ({ ...f, user_name: e.target.value }))} placeholder="Jane Smith" /></div>
-                <div><Label>Email *</Label><Input type="email" value={form.user_email} onChange={e => setForm(f => ({ ...f, user_email: e.target.value }))} placeholder="jane@example.com" /></div>
-              </div>
-              <div><Label>Role</Label>
-                <ResponsiveSelect
-                  value={form.role}
-                  onValueChange={v => setForm(f => ({ ...f, role: v }))}
-                  options={[
-                    { value: "team_member", label: "Team Member" },
-                    { value: "admin", label: "Admin" },
-                  ]}
-                />
-              </div>
-            </div>
-          )}
-
-          <div className="flex gap-2">
-            <Button
-              type="submit"
-              size="sm"
-              disabled={addMember.isPending || (mode === "contact" && selectedContactIds.length === 0)}
-            >
-              {addMember.isPending ? "Inviting..." : "Send Invite"}
-            </Button>
-            <Button type="button" size="sm" variant="ghost" onClick={() => setInviting(false)}>Cancel</Button>
-          </div>
-        </form>
-      )}
-
-      {members.length === 0 ? (
+      {links.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-8 text-center">
-          <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">No team members yet. Invite your crew.</p>
+          <Link2 className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">No one has been given access yet. Tap Share to send a link.</p>
         </div>
       ) : (
         <div className="space-y-2">
-          {members.map(m => (
-            <div key={m.id} className="bg-card border border-border rounded-xl px-4 py-3 flex items-center gap-3">
+          {links.map((l) => (
+            <button key={l.id} onClick={() => setShowShare(true)}
+              className={`w-full text-left bg-card border border-border rounded-xl px-4 py-3 flex items-center gap-3 ${l.active === false ? "opacity-60" : ""}`}>
               <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-sm font-bold text-primary shrink-0">
-                {(m.user_name || m.user_email)?.[0]?.toUpperCase() || "?"}
+                {(l.guest_name || l.guest_email || "?")[0]?.toUpperCase()}
               </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{l.guest_name || l.guest_email}</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {l.role === "team_member" ? "Team member" : "Customer"}{l.active === false ? " · link off" : l.last_opened ? ` · opened ${l.last_opened.slice(0, 10)}` : " · not opened yet"}
+                </p>
+              </div>
+              {l.role === "team_member" ? <Wrench className="w-4 h-4 text-blue-400 shrink-0" /> : <Eye className="w-4 h-4 text-purple-400 shrink-0" />}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {members.length > 0 && (
+        <div className="space-y-2 pt-2">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Earlier invites</p>
+          {members.map((m) => (
+            <div key={m.id} className="bg-card border border-border rounded-xl px-4 py-2.5 flex items-center gap-3">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{m.user_name || m.user_email}</p>
                 {m.user_name && <p className="text-xs text-muted-foreground truncate">{m.user_email}</p>}
               </div>
-              <ResponsiveSelect
-                value={m.role}
-                onValueChange={role => updateRole.mutate({ id: m.id, role })}
-                options={[
-                  { value: "admin", label: "Admin" },
-                  { value: "team_member", label: "Team Member" },
-                ]}
-                className={`h-8 text-xs w-28 border ${roleStyles[m.role]}`}
-              />
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
-                  <AlertDialogHeader><AlertDialogTitle>Remove member?</AlertDialogTitle><AlertDialogDescription>Remove {m.user_name || m.user_email} from this project?</AlertDialogDescription></AlertDialogHeader>
+                  <AlertDialogHeader><AlertDialogTitle>Remove?</AlertDialogTitle><AlertDialogDescription>Remove {m.user_name || m.user_email} from this project's earlier invites?</AlertDialogDescription></AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction onClick={() => removeMember.mutate(m.id)} className="bg-destructive text-destructive-foreground">Remove</AlertDialogAction>
@@ -259,6 +116,11 @@ export default function ProjectMembersTab({ projectId, autoOpenInvite, onInviteO
         </div>
       )}
 
+      <GuestLinkDialog
+        open={showShare}
+        onClose={() => setShowShare(false)}
+        scope={{ type: "project", projectId, label: project?.name || "this project" }}
+      />
       <ManageContactsDialog open={showContacts} onClose={() => setShowContacts(false)} />
     </div>
   );
