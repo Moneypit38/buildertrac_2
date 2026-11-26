@@ -74,7 +74,7 @@ function LinkRow({ link, onChanged }) {
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium truncate">{link.guest_name || link.guest_email || "Unnamed guest"}</p>
           <p className="text-[11px] text-muted-foreground truncate">
-            {roleLabel(link.role)}{link.guest_email && link.guest_name ? ` · ${link.guest_email}` : ""}
+            {roleLabel(link.role)}{link.guest_email && link.guest_name ? ` · ${link.guest_email}` : ""}{link.invited_by ? ` · invited by ${link.invited_by}` : ""}
             {link.last_opened ? ` · opened ${link.last_opened.slice(0, 10)}` : " · not opened yet"}
           </p>
         </div>
