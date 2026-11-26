@@ -10,6 +10,8 @@ import { isUnseenRecent, useSeenIds } from "../lib/viewedContext";
 import { motion } from "framer-motion";
 import TaskCalendar from "../components/TaskCalendar";
 import { Camera } from "lucide-react";
+import { useSharedJobs } from "@/hooks/useSharedJobs";
+import { SharedProjectCards } from "@/components/SharedCards";
 
 
 
@@ -27,10 +29,20 @@ export default function Dashboard() {
   const { data: notes = [] } = useQuery({ queryKey: ["notes"], queryFn: () => base44.entities.Note.list() });
   const { data: appointments = [] } = useQuery({ queryKey: ["appointments"], queryFn: () => base44.entities.Appointment.list() });
 
-  const visibleProjects = allowedProjectIds ? projects.filter(p => allowedProjectIds.includes(p.id)) : projects;
-  const visibleTasks = allowedProjectIds ? tasks.filter(t => allowedProjectIds.includes(t.project_id)) : tasks;
-  const visibleDocs = allowedProjectIds ? docs.filter(d => allowedProjectIds.includes(d.project_id)) : docs;
-  const visiblePhotos = allowedProjectIds ? photos.filter(ph => allowedProjectIds.includes(ph.project_id)) : photos;
+  // Jobs other people shared with this user (added from an invite link): merged in like native data.
+  const shared = useSharedJobs();
+  const sharedProjects = shared.flatMap(s => (s.data.projects || []).map(p => ({ ...p, __token: s.job.token })));
+  const sharedTasks = sharedProjects.flatMap(p => (p.tasks || []).map(t => ({ ...t, project_id: p.id })));
+  const sharedDocs = sharedProjects.flatMap(p => (p.docs || []).map(d => ({ ...d, project_id: p.id })));
+  const sharedPhotos = sharedProjects.flatMap(p => (p.photos || []).map(ph => ({ ...ph, project_id: p.id })));
+  const sharedAppts = sharedProjects.flatMap(p => (p.appointments || []).map(a => ({ ...a, project_id: p.id })));
+  const projectLinks = Object.fromEntries(sharedProjects.map(p => [p.id, `/shared/${p.__token}?project=${p.id}`]));
+
+  const visibleProjects = [...(allowedProjectIds ? projects.filter(p => allowedProjectIds.includes(p.id)) : projects), ...sharedProjects];
+  const visibleTasks = [...(allowedProjectIds ? tasks.filter(t => allowedProjectIds.includes(t.project_id)) : tasks), ...sharedTasks];
+  const visibleDocs = [...(allowedProjectIds ? docs.filter(d => allowedProjectIds.includes(d.project_id)) : docs), ...sharedDocs];
+  const visiblePhotos = [...(allowedProjectIds ? photos.filter(ph => allowedProjectIds.includes(ph.project_id)) : photos), ...sharedPhotos];
+  const allAppointments = [...appointments, ...sharedAppts];
 
   const todayStr = new Date().toLocaleDateString("en-CA"); // local date, YYYY-MM-DD
 
@@ -64,6 +76,7 @@ export default function Dashboard() {
 
   // Brand-new account (not a client view) with nothing created yet
   const isNewUser = !allowedProjectIds && visibleProjects.length === 0;
+  const sharedPortfolios = shared.filter(s => s.data.portfolio_name);
   const hasPortfolio = portfolios.length > 0;
 
   if (accessLoading) return (
@@ -154,12 +167,12 @@ export default function Dashboard() {
         <h2 className="text-primary font-bold text-sm uppercase tracking-wider mb-3 flex items-center gap-2">
           <span>Task Calendar</span>
         </h2>
-        <TaskCalendar tasks={visibleTasks} projects={visibleProjects} appointments={appointments} />
+        <TaskCalendar tasks={visibleTasks} projects={visibleProjects} appointments={allAppointments} projectLinks={projectLinks} />
       </motion.div>
       </>)}
 
       {/* Portfolios */}
-      {visiblePortfolios.length > 0 && (
+      {(visiblePortfolios.length > 0 || sharedPortfolios.length > 0) && (
         <motion.div {...fadeUp(0.2)}>
           <h2 className="text-primary font-bold text-sm uppercase tracking-wider mb-3 flex items-center gap-2">
             <Layers className="w-4 h-4" /> Portfolios
@@ -201,6 +214,22 @@ export default function Dashboard() {
                 </motion.div>
               );
             })}
+            {sharedPortfolios.map(({ job, data }) => {
+              const pfProjects = data.projects || [];
+              const cover = pfProjects.flatMap(p => p.photos || []).find(ph => ph.photo_url)?.photo_url || data.portfolio_style?.logo_url;
+              return (
+                <motion.div key={job.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.25 }}>
+                  <Link to={`/shared/${job.token}`} className="relative rounded-xl overflow-hidden border border-border hover:border-primary/40 transition-all block aspect-[4/3]">
+                    {cover ? <img src={cover} alt={data.portfolio_name} className="absolute inset-0 w-full h-full object-cover" /> : <div className="absolute inset-0 bg-muted" />}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                      <p className="font-semibold text-sm text-white leading-tight truncate">{data.portfolio_name}</p>
+                      <p className="text-[11px] text-white/70 mt-0.5">{pfProjects.length} project{pfProjects.length !== 1 ? "s" : ""}</p>
+                    </div>
+                  </Link>
+                </motion.div>
+              );
+            })}
           </div>
         </motion.div>
       )}
@@ -209,18 +238,19 @@ export default function Dashboard() {
       {!isNewUser && (
       <motion.div {...fadeUp(0.26)}>
         <h2 className="text-primary font-bold text-sm uppercase tracking-wider mb-3">Your Projects</h2>
-        {visibleProjects.length === 0 ? (
+        {visibleProjects.length === 0 && shared.length === 0 ? (
           <div className="bg-card border border-border rounded-xl p-8 text-center">
             <HardHat className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
             <p className="text-muted-foreground">No projects yet. Head to Projects to break ground.</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {visibleProjects.map((p, i) => (
+            {visibleProjects.filter(p => !p.__token).map((p, i) => (
               <motion.div key={p.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.22 + i * 0.06 }}>
                 <ProjectCard project={p} allTasks={tasks} allNotes={notes} allPhotos={photos} />
               </motion.div>
             ))}
+            <SharedProjectCards shared={shared} />
           </div>
         )}
       </motion.div>
