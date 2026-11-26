@@ -5,7 +5,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Link2, Copy, Share2, Mail, Trash2, Power, Eye, Wrench, Check, ShieldCheck } from "lucide-react";
+import { Link2, Copy, Share2, Mail, Trash2, Power, Eye, Wrench, Check, ShieldCheck, MessageSquare } from "lucide-react";
+
+const smsHref = (url) => `sms:?&body=${encodeURIComponent(`Here's your BuilderTrac link (no account needed): ${url}`)}`;
 import { toast } from "sonner";
 
 // Guest links always point at the published web app, even when this screen
@@ -82,6 +84,7 @@ function LinkRow({ link, onChanged }) {
       </div>
       <div className="flex flex-wrap gap-1.5">
         <Button type="button" size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={copy}><Copy className="w-3 h-3" /> Copy</Button>
+        <a href={smsHref(guestUrl(link.token))}><Button type="button" size="sm" variant="outline" className="h-7 text-xs gap-1"><MessageSquare className="w-3 h-3" /> Text</Button></a>
         {typeof navigator !== "undefined" && navigator.share && (
           <Button type="button" size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={share}><Share2 className="w-3 h-3" /> Send</Button>
         )}
@@ -199,6 +202,7 @@ export default function GuestLinkDialog({ open, onClose, scope }) {
             <p className="text-[11px] break-all text-muted-foreground bg-background rounded-md p-2 select-all">{created.url}</p>
             <div className="flex gap-1.5">
               <Button type="button" size="sm" className="gap-1" onClick={async () => (await copyText(created.url)) ? toast.success("Link copied") : toast.error("Press and hold the link to copy it.")}><Copy className="w-3.5 h-3.5" /> Copy</Button>
+              <a href={smsHref(created.url)}><Button type="button" size="sm" variant="outline" className="gap-1"><MessageSquare className="w-3.5 h-3.5" /> Text</Button></a>
               {typeof navigator !== "undefined" && navigator.share && (
                 <Button type="button" size="sm" variant="outline" className="gap-1" onClick={() => navigator.share({ title: "BuilderTrac", text: "Here's your BuilderTrac link:", url: created.url }).catch(() => {})}><Share2 className="w-3.5 h-3.5" /> Text / share</Button>
               )}
