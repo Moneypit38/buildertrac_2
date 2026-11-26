@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Trash2, User, CalendarDays, X, FolderKanban } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -58,6 +58,8 @@ function PhotoThumbnail({ photo, canDelete, onSelect }) {
 
 export function PhotoExpanded({ photo, onClose, canDelete, projectName }) {
   const qc = useQueryClient();
+  // Any place a photo is opened (grid, project strip, etc.) clears its alert
+  useEffect(() => { markPhotoSeen(photo.id); }, [photo.id]);
   const remove = useMutation({
     mutationFn: () => base44.entities.SitePhoto.delete(photo.id),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["photos"] }); toast.success("Photo removed"); onClose(); },
