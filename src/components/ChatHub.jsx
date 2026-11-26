@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ChevronLeft, Users, Send, Flag, Loader2, Lock, ShieldAlert } from "lucide-react";
+import { ChevronLeft, Users, Send, Flag, Loader2, Lock, ShieldAlert, Check } from "lucide-react";
 import { toast } from "sonner";
-import { callChat, markSeen, isUnread } from "@/lib/chat";
+import { callChat, markSeen, isUnread, playChime } from "@/lib/chat";
 import { base44 } from "@/api/base44Client";
 
 const ROLE = { owner: "Owner", project_manager: "Project manager", team_member: "Team member" };
@@ -67,6 +67,7 @@ function Thread({ token, me, target, onBack }) {
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const bottomRef = useRef(null);
+  const lastIdRef = useRef(null);
   const key = target.kind === "team" ? `team|${target.room}` : `dm|${target.with}`;
   const params = target.kind === "team" ? { kind: "team", room: target.room } : { kind: "dm", with: target.with };
 
@@ -76,6 +77,8 @@ function Thread({ token, me, target, onBack }) {
       if (r?.messages) {
         setMessages((prev) => (prev && prev.length === r.messages.length && prev[prev.length - 1]?.id === r.messages[r.messages.length - 1]?.id ? prev : r.messages));
         const last = r.messages[r.messages.length - 1];
+        if (last && lastIdRef.current && last.id !== lastIdRef.current && !last.mine) playChime();
+        if (last) lastIdRef.current = last.id;
         markSeen(me.id, key, last?.created_date);
       }
     } catch { /* keep what we have */ }
@@ -155,6 +158,10 @@ export default function ChatHub({ token = null, isOwner = false }) {
   const [inbox, setInbox] = useState([]);
   const [target, setTarget] = useState(null);
   const [error, setError] = useState(false);
+  const [multi, setMulti] = useState(false);
+  const [picked, setPicked] = useState([]);
+  const [multiText, setMultiText] = useState("");
+  const [multiSending, setMultiSending] = useState(false);
 
   useEffect(() => {
     let off = false;
@@ -189,6 +196,20 @@ export default function ChatHub({ token = null, isOwner = false }) {
 
   const unread = (key) => isUnread(who.me.id, inbox.find((t) => t.key === key));
 
+  const togglePick = (id) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+  const sendMany = async () => {
+    const content = multiText.trim();
+    if (!content || picked.length === 0 || multiSending) return;
+    setMultiSending(true);
+    try {
+      const r = await callChat(token, "send", { kind: "dm_many", with_many: picked, content });
+      if (r?.error) throw new Error(r.error);
+      toast.success(`Sent to ${r.sent} ${r.sent === 1 ? "person" : "people"}`);
+      setMulti(false); setPicked([]); setMultiText("");
+    } catch { toast.error("Couldn't send. Please try again."); }
+    setMultiSending(false);
+  };
+
   return (
     <div className="space-y-5">
       {isOwner && <FlagsPanel />}
@@ -208,21 +229,41 @@ export default function ChatHub({ token = null, isOwner = false }) {
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-primary font-bold text-sm uppercase tracking-wider flex items-center gap-2"><Lock className="w-4 h-4" /> Direct messages</h2>
-        <p className="text-[11px] text-muted-foreground -mt-1">Private between two people. Nobody else can read them, including the account owner.</p>
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-primary font-bold text-sm uppercase tracking-wider flex items-center gap-2"><Lock className="w-4 h-4" /> Direct messages</h2>
+          {who.people.length > 1 && (
+            <Button size="sm" variant={multi ? "default" : "outline"} onClick={() => { setMulti((v) => !v); setPicked([]); }}>
+              {multi ? "Cancel" : "Message several"}
+            </Button>
+          )}
+        </div>
+        <p className="text-[11px] text-muted-foreground -mt-1">
+          {multi ? "Pick the people to message. Each one gets it as their own private message." : "Private between two people. Nobody else can read them, including the account owner."}
+        </p>
         {who.people.length === 0 ? (
           <p className="text-sm text-muted-foreground">No one to message yet. Team members show up here once they're invited.</p>
         ) : who.people.map((p) => (
-          <button key={p.id} onClick={() => setTarget({ kind: "dm", with: p.id, title: p.name })}
+          <button key={p.id} onClick={() => (multi ? togglePick(p.id) : setTarget({ kind: "dm", with: p.id, title: p.name }))}
             className="w-full text-left bg-card border border-border rounded-xl px-4 min-h-[56px] flex items-center gap-3 hover:border-primary/50 transition-colors">
             <div className="w-9 h-9 rounded-full bg-accent flex items-center justify-center text-sm font-bold shrink-0">{(p.name || "?")[0].toUpperCase()}</div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm truncate">{p.name}</p>
               <p className="text-[11px] text-muted-foreground">{ROLE[p.role] || "Team"}</p>
             </div>
-            {unread(`dm|${p.id}`) && <Dot />}
+            {multi
+              ? <span className={`w-6 h-6 rounded-md border-2 flex items-center justify-center shrink-0 ${picked.includes(p.id) ? "bg-primary border-primary text-primary-foreground" : "border-muted-foreground/40"}`}>{picked.includes(p.id) && <Check className="w-4 h-4" />}</span>
+              : unread(`dm|${p.id}`) && <Dot />}
           </button>
         ))}
+        {multi && (
+          <div className="bg-card border border-border rounded-xl p-3 space-y-2">
+            <Textarea value={multiText} onChange={(e) => setMultiText(e.target.value)} rows={2} placeholder="Type your message…" className="text-sm" />
+            <Button className="w-full" disabled={!multiText.trim() || picked.length === 0 || multiSending} onClick={sendMany}>
+              {multiSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              {picked.length === 0 ? "Pick at least one person" : `Send to ${picked.length} ${picked.length === 1 ? "person" : "people"}`}
+            </Button>
+          </div>
+        )}
       </section>
     </div>
   );
