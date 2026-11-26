@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { resolveShareLinkOwner } from '../../shared/shareLinkOwner.ts';
 
 // Team chat + private direct messages for BuilderTrac.
 //
@@ -42,7 +43,8 @@ Deno.serve(async (req) => {
       if (!/^[a-f0-9]{40,128}$/.test(token)) return json({ error: 'invalid_link' }, 404);
       const link = (await db.ShareLink.filter({ token }))?.[0];
       if (!link || link.active === false || (link.expires_at && link.expires_at < today)) return json({ error: 'invalid_link' }, 404);
-      const ownerId = link.owner_id || link.created_by_id;
+      // owner_id on a link is client-writable, so the anchor comes from the shared check.
+      const ownerId = await resolveShareLinkOwner(db, link, today);
       if (!ownerId) return json({ error: 'invalid_link' }, 404);
       const role = link.role === 'project_manager' ? 'project_manager' : link.role === 'team_member' ? 'team_member' : 'customer';
       me = {

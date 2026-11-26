@@ -11,6 +11,13 @@ const SUPPORT_EMAIL = 'support@buildertrac.app';
 const PUBLIC_URL = 'https://mybuildertrac.base44.app';
 const EMAIL_RE = /^[^\s@,;<>"]{1,64}@[^\s@,;<>"]{1,190}\.[a-z]{2,24}$/i;
 const clean = (v: unknown, max: number) => String(v ?? '').trim().slice(0, max);
+// Text that goes inside a mail body: one plain line, no markup and no line breaks, so a
+// caller-supplied name can't add sections or links of its own to the mail.
+const plain = (v: unknown, max: number) =>
+  String(v ?? '').replace(/[<>\r\n\t\u0000-\u001f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max);
+// One account can send a limited number of invites a day, and not repeat the same link at once.
+const MAX_INVITES_PER_DAY = 25;
+const INVITE_COOLDOWN_MS = 60_000;
 
 export default async function (req: Request): Promise<Response> {
   try {
@@ -40,22 +47,35 @@ export default async function (req: Request): Promise<Response> {
       const found = await db.ShareLink.filter({ token });
       const link = found?.[0];
       if (!link || link.active === false) return Response.json({ error: 'invalid_link' }, { status: 404 });
-      if (link.created_by_id !== user.id && link.owner_id !== user.id) {
+      // Only the account that created the link may mail it. owner_id is a client-writable field
+      // and is deliberately not accepted here.
+      if (link.created_by_id !== user.id) {
         return Response.json({ error: 'not_allowed' }, { status: 403 });
+      }
+
+      // This app's mail must not work as a relay: cap the invites one account sends in a day,
+      // and don't send the same link again within a minute.
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const mine = await db.ShareLink.filter({ created_by_id: user.id });
+      if (mine.filter((l: any) => String(l.created_date || '') >= since).length > MAX_INVITES_PER_DAY) {
+        return Response.json({ error: 'rate_limited' }, { status: 429 });
+      }
+      if (Date.now() - (Date.parse(link.invite_sent_at || '') || 0) < INVITE_COOLDOWN_MS) {
+        return Response.json({ error: 'rate_limited' }, { status: 429 });
       }
 
       const to = clean(link.guest_email, 200).toLowerCase();
       if (!EMAIL_RE.test(to)) return Response.json({ error: 'bad_email' }, { status: 400 });
 
-      let label = clean(link.portfolio_name, 200);
+      let label = plain(link.portfolio_name, 200);
       if (link.scope === 'project' && link.project_id) {
         const proj = await db.Project.get(link.project_id).catch(() => null);
-        if (proj?.name) label = clean(proj.name, 200);
+        if (proj?.name) label = plain(proj.name, 200);
       }
       label = label || 'a project';
 
-      const guestName = clean(link.guest_name, 80);
-      const ownerName = clean(link.owner_name || user.full_name || user.email, 120) || 'Your contractor';
+      const guestName = plain(link.guest_name, 80);
+      const ownerName = plain(link.owner_name || user.full_name || user.email, 120) || 'Your contractor';
 
       try {
         await base44.asServiceRole.integrations.Core.SendEmail({
@@ -68,6 +88,8 @@ export default async function (req: Request): Promise<Response> {
         console.error('share invite email failed:', mailError?.message || mailError);
         return Response.json({ ok: true, emailed: false });
       }
+
+      try { await db.ShareLink.update(link.id, { invite_sent_at: new Date().toISOString() }); } catch (_e) { /* cooldown only */ }
 
       return Response.json({ ok: true, emailed: true });
     }

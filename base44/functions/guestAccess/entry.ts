@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { resolveShareLinkOwner } from '../../shared/shareLinkOwner.ts';
 
 // Guest access for BuilderTrac share links (no account, no payment).
 //
@@ -67,8 +68,10 @@ Deno.serve(async (req) => {
     if (!link || link.active === false || (link.expires_at && link.expires_at < today)) {
       return json({ error: 'invalid_link' }, 404);
     }
-    // Links made by a project manager carry owner_id so they still belong to the owner's account.
-    const ownerId = link.owner_id || link.created_by_id;
+    // Links made by a project manager carry owner_id so they still belong to the owner's account,
+    // but that field is client-writable, so the anchor is only taken from it when the link also
+    // names the project-manager link it came from. See ../../shared/shareLinkOwner.ts.
+    const ownerId = await resolveShareLinkOwner(db, link, today);
     if (!ownerId) return json({ error: 'invalid_link' }, 404);
 
     // A project-manager link only counts as one when it is tied to a portfolio.
@@ -274,6 +277,7 @@ Deno.serve(async (req) => {
           active: true,
           owner_name: link.owner_name || '',
           owner_id: ownerId,
+          parent_token: link.token,
           invited_by: guestLabel,
         });
         const url = `${PUBLIC_URL}/g/${newToken}`;

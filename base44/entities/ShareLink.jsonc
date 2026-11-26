@@ -15,6 +15,10 @@
     "guest_name": {
       "type": "string"
     },
+    "invite_sent_at": {
+      "description": "When the invite email was last sent for this link, used to stop repeat sends",
+      "type": "string"
+    },
     "invited_by": {
       "description": "Name of the project manager who created this link, if not the owner",
       "type": "string"
@@ -23,10 +27,14 @@
       "type": "string"
     },
     "owner_id": {
-      "description": "Account owner's user id. Set when a project manager creates the link, so it still belongs to the owner's account",
+      "description": "Account owner's user id. Only trusted together with parent_token, which the server sets when a project manager creates the link",
       "type": "string"
     },
     "owner_name": {
+      "type": "string"
+    },
+    "parent_token": {
+      "description": "Token of the project manager's link this one was created from. Set server-side only",
       "type": "string"
     },
     "portfolio_id": {
