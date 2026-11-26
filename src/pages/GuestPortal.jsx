@@ -404,7 +404,7 @@ function AddToMyApp({ token, data }) {
     return () => { off = true; };
   }, [token]);
   if (state === "hidden") return null;
-  if (state === "added") return <p className="text-xs text-primary font-medium text-center">In your BuilderTrac app — find it under Shared with me.</p>;
+  if (state === "added") return <p className="text-xs text-primary font-medium text-center">Added — find it in the Portfolios and Projects tabs of your BuilderTrac app.</p>;
   const names = (data.projects || []).map((p) => p.name);
   const label = data.portfolio_name || names[0] || "Shared job";
   return (
