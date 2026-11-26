@@ -7,7 +7,7 @@ import ProjectCard from "../components/ProjectCard";
 import { HardHat, Layers, FolderPlus, Sparkles, UserPlus, Building2, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
-import { useViewedTimes, isNewItem, getSeenPhotoIds } from "../lib/viewedContext";
+import { isUnseenRecent, useSeenIds } from "../lib/viewedContext";
 import { motion } from "framer-motion";
 import TaskCalendar from "../components/TaskCalendar";
 import { Camera } from "lucide-react";
@@ -16,7 +16,7 @@ import { Camera } from "lucide-react";
 
 export default function Dashboard() {
   const { allowedProjectIds, isLoading: accessLoading } = useClientAccess();
-  const lastViewedTimes = useViewedTimes();
+  const { seenPhotoIds, seenDocIds } = useSeenIds();
   const qc = useQueryClient();
 
   const { refreshing, touchHandlers } = usePullToRefresh(() => qc.invalidateQueries());
@@ -42,16 +42,9 @@ export default function Dashboard() {
   ).length;
 
   // Docs uploaded in last 72h and not yet viewed
-  const newDocs = visibleDocs.filter(d => isNewItem(d.created_date, lastViewedTimes.docs)).length;
+  const newDocs = visibleDocs.filter(d => isUnseenRecent(d.created_date, seenDocIds, d.id)).length;
 
   // Photos uploaded in last 72h and not yet individually viewed
-  const [seenPhotoIds, setSeenPhotoIds] = useState(() => getSeenPhotoIds());
-  useEffect(() => {
-    const handler = () => setSeenPhotoIds(getSeenPhotoIds());
-    window.addEventListener("photos-seen-updated", handler);
-    return () => window.removeEventListener("photos-seen-updated", handler);
-  }, []);
-
   const newPhotos = visiblePhotos.filter(ph => {
     const cutoff72h = new Date(Date.now() - 72 * 60 * 60 * 1000);
     return new Date(ph.created_date) > cutoff72h && !seenPhotoIds.has(ph.id);
