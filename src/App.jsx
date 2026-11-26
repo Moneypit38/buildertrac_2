@@ -16,6 +16,7 @@ import useTaskReminders from './hooks/useTaskReminders';
 import ProjectDetail from './pages/ProjectDetail';
 import PortfolioDetail from './pages/PortfolioDetail';
 import AppStoreMockups from './pages/AppStoreMockups';
+import Chat from './pages/Chat';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import DeleteAccount from './pages/DeleteAccount';
 import Support from './pages/Support';
@@ -61,6 +62,7 @@ const AuthenticatedApp = () => {
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<Layout />}>
           <Route path="/shared/:token" element={<GuestPortal embedded />} />
+          <Route path="/chat" element={<Chat />} />
           <Route path="/" element={<></>} />
           <Route path="/projects" element={<></>} />
           <Route path="/portfolios" element={<></>} />
