@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Link2, Copy, Share2, Mail, Trash2, Power, Eye, Wrench, Check } from "lucide-react";
+import { Link2, Copy, Share2, Mail, Trash2, Power, Eye, Wrench, Check, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
 // Guest links always point at the published web app, even when this screen
@@ -33,7 +33,13 @@ const ROLES = [
     blurb: "Everything a customer can do, plus see and post messages and change task status. Can't edit the project, budget or delete anything.",
   },
 ];
-const roleLabel = (r) => (r === "team_member" ? "Team member" : "Customer");
+const ADMIN_ROLE = {
+  value: "admin",
+  label: "Admin",
+  icon: ShieldCheck,
+  blurb: "Manages this one portfolio: add and edit projects and tasks, upload and delete photos, documents and messages. Can't see budgets, other portfolios, or share links. Only give this to someone you trust — anyone with the link has this access.",
+};
+const roleLabel = (r) => (r === "team_member" ? "Team member" : r === "admin" ? "Admin" : "Customer");
 
 async function copyText(text) {
   try {
@@ -168,7 +174,9 @@ export default function GuestLinkDialog({ open, onClose, scope }) {
   });
 
   const close = () => { setCreated(null); onClose(); };
-  const activeRole = ROLES.find((r) => r.value === form.role);
+  // Admin links manage a whole portfolio, so they're only offered from a portfolio.
+  const roleOptions = isProject ? ROLES : [...ROLES, ADMIN_ROLE];
+  const activeRole = roleOptions.find((r) => r.value === form.role) || ROLES[0];
 
   const availableContacts = contacts.filter((c) => c.email);
 
@@ -234,8 +242,8 @@ export default function GuestLinkDialog({ open, onClose, scope }) {
 
           <div>
             <Label className="text-xs">Access</Label>
-            <div className="grid grid-cols-2 gap-2 mt-1">
-              {ROLES.map((r) => (
+            <div className={`grid ${roleOptions.length === 3 ? "grid-cols-3" : "grid-cols-2"} gap-2 mt-1`}>
+              {roleOptions.map((r) => (
                 <button key={r.value} type="button" onClick={() => setForm((f) => ({ ...f, role: r.value }))}
                   className={`flex items-center justify-center gap-1.5 text-sm font-medium rounded-lg border py-2 transition-colors ${form.role === r.value ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground"}`}>
                   <r.icon className="w-3.5 h-3.5" /> {r.label}
