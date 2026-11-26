@@ -1,12 +1,8 @@
 {
   "name": "Document",
-  "type": "object",
   "properties": {
-    "name": {
-      "type": "string"
-    },
     "category": {
-      "type": "string",
+      "default": "Plans",
       "enum": [
         "Plans",
         "RFI",
@@ -14,17 +10,20 @@
         "Report",
         "Contract"
       ],
-      "default": "Plans"
-    },
-    "version": {
-      "type": "number",
-      "default": 1
-    },
-    "file_url": {
-      "type": "string",
-      "format": "uri"
+      "type": "string"
     },
     "description": {
+      "type": "string"
+    },
+    "file_url": {
+      "format": "uri",
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "description": "Account owner's user id; set when a guest uploads via a share link",
       "type": "string"
     },
     "project_id": {
@@ -32,6 +31,13 @@
     },
     "size": {
       "type": "string"
+    },
+    "uploaded_by_guest": {
+      "type": "string"
+    },
+    "version": {
+      "default": 1,
+      "type": "number"
     }
   },
   "required": [
@@ -42,14 +48,36 @@
     "create": {
       "created_by_id": "{{user.id}}"
     },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
+    },
     "read": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
     },
     "update": {
-      "created_by_id": "{{user.id}}"
-    },
-    "delete": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
     }
-  }
+  },
+  "type": "object"
 }
