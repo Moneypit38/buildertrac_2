@@ -1,0 +1,76 @@
+{
+  "name": "ShareLink",
+  "properties": {
+    "active": {
+      "default": true,
+      "type": "boolean"
+    },
+    "expires_at": {
+      "format": "date",
+      "type": "string"
+    },
+    "guest_email": {
+      "type": "string"
+    },
+    "guest_name": {
+      "type": "string"
+    },
+    "last_opened": {
+      "type": "string"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "portfolio_id": {
+      "type": "string"
+    },
+    "portfolio_name": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "role": {
+      "default": "customer",
+      "description": "admin = portfolio manager, limited to the one portfolio on the link",
+      "enum": [
+        "customer",
+        "team_member",
+        "admin"
+      ],
+      "type": "string"
+    },
+    "scope": {
+      "default": "project",
+      "enum": [
+        "project",
+        "portfolio"
+      ],
+      "type": "string"
+    },
+    "token": {
+      "description": "Long random secret in the guest link",
+      "type": "string"
+    }
+  },
+  "required": [
+    "token",
+    "role",
+    "scope"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    },
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    }
+  },
+  "type": "object"
+}
