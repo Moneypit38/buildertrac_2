@@ -9,9 +9,12 @@ import AssignPortfolioDialog from "../components/AssignPortfolioDialog";
 import { Button } from "@/components/ui/button";
 import { Plus, FolderKanban, Layers } from "lucide-react";
 import TeamMemberGate from "@/components/TeamMemberGate";
+import { useSharedJobs } from "@/hooks/useSharedJobs";
+import { SharedProjectCards } from "@/components/SharedCards";
 
 
 export default function Projects() {
+  const shared = useSharedJobs();
   const { data: projects = [], isLoading } = useQuery({ queryKey: ["projects"], queryFn: () => base44.entities.Project.list() });
   const { data: allTasks = [] } = useQuery({ queryKey: ["tasks"], queryFn: () => base44.entities.Task.list() });
   const { data: allNotes = [] } = useQuery({ queryKey: ["notes"], queryFn: () => base44.entities.Note.list() });
@@ -58,7 +61,7 @@ export default function Projects() {
         </div>
       )}
 
-      {filtered.length === 0 ? (
+      {filtered.length === 0 && shared.length === 0 ? (
         <div className="bg-card border border-border rounded-xl p-8 text-center">
           <FolderKanban className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground">No projects here yet. Create your first one.</p>
@@ -78,6 +81,7 @@ export default function Projects() {
               )}
             </div>
           ))}
+          {filter === "All" && <SharedProjectCards shared={shared} />}
         </div>
       )}
 
