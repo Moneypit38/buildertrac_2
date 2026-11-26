@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -389,9 +389,40 @@ function ProjectView({ project, role, token, reload, guestName, shareProps }) {
   );
 }
 
+// For visitors who are already signed in to BuilderTrac: save this job into their own app.
+function AddToMyApp({ token, data }) {
+  const [state, setState] = useState("hidden");
+  useEffect(() => {
+    let off = false;
+    (async () => {
+      try {
+        if (!(await base44.auth.isAuthenticated())) return;
+        const jobs = await base44.entities.SharedJob.list();
+        if (!off) setState(jobs.some((j) => j.token === token) ? "added" : "ready");
+      } catch { /* not signed in */ }
+    })();
+    return () => { off = true; };
+  }, [token]);
+  if (state === "hidden") return null;
+  if (state === "added") return <p className="text-xs text-primary font-medium text-center">In your BuilderTrac app — find it under Shared with me.</p>;
+  const names = (data.projects || []).map((p) => p.name);
+  const label = data.portfolio_name || names[0] || "Shared job";
+  return (
+    <Button size="sm" className="w-full" onClick={async () => {
+      try {
+        await base44.entities.SharedJob.create({ token, label, owner_name: data.owner_name || "", role: data.role });
+        setState("added");
+        toast.success("Added to your BuilderTrac app");
+      } catch { toast.error("Couldn't add it. Please try again."); }
+    }}>Add to my BuilderTrac app</Button>
+  );
+}
+
 // ---------- page ----------
-export default function GuestPortal() {
-  const { token } = useParams();
+export default function GuestPortal({ embedded = false }) {
+  const params = useParams();
+  const token = params.token;
+  const navigate = useNavigate();
   const [state, setState] = useState({ loading: true, error: null, data: null });
   const [selectedId, setSelectedId] = useState(null);
 
@@ -463,10 +494,14 @@ export default function GuestPortal() {
           {!single && selected && (
             <Button variant="ghost" size="sm" onClick={() => setSelectedId(null)} className="gap-1 text-primary"><ChevronLeft className="w-4 h-4" /> All projects</Button>
           )}
+          {embedded && (!selected || single) && (
+            <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-1 text-primary"><ChevronLeft className="w-4 h-4" /> My app</Button>
+          )}
         </div>
       </header>
 
       <main className="flex-1 max-w-2xl w-full mx-auto p-4 space-y-4">
+        {!embedded && <AddToMyApp token={token} data={data} />}
         {projects.length === 0 && data.role === "project_manager" && (
           <div className="space-y-3">
             {data.portfolio_name && <h1 className="text-xl font-bold font-display">{data.portfolio_name}</h1>}
@@ -511,7 +546,7 @@ export default function GuestPortal() {
         )}
       </main>
 
-      <footer className="max-w-2xl w-full mx-auto px-4 pb-8 pt-2 text-center">
+      {!embedded && <footer className="max-w-2xl w-full mx-auto px-4 pb-8 pt-2 text-center">
         <p className="text-xs text-muted-foreground">
           Run your own jobs the same way.{" "}
           <a href="https://mybuildertrac.base44.app" target="_blank" rel="noopener noreferrer" className="text-primary font-medium hover:underline">Try BuilderTrac</a>
