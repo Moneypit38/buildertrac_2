@@ -119,9 +119,10 @@ export default function ProjectCard({ project, onDelete, allTasks, allNotes, all
             <>
               <button
                 onClick={e => { e.preventDefault(); e.stopPropagation(); setShowDelete(true); }}
-                className="p-1 rounded text-muted-foreground hover:text-destructive transition-colors"
+                aria-label="Delete project"
+                className="inline-flex items-center justify-center h-11 w-11 -m-2 rounded-xl text-muted-foreground hover:text-destructive active:bg-accent transition-colors"
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash2 className="w-4 h-4" />
               </button>
               <AlertDialog open={showDelete} onOpenChange={setShowDelete}>
                 <AlertDialogContent>
