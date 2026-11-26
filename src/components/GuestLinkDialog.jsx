@@ -83,22 +83,22 @@ function LinkRow({ link, onChanged }) {
         {off && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">Off</span>}
       </div>
       <div className="flex flex-wrap gap-1.5">
-        <Button type="button" size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={copy}><Copy className="w-3 h-3" /> Copy</Button>
-        <a href={smsHref(guestUrl(link.token))}><Button type="button" size="sm" variant="outline" className="h-7 text-xs gap-1"><MessageSquare className="w-3 h-3" /> Text</Button></a>
+        <Button type="button" size="sm" variant="outline" className="h-10 text-sm gap-1.5 px-3" onClick={copy}><Copy className="w-4 h-4" /> Copy</Button>
+        <a href={smsHref(guestUrl(link.token))}><Button type="button" size="sm" variant="outline" className="h-10 text-sm gap-1.5 px-3"><MessageSquare className="w-4 h-4" /> Text</Button></a>
         {typeof navigator !== "undefined" && navigator.share && (
-          <Button type="button" size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={share}><Share2 className="w-3 h-3" /> Send</Button>
+          <Button type="button" size="sm" variant="outline" className="h-10 text-sm gap-1.5 px-3" onClick={share}><Share2 className="w-4 h-4" /> Send</Button>
         )}
-        <Button type="button" size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => toggle.mutate()} disabled={toggle.isPending}>
-          <Power className="w-3 h-3" /> {off ? "Turn on" : "Turn off"}
+        <Button type="button" size="sm" variant="outline" className="h-10 text-sm gap-1.5 px-3" onClick={() => toggle.mutate()} disabled={toggle.isPending}>
+          <Power className="w-4 h-4" /> {off ? "Turn on" : "Turn off"}
         </Button>
         {confirm ? (
           <>
-            <Button type="button" size="sm" variant="destructive" className="h-7 text-xs" onClick={() => remove.mutate()} disabled={remove.isPending}>Yes, remove</Button>
-            <Button type="button" size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setConfirm(false)}>Cancel</Button>
+            <Button type="button" size="sm" variant="destructive" className="h-10 text-sm px-3" onClick={() => remove.mutate()} disabled={remove.isPending}>Yes, remove</Button>
+            <Button type="button" size="sm" variant="ghost" className="h-10 text-sm px-3" onClick={() => setConfirm(false)}>Cancel</Button>
           </>
         ) : (
-          <Button type="button" size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground hover:text-destructive gap-1" onClick={() => setConfirm(true)}>
-            <Trash2 className="w-3 h-3" /> Remove
+          <Button type="button" size="sm" variant="ghost" className="h-10 text-sm px-3 text-muted-foreground hover:text-destructive gap-1.5" onClick={() => setConfirm(true)}>
+            <Trash2 className="w-4 h-4" /> Remove
           </Button>
         )}
       </div>
@@ -202,10 +202,10 @@ export default function GuestLinkDialog({ open, onClose, scope }) {
             </p>
             <p className="text-[11px] break-all text-muted-foreground bg-background rounded-md p-2 select-all">{created.url}</p>
             <div className="flex gap-1.5">
-              <Button type="button" size="sm" className="gap-1" onClick={async () => (await copyText(created.url)) ? toast.success("Link copied") : toast.error("Press and hold the link to copy it.")}><Copy className="w-3.5 h-3.5" /> Copy</Button>
-              <a href={smsHref(created.url)}><Button type="button" size="sm" variant="outline" className="gap-1"><MessageSquare className="w-3.5 h-3.5" /> Text</Button></a>
+              <Button type="button" size="sm" className="gap-1" onClick={async () => (await copyText(created.url)) ? toast.success("Link copied") : toast.error("Press and hold the link to copy it.")}><Copy className="w-4 h-4" /> Copy</Button>
+              <a href={smsHref(created.url)}><Button type="button" size="sm" variant="outline" className="gap-1"><MessageSquare className="w-4 h-4" /> Text</Button></a>
               {typeof navigator !== "undefined" && navigator.share && (
-                <Button type="button" size="sm" variant="outline" className="gap-1" onClick={() => navigator.share({ title: "BuilderTrac", text: "Here's your BuilderTrac link:", url: created.url }).catch(() => {})}><Share2 className="w-3.5 h-3.5" /> Text / share</Button>
+                <Button type="button" size="sm" variant="outline" className="gap-1" onClick={() => navigator.share({ title: "BuilderTrac", text: "Here's your BuilderTrac link:", url: created.url }).catch(() => {})}><Share2 className="w-4 h-4" /> Text / share</Button>
               )}
             </div>
             {!created.emailed && created.name && (

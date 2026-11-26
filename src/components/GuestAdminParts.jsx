@@ -17,18 +17,18 @@ export function DeleteButton({ onConfirm, className = "", label }) {
   if (sure) {
     return (
       <span className={`inline-flex items-center gap-1 ${className}`}>
-        <Button type="button" size="sm" variant="destructive" className="h-7 text-xs px-2" disabled={busy}
+        <Button type="button" size="sm" variant="destructive" className="h-11 text-sm px-3" disabled={busy}
           onClick={async (e) => { e.preventDefault(); e.stopPropagation(); setBusy(true); await onConfirm(); setBusy(false); setSure(false); }}>
           {busy ? <Loader2 className="w-3 h-3 animate-spin" /> : "Yes, delete"}
         </Button>
-        <Button type="button" size="sm" variant="ghost" className="h-7 text-xs px-2" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSure(false); }}>No</Button>
+        <Button type="button" size="sm" variant="ghost" className="h-11 text-sm px-3" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSure(false); }}>No</Button>
       </span>
     );
   }
   return (
     <button type="button" aria-label="Delete" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSure(true); }}
-      className={`inline-flex items-center gap-1 p-1 text-muted-foreground hover:text-destructive transition-colors ${className}`}>
-      <Trash2 className="w-3.5 h-3.5" />{label && <span className="text-xs">{label}</span>}
+      className={`inline-flex items-center justify-center gap-1.5 h-11 ${label ? "px-3" : "w-11 -m-1.5"} rounded-xl text-muted-foreground hover:text-destructive active:bg-accent transition-colors ${className}`}>
+      <Trash2 className="w-4 h-4" />{label && <span className="text-sm">{label}</span>}
     </button>
   );
 }
@@ -98,8 +98,8 @@ export function ProjectEditor({ project, onSave, onDelete }) {
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   if (!open) {
     return (
-      <Button type="button" size="sm" variant="outline" className="h-7 text-xs gap-1 mt-3" onClick={() => setOpen(true)}>
-        <Pencil className="w-3 h-3" /> Edit project
+      <Button type="button" size="sm" variant="outline" className="h-10 text-sm gap-1.5 px-3 mt-3" onClick={() => setOpen(true)}>
+        <Pencil className="w-4 h-4" /> Edit project
       </Button>
     );
   }
@@ -176,8 +176,8 @@ export function PortfolioEditor({ portfolio, onSave }) {
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   if (!open) {
     return (
-      <Button type="button" size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setOpen(true)}>
-        <Pencil className="w-3 h-3" /> Edit portfolio details
+      <Button type="button" size="sm" variant="outline" className="h-10 text-sm gap-1.5 px-3" onClick={() => setOpen(true)}>
+        <Pencil className="w-4 h-4" /> Edit portfolio details
       </Button>
     );
   }
@@ -219,8 +219,8 @@ export function ShareSection({ links = [], projects = [], defaultProjectId = "",
 
   if (!open) {
     return (
-      <Button type="button" size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setOpen(true)}>
-        <UserPlus className="w-3 h-3" /> Invite people{shown.length ? ` (${shown.length})` : ""}
+      <Button type="button" size="sm" variant="outline" className="h-10 text-sm gap-1.5 px-3" onClick={() => setOpen(true)}>
+        <UserPlus className="w-4 h-4" /> Invite people{shown.length ? ` (${shown.length})` : ""}
       </Button>
     );
   }
@@ -229,15 +229,15 @@ export function ShareSection({ links = [], projects = [], defaultProjectId = "",
     <div className="bg-accent/40 border border-border rounded-xl p-3 space-y-3 w-full">
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold">Invite customers &amp; team members</p>
-        <Button type="button" size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setOpen(false); setCreated(null); }}>Close</Button>
+        <Button type="button" size="sm" variant="ghost" className="h-10 text-sm px-3" onClick={() => { setOpen(false); setCreated(null); }}>Close</Button>
       </div>
 
       {created && (
         <div className="bg-primary/10 border border-primary/30 rounded-lg p-2.5 space-y-1.5">
           <p className="text-xs font-semibold flex items-center gap-1"><Check className="w-3.5 h-3.5 text-primary" /> {created.emailed ? "Link emailed" : "Link ready — copy it and send it yourself"}</p>
           <p className="text-[11px] break-all bg-background rounded p-1.5 select-all">{created.url}</p>
-          <Button type="button" size="sm" className="h-7 text-xs gap-1" onClick={() => copyText(created.url)}><Copy className="w-3 h-3" /> Copy</Button>
-          <a href={smsHref(created.url)} className="ml-1.5"><Button type="button" size="sm" variant="outline" className="h-7 text-xs gap-1"><MessageSquare className="w-3 h-3" /> Text</Button></a>
+          <Button type="button" size="sm" className="h-10 text-sm gap-1.5 px-3" onClick={() => copyText(created.url)}><Copy className="w-4 h-4" /> Copy</Button>
+          <a href={smsHref(created.url)} className="ml-1.5"><Button type="button" size="sm" variant="outline" className="h-10 text-sm gap-1.5 px-3"><MessageSquare className="w-4 h-4" /> Text</Button></a>
         </div>
       )}
 
@@ -278,12 +278,12 @@ export function ShareSection({ links = [], projects = [], defaultProjectId = "",
                 {roleName(l.role)} · {l.scope === "portfolio" ? "whole portfolio" : projectName(l.project_id)}{l.active ? (l.last_opened ? ` · opened ${l.last_opened.slice(0, 10)}` : " · not opened yet") : " · off"}
               </p>
               <div className="flex flex-wrap items-center gap-1 mt-1.5">
-                <Button type="button" size="sm" variant="outline" className="h-6 text-[11px] px-2 gap-1" onClick={() => copyText(url(l.token))}><Copy className="w-3 h-3" /> Copy</Button>
-                <a href={smsHref(url(l.token))}><Button type="button" size="sm" variant="outline" className="h-6 text-[11px] px-2 gap-1"><MessageSquare className="w-3 h-3" /> Text</Button></a>
+                <Button type="button" size="sm" variant="outline" className="h-10 text-xs px-3 gap-1.5" onClick={() => copyText(url(l.token))}><Copy className="w-4 h-4" /> Copy</Button>
+                <a href={smsHref(url(l.token))}><Button type="button" size="sm" variant="outline" className="h-10 text-xs px-3 gap-1.5"><MessageSquare className="w-4 h-4" /> Text</Button></a>
                 {typeof navigator !== "undefined" && navigator.share && (
-                  <Button type="button" size="sm" variant="outline" className="h-6 text-[11px] px-2 gap-1" onClick={() => navigator.share({ title: "BuilderTrac", url: url(l.token) }).catch(() => {})}><Share2 className="w-3 h-3" /> Send</Button>
+                  <Button type="button" size="sm" variant="outline" className="h-10 text-xs px-3 gap-1.5" onClick={() => navigator.share({ title: "BuilderTrac", url: url(l.token) }).catch(() => {})}><Share2 className="w-4 h-4" /> Send</Button>
                 )}
-                <Button type="button" size="sm" variant="outline" className="h-6 text-[11px] px-2 gap-1" onClick={() => onToggle(l)}><Power className="w-3 h-3" /> {l.active ? "Turn off" : "Turn on"}</Button>
+                <Button type="button" size="sm" variant="outline" className="h-10 text-xs px-3 gap-1.5" onClick={() => onToggle(l)}><Power className="w-4 h-4" /> {l.active ? "Turn off" : "Turn on"}</Button>
                 <DeleteButton onConfirm={() => onDelete(l)} />
               </div>
             </div>
