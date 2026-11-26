@@ -162,7 +162,7 @@ function TasksPanel({ project, canEdit, isAdmin, token, reload }) {
   );
 }
 
-function PhotosPanel({ project, token, reload }) {
+function PhotosPanel({ project, isAdmin, token, reload }) {
   const [open, setOpen] = useState(null);
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef(null);
@@ -212,12 +212,18 @@ function PhotosPanel({ project, token, reload }) {
           ))}
         </div>
       )}
-      {open && <Lightbox photo={open} onClose={() => setOpen(null)} />}
+      {open && (
+        <Lightbox
+          photo={open}
+          onClose={() => setOpen(null)}
+          onDelete={isAdmin ? async () => { if (await adminDo(token, "deletePhoto", { record_id: open.id }, "Photo deleted", reload)) setOpen(null); } : undefined}
+        />
+      )}
     </div>
   );
 }
 
-function DocsPanel({ project, token, reload }) {
+function DocsPanel({ project, isAdmin, token, reload }) {
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef(null);
 
@@ -265,6 +271,7 @@ function DocsPanel({ project, token, reload }) {
                 <p className="text-sm font-semibold truncate">{d.name}</p>
                 <p className="text-[11px] text-muted-foreground">{d.category} · {d.size || "—"} · {d.created_date?.slice(0, 10)}{d.uploaded_by_guest ? ` · ${d.uploaded_by_guest}` : ""}</p>
               </div>
+              {isAdmin && <DeleteButton onConfirm={() => adminDo(token, "deleteDoc", { record_id: d.id }, "Document deleted", reload)} />}
               <ExternalLink className="w-4 h-4 text-muted-foreground shrink-0" />
             </a>
           ))}
@@ -274,7 +281,7 @@ function DocsPanel({ project, token, reload }) {
   );
 }
 
-function MessagesPanel({ project, token, reload, guestName }) {
+function MessagesPanel({ project, isAdmin, token, reload, guestName }) {
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const bottomRef = useRef(null);
@@ -306,6 +313,7 @@ function MessagesPanel({ project, token, reload, guestName }) {
             <div key={n.id} className={`flex flex-col ${mine ? "items-end" : "items-start"}`}>
               <p className="text-[11px] text-muted-foreground mb-0.5">{n.author_name || "Team"} · {n.created_date?.slice(0, 10)}</p>
               <div className={`rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap break-words max-w-[85%] ${mine ? "bg-primary text-primary-foreground" : "bg-accent"}`}>{n.content}</div>
+              {isAdmin && <DeleteButton onConfirm={() => adminDo(token, "deleteNote", { record_id: n.id }, "Message deleted", reload)} />}
             </div>
           );
         })}
@@ -322,7 +330,8 @@ function MessagesPanel({ project, token, reload, guestName }) {
 }
 
 function ProjectView({ project, role, token, reload, guestName }) {
-  const isTeam = role === "team_member";
+  const isAdmin = role === "admin";
+  const isTeam = role === "team_member" || isAdmin;
   const tabs = [
     { id: "tasks", label: "Tasks", icon: ClipboardList },
     { id: "photos", label: "Photos", icon: Camera },
@@ -338,6 +347,9 @@ function ProjectView({ project, role, token, reload, guestName }) {
         {project.address && <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1"><MapPin className="w-3.5 h-3.5" /> {project.address}</p>}
         {project.status && <span className="inline-block mt-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/15 text-primary">{project.status}</span>}
         {project.description && <p className="text-sm text-muted-foreground mt-2">{project.description}</p>}
+        {isAdmin && (
+          <ProjectEditor project={project} onSave={(v) => adminDo(token, "updateProject", { project_id: project.id, ...v }, "Project saved", reload)} />
+        )}
       </div>
 
       <div className="flex bg-card border border-border rounded-lg p-0.5">
@@ -349,10 +361,10 @@ function ProjectView({ project, role, token, reload, guestName }) {
         ))}
       </div>
 
-      {tab === "tasks" && <TasksPanel project={project} canEdit={isTeam} token={token} reload={reload} />}
-      {tab === "photos" && <PhotosPanel project={project} token={token} reload={reload} />}
-      {tab === "docs" && <DocsPanel project={project} token={token} reload={reload} />}
-      {tab === "messages" && isTeam && <MessagesPanel project={project} token={token} reload={reload} guestName={guestName} />}
+      {tab === "tasks" && <TasksPanel project={project} canEdit={isTeam} isAdmin={isAdmin} token={token} reload={reload} />}
+      {tab === "photos" && <PhotosPanel project={project} isAdmin={isAdmin} token={token} reload={reload} />}
+      {tab === "docs" && <DocsPanel project={project} isAdmin={isAdmin} token={token} reload={reload} />}
+      {tab === "messages" && isTeam && <MessagesPanel project={project} isAdmin={isAdmin} token={token} reload={reload} guestName={guestName} />}
     </div>
   );
 }
@@ -414,7 +426,13 @@ export default function GuestPortal() {
       </header>
 
       <main className="flex-1 max-w-2xl w-full mx-auto p-4 space-y-4">
-        {projects.length === 0 && (
+        {projects.length === 0 && data.role === "admin" && (
+          <div className="space-y-3">
+            {data.portfolio_name && <h1 className="text-xl font-bold font-display">{data.portfolio_name}</h1>}
+            <AddProjectForm onAdd={(v) => adminDo(token, "addProject", v, "Project added", load)} />
+          </div>
+        )}
+        {projects.length === 0 && data.role !== "admin" && (
           <div className="bg-card border border-border rounded-xl p-8 text-center">
             <HardHat className="w-9 h-9 text-muted-foreground mx-auto mb-2" />
             <p className="text-sm text-muted-foreground">There are no projects to show yet.</p>
@@ -424,6 +442,9 @@ export default function GuestPortal() {
         {!selected && projects.length > 0 && (
           <>
             {data.portfolio_name && <h1 className="text-xl font-bold font-display">{data.portfolio_name}</h1>}
+            {data.role === "admin" && (
+              <AddProjectForm onAdd={(v) => adminDo(token, "addProject", v, "Project added", load)} />
+            )}
             <div className="space-y-2">
               {projects.map((p) => (
                 <button key={p.id} onClick={() => setSelectedId(p.id)}
