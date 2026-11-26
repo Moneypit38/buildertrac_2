@@ -16,7 +16,7 @@ const statusBadgeStyle = (status) => {
 };
 
 // Shared portfolios, drawn exactly like the user's own portfolio cards.
-export function SharedPortfolioCards({ shared }) {
+export function SharedPortfolioCards({ shared, refs, highlightedId }) {
   const navigate = useNavigate();
   const qc = useQueryClient();
 
@@ -39,7 +39,8 @@ export function SharedPortfolioCards({ shared }) {
       const statuses = Object.entries(counts);
       const pfPhotos = pfProjects.flatMap((p) => p.photos || []).filter((ph) => ph.photo_url);
       return (
-        <div key={job.id} className="bg-card border border-border rounded-xl overflow-hidden transition-all duration-300 hover:border-primary/40">
+        <div key={job.id} ref={(el) => { if (refs) refs.current[job.id] = el; }}
+          className={`bg-card border rounded-xl overflow-hidden transition-all duration-300 hover:border-primary/40 ${highlightedId === job.id ? "border-primary ring-2 ring-primary/40" : "border-border"}`}>
           <button className="w-full text-left p-3 space-y-2" onClick={() => navigate(`/shared/${job.token}`)}>
             <div className="flex items-start justify-between">
               <PortfolioIcon icon={style.icon} color={style.color} size="sm" logoUrl={style.logo_url} />
