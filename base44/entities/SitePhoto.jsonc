@@ -1,18 +1,24 @@
 {
   "name": "SitePhoto",
-  "type": "object",
   "properties": {
-    "title": {
-      "type": "string"
-    },
     "description": {
       "type": "string"
     },
+    "owner_id": {
+      "description": "Account owner's user id; set when a guest uploads via a share link",
+      "type": "string"
+    },
     "photo_url": {
-      "type": "string",
-      "format": "uri"
+      "format": "uri",
+      "type": "string"
     },
     "project_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "uploaded_by_guest": {
       "type": "string"
     }
   },
@@ -24,14 +30,36 @@
     "create": {
       "created_by_id": "{{user.id}}"
     },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
+    },
     "read": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
     },
     "update": {
-      "created_by_id": "{{user.id}}"
-    },
-    "delete": {
-      "created_by_id": "{{user.id}}"
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
     }
-  }
+  },
+  "type": "object"
 }
