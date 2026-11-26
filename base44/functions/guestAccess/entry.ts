@@ -15,7 +15,10 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 //                       portfolio's details, add / edit / delete projects (including
 //                       budgets), add / edit / delete tasks and subtasks, add / delete
 //                       appointments, and delete photos, documents and messages.
-//                       Can NOT: delete the portfolio itself, create or manage share
+//                       Can also invite customers and team members (never other project
+//                       managers) to the portfolio or to any single project in it, and
+//                       turn those links off.
+//                       Can NOT: delete the portfolio itself, create project-manager
 //                       links, reach any other portfolio, or touch account settings.
 
 const TASK_STATUSES = ['Not Started', 'In Progress', 'Pending Approval', 'Blocked', 'Done'];
@@ -24,6 +27,12 @@ const DOC_CATEGORIES = ['Plans', 'RFI', 'Change Order', 'Report', 'Contract'];
 const MAX_BASE64 = 14_000_000; // ~10 MB file
 const DOC_EXT = /\.(pdf|png|jpe?g|heic|gif|webp|docx?|xlsx?|pptx?|txt|csv|dwg|zip)$/i;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const PUBLIC_URL = 'https://mybuildertrac.base44.app';
+const makeToken = () => {
+  const bytes = new Uint8Array(24);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+};
 
 const json = (body: unknown, status = 200) => Response.json(body, { status });
 const clean = (v: unknown, max: number) => String(v ?? '').trim().slice(0, max);
@@ -57,7 +66,8 @@ Deno.serve(async (req) => {
     if (!link || link.active === false || (link.expires_at && link.expires_at < today)) {
       return json({ error: 'invalid_link' }, 404);
     }
-    const ownerId = link.created_by_id;
+    // Links made by a project manager carry owner_id so they still belong to the owner's account.
+    const ownerId = link.owner_id || link.created_by_id;
     if (!ownerId) return json({ error: 'invalid_link' }, 404);
 
     // A project-manager link only counts as one when it is tied to a portfolio.
@@ -144,6 +154,21 @@ Deno.serve(async (req) => {
         }
       }
 
+      // Project managers see the customer / team-member links for their portfolio (never other PM links).
+      let links: any[] = [];
+      if (isPM) {
+        const all = await db.ShareLink.list();
+        links = all
+          .filter((l: any) => isOwners(l) && l.role !== 'project_manager' &&
+            ((l.scope === 'portfolio' && l.portfolio_name === link.portfolio_name) ||
+             (l.scope === 'project' && projectIds.has(l.project_id))))
+          .map((l: any) => ({
+            id: l.id, token: l.token, role: l.role, scope: l.scope, project_id: l.project_id || null,
+            guest_name: l.guest_name || '', guest_email: l.guest_email || '', active: l.active !== false,
+            last_opened: l.last_opened || null,
+          }));
+      }
+
       // Remember when the link was last used (best effort).
       try { await db.ShareLink.update(link.id, { last_opened: new Date().toISOString() }); } catch (_e) { /* ignore */ }
 
@@ -153,6 +178,7 @@ Deno.serve(async (req) => {
         owner_name: link.owner_name || '',
         portfolio_name: link.portfolio_name || '',
         portfolio,
+        links,
         projects: data,
       });
     }
@@ -212,6 +238,62 @@ Deno.serve(async (req) => {
         if (body.contact_phone !== undefined) patch.contact_phone = clean(body.contact_phone, 60);
         if (body.business_address !== undefined) patch.business_address = clean(body.business_address, 300);
         await db.Portfolio.update(pf.id, patch);
+        return json({ ok: true });
+      }
+
+      // ----- Invite / manage customers and team members -----
+      if (action === 'createLink') {
+        const inviteRole = body.role === 'team_member' ? 'team_member' : 'customer';
+        const name = clean(body.guest_name, 80);
+        const email = clean(body.guest_email, 200);
+        if (!name && !email) return json({ error: 'empty' }, 400);
+        let scope = 'portfolio';
+        let pid: string | undefined;
+        let label = link.portfolio_name;
+        if (body.project_id) {
+          const proj = projects.find((p: any) => p.id === clean(body.project_id, 64));
+          if (!proj) return json({ error: 'not_allowed' }, 403);
+          scope = 'project';
+          pid = proj.id;
+          label = proj.name;
+        }
+        const newToken = makeToken();
+        const rec = await db.ShareLink.create({
+          token: newToken,
+          role: inviteRole,
+          scope,
+          project_id: pid,
+          portfolio_name: scope === 'portfolio' ? link.portfolio_name : undefined,
+          guest_name: name,
+          guest_email: email,
+          active: true,
+          owner_name: link.owner_name || '',
+          owner_id: ownerId,
+          invited_by: guestLabel,
+        });
+        const url = `${PUBLIC_URL}/g/${newToken}`;
+        let emailed = false;
+        if (email) {
+          try {
+            await base44.asServiceRole.integrations.Core.SendEmail({
+              to: email,
+              subject: `${guestLabel} shared ${label} with you on BuilderTrac`,
+              body: `Hi${name ? ' ' + name : ''},\n\n${guestLabel}${link.owner_name ? ' (' + link.owner_name + ')' : ''} has shared ${label} with you on BuilderTrac.\n\nOpen it here — no account or sign-up needed:\n${url}\n\nKeep this link private. Anyone who has it can open the project.\n\n— BuilderTrac`,
+            });
+            emailed = true;
+          } catch (_e) { /* fall back to copying the link */ }
+        }
+        return json({ ok: true, id: rec.id, url, emailed });
+      }
+
+      if (action === 'setLinkActive' || action === 'deleteLink') {
+        const target = await db.ShareLink.get(clean(body.link_id, 64)).catch(() => null);
+        const inScope = target && isOwners(target) && target.role !== 'project_manager' &&
+          ((target.scope === 'portfolio' && target.portfolio_name === link.portfolio_name) ||
+           (target.scope === 'project' && projectIds.has(target.project_id)));
+        if (!inScope) return json({ error: 'not_allowed' }, 403);
+        if (action === 'deleteLink') { await db.ShareLink.delete(target.id); return json({ ok: true }); }
+        await db.ShareLink.update(target.id, { active: !!body.active });
         return json({ ok: true });
       }
 
