@@ -143,9 +143,13 @@ Deno.serve(async (req) => {
       }));
 
       let portfolio = null;
-      if (isPM) {
+      let portfolio_style = null;
+      {
         const pf = await getPortfolio();
         if (pf) {
+          portfolio_style = { icon: pf.icon || null, color: pf.color || null, logo_url: pf.logo_url || null };
+        }
+        if (isPM && pf) {
           portfolio = {
             name: pf.name, description: pf.description || '', contact_name: pf.contact_name || '',
             contact_email: pf.contact_email || '', contact_phone: pf.contact_phone || '',
@@ -178,6 +182,7 @@ Deno.serve(async (req) => {
         owner_name: link.owner_name || '',
         portfolio_name: link.portfolio_name || '',
         portfolio,
+        portfolio_style,
         links,
         projects: data,
       });
