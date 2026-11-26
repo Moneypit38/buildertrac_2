@@ -8,7 +8,7 @@ import {
   CheckCircle2, X, ExternalLink, Send, Link2Off, ArrowRight, HardHat, Pencil, Plus, CalendarClock,
 } from "lucide-react";
 import { toast } from "sonner";
-import { DeleteButton, AddTaskForm, TaskEditor, ProjectEditor, AddProjectForm, PortfolioEditor, AppointmentsPanel } from "@/components/GuestAdminParts";
+import { DeleteButton, AddTaskForm, TaskEditor, ProjectEditor, AddProjectForm, PortfolioEditor, AppointmentsPanel, ShareSection } from "@/components/GuestAdminParts";
 
 const STATUSES = ["Not Started", "In Progress", "Pending Approval", "Blocked", "Done"];
 const statusStyle = {
@@ -334,7 +334,7 @@ function MessagesPanel({ project, isAdmin, token, reload, guestName }) {
   );
 }
 
-function ProjectView({ project, role, token, reload, guestName }) {
+function ProjectView({ project, role, token, reload, guestName, shareProps }) {
   const isAdmin = role === "project_manager";
   const isTeam = role === "team_member" || isAdmin;
   const tabs = [
@@ -358,6 +358,9 @@ function ProjectView({ project, role, token, reload, guestName }) {
             onSave={(v) => adminDo(token, "updateProject", { project_id: project.id, ...v }, "Project saved", reload)}
             onDelete={() => adminDo(token, "deleteProject", { project_id: project.id }, "Project deleted", reload)}
           />
+        )}
+        {isAdmin && shareProps && (
+          <div className="mt-2"><ShareSection {...shareProps} defaultProjectId={project.id} /></div>
         )}
       </div>
 
@@ -423,6 +426,27 @@ export default function GuestPortal() {
   }
 
   const projects = data.projects || [];
+
+  // Project managers can invite customers and team members for their portfolio.
+  const shareProps = data.role === "project_manager" ? {
+    links: data.links || [],
+    projects,
+    baseUrl: "https://mybuildertrac.base44.app",
+    onCreate: async (v) => {
+      try {
+        const r = await call(token, "createLink", v);
+        if (r?.error) throw new Error(r.error);
+        await load();
+        toast.success(r.emailed ? "Link emailed" : "Link created");
+        return r;
+      } catch {
+        toast.error("Couldn't create the link. Please try again.");
+        return null;
+      }
+    },
+    onToggle: (l) => adminDo(token, "setLinkActive", { link_id: l.id, active: !l.active }, l.active ? "Link turned off" : "Link turned on", load),
+    onDelete: (l) => adminDo(token, "deleteLink", { link_id: l.id }, "Link removed", load),
+  } : null;
   const single = projects.length === 1 ? projects[0] : null;
   const selected = single || projects.find((p) => p.id === selectedId) || null;
 
@@ -464,6 +488,7 @@ export default function GuestPortal() {
               <div className="flex flex-wrap gap-2 items-start">
                 <AddProjectForm onAdd={(v) => adminDo(token, "addProject", v, "Project added", load)} />
                 {data.portfolio && <PortfolioEditor portfolio={data.portfolio} onSave={(v) => adminDo(token, "updatePortfolio", v, "Portfolio saved", load)} />}
+                {shareProps && <ShareSection {...shareProps} />}
               </div>
             )}
             <div className="space-y-2">
@@ -482,7 +507,7 @@ export default function GuestPortal() {
         )}
 
         {selected && (
-          <ProjectView key={selected.id} project={selected} role={data.role} token={token} reload={load} guestName={data.guest_name} />
+          <ProjectView key={selected.id} project={selected} role={data.role} token={token} reload={load} guestName={data.guest_name} shareProps={shareProps} />
         )}
       </main>
 
