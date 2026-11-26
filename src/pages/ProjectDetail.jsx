@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import RowMenu from "@/components/RowMenu";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import TaskItem from "../components/TaskItem";
@@ -90,24 +91,18 @@ export default function ProjectDetail() {
             {project.portfolio && <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">{project.portfolio}</p>}
           </div>
           <div className="flex items-center gap-1">
-            {isAdmin && <Button variant="ghost" size="icon" onClick={() => setShowEditProject(true)}><Pencil className="w-4 h-4" /></Button>}
-            {isAdmin && <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => { setActiveTab("team"); setOpenInvite(true); }}><UserPlus className="w-3.5 h-3.5" /> Invite</Button>}
+            {isAdmin && <Button variant="outline" size="sm" className="gap-1.5" onClick={() => { setActiveTab("team"); setOpenInvite(true); }}><UserPlus className="w-4 h-4" /> Invite</Button>}
             {isAdmin && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete project?</AlertDialogTitle>
-                    <AlertDialogDescription>This will permanently delete "{project.name}" and cannot be undone.</AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => deleteProject.mutate()} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <div className="ml-1 mr-1">
+                <RowMenu
+                  onEdit={() => setShowEditProject(true)}
+                  onDelete={() => deleteProject.mutate()}
+                  editLabel="Edit project"
+                  deleteLabel="Delete project"
+                  deleteTitle="Delete project?"
+                  deleteText={`This will permanently delete "${project.name}" and cannot be undone.`}
+                />
+              </div>
             )}
           </div>
         </div>
@@ -129,15 +124,15 @@ export default function ProjectDetail() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full bg-card border border-border p-0.5 flex">
-          <TabsTrigger value="tasks" className="flex-1 gap-1 text-xs px-1 py-1"><ClipboardList className="w-3 h-3" /><span>Tasks</span></TabsTrigger>
-          <TabsTrigger value="docs" className="flex-1 gap-1 text-xs px-1 py-1"><FileText className="w-3 h-3" /><span>Docs</span></TabsTrigger>
-          <TabsTrigger value="photos" className="flex-1 gap-1 text-xs px-1 py-1" onClick={() => { markViewed("photos"); window.dispatchEvent(new Event("photos-seen-updated")); }}><Camera className="w-3 h-3" /><span>Photos</span></TabsTrigger>
-          <TabsTrigger value="appointments" className="flex-1 gap-1 text-xs px-1 py-1"><CalendarClock className="w-3 h-3" /><span>Appts</span></TabsTrigger>
-          <TabsTrigger value="team" className="flex-1 gap-1 text-xs px-1 py-1"><Users className="w-3 h-3" /><span>Team</span></TabsTrigger>
-          <TabsTrigger value="notes" className="flex-1 gap-1 text-xs px-1 py-1 relative" onClick={markMsgsViewed}>
+        <TabsList className="w-full h-auto bg-card border border-border p-1 flex gap-0.5">
+          <TabsTrigger value="tasks" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px]"><ClipboardList className="w-4 h-4" /><span>Tasks</span></TabsTrigger>
+          <TabsTrigger value="docs" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px]"><FileText className="w-4 h-4" /><span>Docs</span></TabsTrigger>
+          <TabsTrigger value="photos" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px]" onClick={() => { markViewed("photos"); window.dispatchEvent(new Event("photos-seen-updated")); }}><Camera className="w-4 h-4" /><span>Photos</span></TabsTrigger>
+          <TabsTrigger value="appointments" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px]"><CalendarClock className="w-4 h-4" /><span>Appts</span></TabsTrigger>
+          <TabsTrigger value="team" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px]"><Users className="w-4 h-4" /><span>Team</span></TabsTrigger>
+          <TabsTrigger value="notes" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px] relative" onClick={markMsgsViewed}>
             <span className="relative">
-              <MessageSquare className="w-3 h-3" />
+              <MessageSquare className="w-4 h-4" />
               {msgsBadge && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-yellow-300 ring-2 ring-background animate-pulse" />}
             </span>
             <span>Messages</span>
