@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   ClipboardList, Camera, FileText, MessageSquare, MapPin, ChevronLeft, Upload, Loader2,
-  CheckCircle2, X, ExternalLink, Send, Link2Off, ArrowRight, HardHat, Pencil,
+  CheckCircle2, X, ExternalLink, Send, Link2Off, ArrowRight, HardHat, Pencil, Plus, CalendarClock,
 } from "lucide-react";
 import { toast } from "sonner";
-import { DeleteButton, AddTaskForm, TaskEditor, ProjectEditor, AddProjectForm } from "@/components/GuestAdminParts";
+import { DeleteButton, AddTaskForm, TaskEditor, ProjectEditor, AddProjectForm, PortfolioEditor, AppointmentsPanel } from "@/components/GuestAdminParts";
 
 const STATUSES = ["Not Started", "In Progress", "Pending Approval", "Blocked", "Done"];
 const statusStyle = {
@@ -96,6 +96,7 @@ function Lightbox({ photo, onClose, onDelete }) {
 function TasksPanel({ project, canEdit, isAdmin, token, reload }) {
   const [busy, setBusy] = useState(null);
   const [editingId, setEditingId] = useState(null);
+  const [subFor, setSubFor] = useState(null);
   const roots = project.tasks.filter((t) => !t.parent_task_id);
   const kids = (id) => project.tasks.filter((t) => t.parent_task_id === id);
   roots.sort((a, b) => Number(a.completed) - Number(b.completed) || (a.due_date || "9999").localeCompare(b.due_date || "9999"));
@@ -137,11 +138,15 @@ function TasksPanel({ project, canEdit, isAdmin, token, reload }) {
         )}
         {isAdmin && (
           <>
+            {!child && <button type="button" aria-label="Add subtask" onClick={() => setSubFor(subFor === t.id ? null : t.id)} className="p-1 text-muted-foreground hover:text-primary"><Plus className="w-3.5 h-3.5" /></button>}
             <button type="button" aria-label="Edit task" onClick={() => setEditingId(editingId === t.id ? null : t.id)} className="p-1 text-muted-foreground hover:text-primary"><Pencil className="w-3.5 h-3.5" /></button>
             <DeleteButton onConfirm={() => adminDo(token, "deleteTask", { task_id: t.id }, "Task deleted", reload)} />
           </>
         )}
       </div>
+      {isAdmin && subFor === t.id && (
+        <div className="mt-2"><AddTaskForm placeholder="Add a subtask…" onAdd={async (v) => { const ok = await adminDo(token, "addTask", { project_id: project.id, parent_task_id: t.id, ...v }, "Subtask added", reload); if (ok) setSubFor(null); return ok; }} /></div>
+      )}
       {isAdmin && editingId === t.id && (
         <TaskEditor task={t} onCancel={() => setEditingId(null)} onSave={(v) => adminDo(token, "editTask", { task_id: t.id, ...v }, "Task saved", reload)} />
       )}
@@ -330,13 +335,13 @@ function MessagesPanel({ project, isAdmin, token, reload, guestName }) {
 }
 
 function ProjectView({ project, role, token, reload, guestName }) {
-  const isAdmin = role === "admin";
+  const isAdmin = role === "project_manager";
   const isTeam = role === "team_member" || isAdmin;
   const tabs = [
     { id: "tasks", label: "Tasks", icon: ClipboardList },
     { id: "photos", label: "Photos", icon: Camera },
     { id: "docs", label: "Docs", icon: FileText },
-    ...(isTeam ? [{ id: "messages", label: "Messages", icon: MessageSquare }] : []),
+    ...(isTeam ? [{ id: "appts", label: "Appts", icon: CalendarClock }, { id: "messages", label: "Messages", icon: MessageSquare }] : []),
   ];
   const [tab, setTab] = useState("tasks");
 
@@ -348,7 +353,11 @@ function ProjectView({ project, role, token, reload, guestName }) {
         {project.status && <span className="inline-block mt-2 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/15 text-primary">{project.status}</span>}
         {project.description && <p className="text-sm text-muted-foreground mt-2">{project.description}</p>}
         {isAdmin && (
-          <ProjectEditor project={project} onSave={(v) => adminDo(token, "updateProject", { project_id: project.id, ...v }, "Project saved", reload)} />
+          <ProjectEditor
+            project={project}
+            onSave={(v) => adminDo(token, "updateProject", { project_id: project.id, ...v }, "Project saved", reload)}
+            onDelete={() => adminDo(token, "deleteProject", { project_id: project.id }, "Project deleted", reload)}
+          />
         )}
       </div>
 
@@ -364,6 +373,14 @@ function ProjectView({ project, role, token, reload, guestName }) {
       {tab === "tasks" && <TasksPanel project={project} canEdit={isTeam} isAdmin={isAdmin} token={token} reload={reload} />}
       {tab === "photos" && <PhotosPanel project={project} isAdmin={isAdmin} token={token} reload={reload} />}
       {tab === "docs" && <DocsPanel project={project} isAdmin={isAdmin} token={token} reload={reload} />}
+      {tab === "appts" && isTeam && (
+        <AppointmentsPanel
+          project={project}
+          canManage={isAdmin}
+          onAdd={(v) => adminDo(token, "addAppointment", { project_id: project.id, ...v }, "Appointment added", reload)}
+          onDelete={(id) => adminDo(token, "deleteAppointment", { record_id: id }, "Appointment deleted", reload)}
+        />
+      )}
       {tab === "messages" && isTeam && <MessagesPanel project={project} isAdmin={isAdmin} token={token} reload={reload} guestName={guestName} />}
     </div>
   );
@@ -426,13 +443,14 @@ export default function GuestPortal() {
       </header>
 
       <main className="flex-1 max-w-2xl w-full mx-auto p-4 space-y-4">
-        {projects.length === 0 && data.role === "admin" && (
+        {projects.length === 0 && data.role === "project_manager" && (
           <div className="space-y-3">
             {data.portfolio_name && <h1 className="text-xl font-bold font-display">{data.portfolio_name}</h1>}
+            {data.portfolio && <PortfolioEditor portfolio={data.portfolio} onSave={(v) => adminDo(token, "updatePortfolio", v, "Portfolio saved", load)} />}
             <AddProjectForm onAdd={(v) => adminDo(token, "addProject", v, "Project added", load)} />
           </div>
         )}
-        {projects.length === 0 && data.role !== "admin" && (
+        {projects.length === 0 && data.role !== "project_manager" && (
           <div className="bg-card border border-border rounded-xl p-8 text-center">
             <HardHat className="w-9 h-9 text-muted-foreground mx-auto mb-2" />
             <p className="text-sm text-muted-foreground">There are no projects to show yet.</p>
@@ -442,8 +460,11 @@ export default function GuestPortal() {
         {!selected && projects.length > 0 && (
           <>
             {data.portfolio_name && <h1 className="text-xl font-bold font-display">{data.portfolio_name}</h1>}
-            {data.role === "admin" && (
-              <AddProjectForm onAdd={(v) => adminDo(token, "addProject", v, "Project added", load)} />
+            {data.role === "project_manager" && (
+              <div className="flex flex-wrap gap-2 items-start">
+                <AddProjectForm onAdd={(v) => adminDo(token, "addProject", v, "Project added", load)} />
+                {data.portfolio && <PortfolioEditor portfolio={data.portfolio} onSave={(v) => adminDo(token, "updatePortfolio", v, "Portfolio saved", load)} />}
+              </div>
             )}
             <div className="space-y-2">
               {projects.map((p) => (
