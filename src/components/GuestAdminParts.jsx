@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Trash2, Pencil, Plus, Loader2, CalendarClock, MapPin, UserPlus, Copy, Share2, Power, Check } from "lucide-react";
+import { Trash2, Pencil, Plus, Loader2, CalendarClock, MapPin, UserPlus, Copy, Share2, Power, Check, MessageSquare } from "lucide-react";
+
+const smsHref = (url) => `sms:?&body=${encodeURIComponent(`Here's your BuilderTrac link (no account needed): ${url}`)}`;
 import { toast } from "sonner";
 
 // Building blocks used only by project managers on the /g/<token> page.
@@ -234,6 +236,7 @@ export function ShareSection({ links = [], projects = [], defaultProjectId = "",
           <p className="text-xs font-semibold flex items-center gap-1"><Check className="w-3.5 h-3.5 text-primary" /> {created.emailed ? "Link emailed" : "Link ready — copy it and send it yourself"}</p>
           <p className="text-[11px] break-all bg-background rounded p-1.5 select-all">{created.url}</p>
           <Button type="button" size="sm" className="h-7 text-xs gap-1" onClick={() => copyText(created.url)}><Copy className="w-3 h-3" /> Copy</Button>
+          <a href={smsHref(created.url)} className="ml-1.5"><Button type="button" size="sm" variant="outline" className="h-7 text-xs gap-1"><MessageSquare className="w-3 h-3" /> Text</Button></a>
         </div>
       )}
 
@@ -275,6 +278,7 @@ export function ShareSection({ links = [], projects = [], defaultProjectId = "",
               </p>
               <div className="flex flex-wrap items-center gap-1 mt-1.5">
                 <Button type="button" size="sm" variant="outline" className="h-6 text-[11px] px-2 gap-1" onClick={() => copyText(url(l.token))}><Copy className="w-3 h-3" /> Copy</Button>
+                <a href={smsHref(url(l.token))}><Button type="button" size="sm" variant="outline" className="h-6 text-[11px] px-2 gap-1"><MessageSquare className="w-3 h-3" /> Text</Button></a>
                 {typeof navigator !== "undefined" && navigator.share && (
                   <Button type="button" size="sm" variant="outline" className="h-6 text-[11px] px-2 gap-1" onClick={() => navigator.share({ title: "BuilderTrac", url: url(l.token) }).catch(() => {})}><Share2 className="w-3 h-3" /> Send</Button>
                 )}
