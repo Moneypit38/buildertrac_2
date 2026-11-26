@@ -551,7 +551,7 @@ export default function GuestPortal({ embedded = false }) {
           Run your own jobs the same way.{" "}
           <a href="https://mybuildertrac.base44.app" target="_blank" rel="noopener noreferrer" className="text-primary font-medium hover:underline">Try BuilderTrac</a>
         </p>
-      </footer>
+      </footer>}
     </div>
   );
 }
