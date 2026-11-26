@@ -117,7 +117,7 @@ export default function NotesTab({ projectId }) {
                         <IconButton
                           destructive
                           aria-label="Delete message"
-                          onClick={() => deleteNote.mutate(note.id)}
+                          onClick={() => { if (window.confirm("Delete this message?")) deleteNote.mutate(note.id); }}
                           className={cn("-m-1.5", isMe ? "order-first" : "order-last")}
                         >
                           <Trash2 className="w-4 h-4" />
