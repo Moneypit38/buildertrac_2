@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Calendar, ChevronDown, Pencil, Trash2, Check } from "lucide-react";
+import { Calendar, ChevronDown, Pencil, Trash2, Check, MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { isNew } from "../hooks/useLastViewed";
@@ -192,6 +192,24 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
           {task.assigned_to && (
             <p style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", margin: "2px 0 0" }}>{task.assigned_to}</p>
           )}
+          {showActions && (
+            <div style={{ display: "flex", gap: 8, marginTop: 10 }} onClick={(e) => e.stopPropagation()}>
+              {onEdit && (
+                <div
+                  onClick={(e) => { e.stopPropagation(); setShowActions(false); onEdit(); }}
+                  style={{ ...tapStyle, flex: 1, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 10, border: "1px solid hsl(var(--border))", fontSize: 13, fontWeight: 600, color: "hsl(var(--foreground))" }}
+                >
+                  <Pencil size={15} /> Edit
+                </div>
+              )}
+              <div
+                onClick={(e) => { e.stopPropagation(); setShowActions(false); setShowDelete(true); }}
+                style={{ ...tapStyle, flex: 1, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 10, border: "1px solid hsl(var(--border))", fontSize: 13, fontWeight: 600, color: "hsl(var(--destructive))" }}
+              >
+                <Trash2 size={15} /> Delete
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right controls — completely isolated from Radix */}
@@ -224,15 +242,12 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
                 <ChevronDown size={18} color="hsl(var(--muted-foreground))" />
               </div>
             )}
-            <div style={{ width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <RowMenu
-                onEdit={onEdit ? () => onEdit() : undefined}
-                onDelete={() => remove.mutate()}
-                editLabel="Edit task"
-                deleteLabel="Delete task"
-                deleteTitle="Delete task?"
-                deleteText={`This will permanently remove "${task.title}".`}
-              />
+            <div
+              onClick={(e) => { e.stopPropagation(); setShowActions((v) => !v); }}
+              style={{ ...tapStyle, width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 10, background: showActions ? "hsl(var(--accent))" : "transparent" }}
+              aria-label="More actions"
+            >
+              <MoreHorizontal size={20} color="hsl(var(--muted-foreground))" />
             </div>
           </div>
         </div>
