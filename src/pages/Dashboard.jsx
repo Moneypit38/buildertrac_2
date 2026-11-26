@@ -219,7 +219,7 @@ export default function Dashboard() {
               const cover = pfProjects.flatMap(p => p.photos || []).find(ph => ph.photo_url)?.photo_url || data.portfolio_style?.logo_url;
               return (
                 <motion.div key={job.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.25 }}>
-                  <Link to={`/shared/${job.token}`} className="relative rounded-xl overflow-hidden border border-border hover:border-primary/40 transition-all block aspect-[4/3]">
+                  <Link to="/portfolios" state={{ openPortfolioId: job.id }} className="relative rounded-xl overflow-hidden border border-border hover:border-primary/40 transition-all block aspect-[4/3]">
                     {cover ? <img src={cover} alt={data.portfolio_name} className="absolute inset-0 w-full h-full object-cover" /> : <div className="absolute inset-0 bg-muted" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-2.5">
