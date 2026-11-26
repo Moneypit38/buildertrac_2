@@ -7,24 +7,30 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 // (always limited to the link owner's own projects), and then enforces what the
 // link's role is allowed to do.
 //
-//   customer     -> view their project(s); upload photos and documents. Nothing else.
-//   team_member  -> everything a customer can, plus see messages, post messages,
-//                   and change a task's status. Can't edit the project, budget,
-//                   members, or delete anything.
-//   admin        -> portfolio manager. Only valid on a PORTFOLIO link, and only ever
-//                   touches that one portfolio. Everything a team member can, plus
-//                   add/edit/delete tasks, edit project details and status, add new
-//                   projects to the portfolio, and remove photos, documents and messages.
-//                   Can NOT touch budgets, delete projects or the portfolio, share
-//                   links, or reach any other portfolio.
+//   customer         -> view their project(s); upload photos and documents. Nothing else.
+//   team_member      -> everything a customer can, plus see appointments and messages,
+//                       post messages, and change a task's status.
+//   project_manager  -> runs ONE portfolio and every project in it (only valid on a
+//                       PORTFOLIO link). Everything a team member can, plus: edit the
+//                       portfolio's details, add / edit / delete projects (including
+//                       budgets), add / edit / delete tasks and subtasks, add / delete
+//                       appointments, and delete photos, documents and messages.
+//                       Can NOT: delete the portfolio itself, create or manage share
+//                       links, reach any other portfolio, or touch account settings.
 
 const TASK_STATUSES = ['Not Started', 'In Progress', 'Pending Approval', 'Blocked', 'Done'];
+const PROJECT_STATUSES = ['Planning', 'In Progress', 'On Hold', 'Completed'];
 const DOC_CATEGORIES = ['Plans', 'RFI', 'Change Order', 'Report', 'Contract'];
 const MAX_BASE64 = 14_000_000; // ~10 MB file
 const DOC_EXT = /\.(pdf|png|jpe?g|heic|gif|webp|docx?|xlsx?|pptx?|txt|csv|dwg|zip)$/i;
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 const json = (body: unknown, status = 200) => Response.json(body, { status });
 const clean = (v: unknown, max: number) => String(v ?? '').trim().slice(0, max);
+const money = (v: unknown) => {
+  const n = Number(v);
+  return Number.isFinite(n) && n >= 0 ? Math.min(n, 1_000_000_000_000) : 0;
+};
 
 function toFile(b64: string, name: string, type: string): File {
   const bin = atob(b64);
@@ -54,35 +60,44 @@ Deno.serve(async (req) => {
     const ownerId = link.created_by_id;
     if (!ownerId) return json({ error: 'invalid_link' }, 404);
 
-    // An admin link only counts as admin when it is tied to a portfolio; otherwise treat it as team member.
-    let role = link.role === 'admin' ? 'admin' : link.role === 'team_member' ? 'team_member' : 'customer';
-    if (role === 'admin' && link.scope !== 'portfolio') role = 'team_member';
-    const isAdmin = role === 'admin';
+    // A project-manager link only counts as one when it is tied to a portfolio.
+    let role = link.role === 'project_manager' ? 'project_manager' : link.role === 'team_member' ? 'team_member' : 'customer';
+    if (role === 'project_manager' && (link.scope !== 'portfolio' || !link.portfolio_name)) role = 'team_member';
+    const isPM = role === 'project_manager';
     const isTeam = role !== 'customer';
     const guestLabel = clean(link.guest_name || link.guest_email || 'Guest', 80);
+    const isOwners = (r: any) => r && (r.created_by_id === ownerId || r.owner_id === ownerId);
 
     // Which projects does this link cover? Always limited to the owner's own projects.
     let projects: any[] = [];
     if (link.scope === 'portfolio') {
       if (link.portfolio_name) {
         const all = await db.Project.filter({ portfolio: link.portfolio_name });
-        projects = all.filter((p: any) => p.created_by_id === ownerId || p.owner_id === ownerId);
+        projects = all.filter(isOwners);
       }
     } else if (link.project_id) {
       try {
         const p = await db.Project.get(link.project_id);
-        if (p && (p.created_by_id === ownerId || p.owner_id === ownerId)) projects = [p];
+        if (isOwners(p)) projects = [p];
       } catch (_e) { /* not found */ }
     }
     const projectIds = new Set(projects.map((p: any) => p.id));
 
+    // The portfolio record (only used for project managers, to show/edit its details)
+    const getPortfolio = async () => {
+      if (!link.portfolio_name) return null;
+      const rows = await db.Portfolio.filter({ name: link.portfolio_name });
+      return rows.find(isOwners) || null;
+    };
+
     if (action === 'load') {
       const data = await Promise.all(projects.map(async (p: any) => {
-        const [tasks, photos, docs, notes] = await Promise.all([
+        const [tasks, photos, docs, notes, appts] = await Promise.all([
           db.Task.filter({ project_id: p.id }),
           db.SitePhoto.filter({ project_id: p.id }),
           db.Document.filter({ project_id: p.id }),
           isTeam ? db.Note.filter({ project_id: p.id }) : Promise.resolve([]),
+          isTeam ? db.Appointment.filter({ project_id: p.id }) : Promise.resolve([]),
         ]);
         return {
           id: p.id,
@@ -91,10 +106,11 @@ Deno.serve(async (req) => {
           status: p.status,
           portfolio: p.portfolio,
           description: p.description,
+          ...(isPM ? { budget_total: p.budget_total || 0, budget_spent: p.budget_spent || 0 } : {}),
           tasks: tasks.map((t: any) => ({
             id: t.id, title: t.title, description: t.description, status: t.status,
             priority: t.priority, due_date: t.due_date, completed: !!t.completed,
-            parent_task_id: t.parent_task_id || null,
+            assigned_to: t.assigned_to || '', parent_task_id: t.parent_task_id || null,
           })),
           photos: photos.map((x: any) => ({
             id: x.id, title: x.title, description: x.description, photo_url: x.photo_url,
@@ -109,8 +125,24 @@ Deno.serve(async (req) => {
             id: n.id, content: n.content, author_name: n.author_name,
             author_email: n.author_email, created_date: n.created_date,
           })),
+          appointments: appts.map((a: any) => ({
+            id: a.id, title: a.title, date: a.date, start_time: a.start_time, end_time: a.end_time,
+            location: a.location, notes: a.notes,
+          })),
         };
       }));
+
+      let portfolio = null;
+      if (isPM) {
+        const pf = await getPortfolio();
+        if (pf) {
+          portfolio = {
+            name: pf.name, description: pf.description || '', contact_name: pf.contact_name || '',
+            contact_email: pf.contact_email || '', contact_phone: pf.contact_phone || '',
+            business_address: pf.business_address || '',
+          };
+        }
+      }
 
       // Remember when the link was last used (best effort).
       try { await db.ShareLink.update(link.id, { last_opened: new Date().toISOString() }); } catch (_e) { /* ignore */ }
@@ -120,6 +152,7 @@ Deno.serve(async (req) => {
         guest_name: link.guest_name || '',
         owner_name: link.owner_name || '',
         portfolio_name: link.portfolio_name || '',
+        portfolio,
         projects: data,
       });
     }
@@ -165,19 +198,34 @@ Deno.serve(async (req) => {
       return json({ ok: true, id: rec.id, file_url: up.file_url });
     }
 
-    // Portfolio-admin-only actions (never reach outside the portfolio on the link)
-    if (isAdmin) {
+    // Project-manager-only actions (never reach outside the portfolio on the link)
+    if (isPM) {
       const portfolioName = link.portfolio_name;
+
+      if (action === 'updatePortfolio') {
+        const pf = await getPortfolio();
+        if (!pf) return json({ error: 'not_allowed' }, 403);
+        const patch: Record<string, unknown> = {};
+        if (body.description !== undefined) patch.description = clean(body.description, 1000);
+        if (body.contact_name !== undefined) patch.contact_name = clean(body.contact_name, 120);
+        if (body.contact_email !== undefined) patch.contact_email = clean(body.contact_email, 200);
+        if (body.contact_phone !== undefined) patch.contact_phone = clean(body.contact_phone, 60);
+        if (body.business_address !== undefined) patch.business_address = clean(body.business_address, 300);
+        await db.Portfolio.update(pf.id, patch);
+        return json({ ok: true });
+      }
 
       if (action === 'addProject') {
         const name = clean(body.name, 120);
         if (!name || !portfolioName) return json({ error: 'empty' }, 400);
-        const status = ['Planning', 'In Progress', 'On Hold', 'Completed'].includes(body.status) ? body.status : 'Planning';
         const rec = await db.Project.create({
           name,
           address: clean(body.address, 200),
           portfolio: portfolioName,
-          status,
+          status: PROJECT_STATUSES.includes(body.status) ? body.status : 'Planning',
+          budget_total: money(body.budget_total),
+          budget_spent: money(body.budget_spent),
+          description: clean(body.description, 1000),
           owner_id: ownerId,
         });
         return json({ ok: true, id: rec.id });
@@ -189,11 +237,19 @@ Deno.serve(async (req) => {
         if (body.name !== undefined) { const n = clean(body.name, 120); if (!n) return json({ error: 'empty' }, 400); patch.name = n; }
         if (body.address !== undefined) patch.address = clean(body.address, 200);
         if (body.description !== undefined) patch.description = clean(body.description, 1000);
+        if (body.budget_total !== undefined) patch.budget_total = money(body.budget_total);
+        if (body.budget_spent !== undefined) patch.budget_spent = money(body.budget_spent);
         if (body.status !== undefined) {
-          if (!['Planning', 'In Progress', 'On Hold', 'Completed'].includes(body.status)) return json({ error: 'bad_status' }, 400);
+          if (!PROJECT_STATUSES.includes(body.status)) return json({ error: 'bad_status' }, 400);
           patch.status = body.status;
         }
         await db.Project.update(projectId, patch);
+        return json({ ok: true });
+      }
+
+      if (action === 'deleteProject') {
+        if (!projectIds.has(projectId)) return json({ error: 'not_allowed' }, 403);
+        await db.Project.delete(projectId);
         return json({ ok: true });
       }
 
@@ -201,13 +257,21 @@ Deno.serve(async (req) => {
         if (!projectIds.has(projectId)) return json({ error: 'not_allowed' }, 403);
         const title = clean(body.title, 200);
         if (!title) return json({ error: 'empty' }, 400);
-        const due = /^\d{4}-\d{2}-\d{2}$/.test(String(body.due_date || '')) ? body.due_date : undefined;
+        let parentId: string | undefined;
+        if (body.parent_task_id) {
+          const parent = await db.Task.get(clean(body.parent_task_id, 64)).catch(() => null);
+          if (!parent || parent.project_id !== projectId) return json({ error: 'not_allowed' }, 403);
+          parentId = parent.id;
+        }
         const rec = await db.Task.create({
           title,
+          description: clean(body.description, 1000),
           project_id: projectId,
+          parent_task_id: parentId,
+          assigned_to: clean(body.assigned_to, 200),
           status: 'Not Started',
           priority: ['high', 'medium', 'low'].includes(body.priority) ? body.priority : 'medium',
-          due_date: due,
+          due_date: DATE_RE.test(String(body.due_date || '')) ? body.due_date : undefined,
           completed: false,
           owner_id: ownerId,
         });
@@ -220,14 +284,36 @@ Deno.serve(async (req) => {
         if (action === 'deleteTask') { await db.Task.delete(task.id); return json({ ok: true }); }
         const patch: Record<string, unknown> = {};
         if (body.title !== undefined) { const t = clean(body.title, 200); if (!t) return json({ error: 'empty' }, 400); patch.title = t; }
-        if (body.due_date !== undefined) patch.due_date = /^\d{4}-\d{2}-\d{2}$/.test(String(body.due_date)) ? body.due_date : null;
+        if (body.description !== undefined) patch.description = clean(body.description, 1000);
+        if (body.assigned_to !== undefined) patch.assigned_to = clean(body.assigned_to, 200);
+        if (body.due_date !== undefined) patch.due_date = DATE_RE.test(String(body.due_date)) ? body.due_date : null;
         if (body.priority !== undefined && ['high', 'medium', 'low'].includes(body.priority)) patch.priority = body.priority;
         await db.Task.update(task.id, patch);
         return json({ ok: true });
       }
 
-      if (action === 'deletePhoto' || action === 'deleteDoc' || action === 'deleteNote') {
-        const entity = action === 'deletePhoto' ? db.SitePhoto : action === 'deleteDoc' ? db.Document : db.Note;
+      if (action === 'addAppointment') {
+        if (!projectIds.has(projectId)) return json({ error: 'not_allowed' }, 403);
+        const title = clean(body.title, 160);
+        if (!title || !DATE_RE.test(String(body.date || ''))) return json({ error: 'empty' }, 400);
+        const rec = await db.Appointment.create({
+          title,
+          date: body.date,
+          start_time: clean(body.start_time, 20),
+          end_time: clean(body.end_time, 20),
+          location: clean(body.location, 200),
+          notes: clean(body.notes, 1000),
+          project_id: projectId,
+          owner_id: ownerId,
+        });
+        return json({ ok: true, id: rec.id });
+      }
+
+      if (['deletePhoto', 'deleteDoc', 'deleteNote', 'deleteAppointment'].includes(action)) {
+        const entity = action === 'deletePhoto' ? db.SitePhoto
+          : action === 'deleteDoc' ? db.Document
+          : action === 'deleteNote' ? db.Note
+          : db.Appointment;
         const rec = await entity.get(clean(body.record_id, 64)).catch(() => null);
         if (!rec || !projectIds.has(rec.project_id)) return json({ error: 'not_allowed' }, 403);
         await entity.delete(rec.id);
