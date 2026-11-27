@@ -18,6 +18,10 @@ const plain = (v: unknown, max: number) =>
 // One account can send a limited number of invites a day, and not repeat the same link at once.
 const MAX_INVITES_PER_DAY = 25;
 const INVITE_COOLDOWN_MS = 60_000;
+// The public deletion page can't require sign-in, so it is throttled instead: one request per
+// address per day, and a cap on the total sent to support per hour.
+const DELETION_PER_EMAIL_MS = 24 * 60 * 60 * 1000;
+const DELETION_GLOBAL_PER_HOUR = 20;
 
 export default async function (req: Request): Promise<Response> {
   try {
@@ -28,6 +32,20 @@ export default async function (req: Request): Promise<Response> {
     if (action === 'account_deletion') {
       const email = clean(body.email, 200).toLowerCase();
       if (!EMAIL_RE.test(email)) return Response.json({ error: 'bad_email' }, { status: 400 });
+
+      const db = base44.asServiceRole.entities;
+      const now = Date.now();
+      const recent = await db.DeletionRequest.list('-created_date', 100);
+      const age = (r: any) => now - (Date.parse(r.requested_at || r.created_date || '') || 0);
+      // Same address already asked today: report success without mailing support again.
+      if (recent.some((r: any) => r.email === email && age(r) < DELETION_PER_EMAIL_MS)) {
+        return Response.json({ ok: true });
+      }
+      if (recent.filter((r: any) => age(r) < 60 * 60 * 1000).length >= DELETION_GLOBAL_PER_HOUR) {
+        return Response.json({ error: 'rate_limited' }, { status: 429 });
+      }
+      await db.DeletionRequest.create({ email, requested_at: new Date(now).toISOString() });
+
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: SUPPORT_EMAIL,
         subject: 'Account Deletion Request',
