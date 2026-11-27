@@ -1,0 +1,31 @@
+{
+  "name": "DeletionRequest",
+  "properties": {
+    "email": {
+      "description": "Email the deletion request was submitted for",
+      "type": "string"
+    },
+    "requested_at": {
+      "description": "ISO timestamp of the request",
+      "type": "string"
+    }
+  },
+  "required": [
+    "email"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "__none__"
+    },
+    "delete": {
+      "created_by_id": "__none__"
+    },
+    "read": {
+      "created_by_id": "__none__"
+    },
+    "update": {
+      "created_by_id": "__none__"
+    }
+  },
+  "type": "object"
+}

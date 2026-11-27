@@ -30,6 +30,6 @@ Deno.serve(async (req) => {
     return Response.json({ isActive: hasActiveSub });
   } catch (error) {
     console.error('Payment status error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    return Response.json({ error: 'server_error' }, { status: 500 });
   }
 });

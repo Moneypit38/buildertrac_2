@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { notificationRecipients, plain } from '../../shared/taskNotifications.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -39,27 +40,27 @@ Deno.serve(async (req) => {
     const projects = await base44.asServiceRole.entities.Project.list();
     const projectMap = Object.fromEntries(projects.map(p => [p.id, p]));
 
-    const members = await base44.asServiceRole.entities.ProjectMember.list();
-
     let emailsSent = 0;
 
     for (const [projectId, tasks] of Object.entries(byProject)) {
       const project = projectMap[projectId];
       if (!project) continue;
 
-      const projectMembers = members.filter(m => m.project_id === projectId);
-      if (projectMembers.length === 0) continue;
+      // Only registered app users added by the project's own account are notified.
+      const recipients = await notificationRecipients(base44.asServiceRole.entities, project);
+      if (recipients.length === 0) continue;
 
+      const projectName = plain(project.name, 120) || 'a project';
       const taskList = tasks.map(t => {
         const daysLeft = Math.ceil((new Date(t.due_date) - today) / (1000 * 60 * 60 * 24));
-        return `• ${t.title} — due ${t.due_date} (${daysLeft === 0 ? 'today' : `in ${daysLeft} day${daysLeft > 1 ? 's' : ''}`})`;
+        return `• ${plain(t.title, 200)} — due ${plain(t.due_date, 10)} (${daysLeft === 0 ? 'today' : `in ${daysLeft} day${daysLeft > 1 ? 's' : ''}`})`;
       }).join('\n');
 
-      for (const member of projectMembers) {
+      for (const member of recipients) {
         await base44.asServiceRole.integrations.Core.SendEmail({
-          to: member.user_email,
-          subject: `⏰ Upcoming task deadlines — ${project.name}`,
-          body: `Hi ${member.user_name || member.user_email},\n\nThe following tasks on "${project.name}" are due soon:\n\n${taskList}\n\nPlease log in to BuilderTrac to review and update task statuses.\n\nThank you,\nBuilderTrac`,
+          to: member.email,
+          subject: `⏰ Upcoming task deadlines — ${projectName}`,
+          body: `Hi ${member.name},\n\nThe following tasks on "${projectName}" are due soon:\n\n${taskList}\n\nPlease log in to BuilderTrac to review and update task statuses.\n\nThank you,\nBuilderTrac`,
         });
         emailsSent++;
       }
@@ -72,6 +73,7 @@ Deno.serve(async (req) => {
 
     return Response.json({ message: `Sent ${emailsSent} reminder email(s).`, emailsSent });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('taskDueReminder error:', error);
+    return Response.json({ error: 'server_error' }, { status: 500 });
   }
 });
