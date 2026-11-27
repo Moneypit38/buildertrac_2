@@ -9,13 +9,23 @@ export default function DeleteAccount() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email.trim()) return;
     setLoading(true);
-    await base44.functions.invoke("sendAppEmail", { action: "account_deletion", email: email.trim() });
-    setSubmitted(true);
+    setError("");
+    try {
+      await base44.functions.invoke("sendAppEmail", { action: "account_deletion", email: email.trim() });
+      setSubmitted(true);
+    } catch (err) {
+      setError(
+        err?.response?.status === 429
+          ? "Too many requests right now. Please try again later or email support@buildertrac.app."
+          : "We couldn't submit your request. Please check the email address and try again."
+      );
+    }
     setLoading(false);
   };
 
@@ -63,6 +73,7 @@ export default function DeleteAccount() {
                   className="mt-1"
                 />
               </div>
+              {error && <p className="text-sm text-destructive">{error}</p>}
               <Button
                 type="submit"
                 variant="destructive"
