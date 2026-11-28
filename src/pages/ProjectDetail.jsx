@@ -26,6 +26,7 @@ import LogEntryDialog from "../components/LogEntryDialog";
 import { formatWhen } from "@/lib/logTypes";
 import ProjectPhotoStrip from "../components/ProjectPhotoStrip";
 import FollowUpBadge from "../components/FollowUpBadge";
+import FollowUpDone from "../components/FollowUpDone";
 
 export default function ProjectDetail() {
   const { projectId } = useParams();
@@ -131,7 +132,7 @@ export default function ProjectDetail() {
               ? `Last: ${lastLog.type}${lastLog.with_whom ? ` with ${lastLog.with_whom}` : ""}, ${formatWhen(lastLog.occurred_at, lastLog.created_date)}`
               : "Nothing logged yet"}
           </button>
-          <div className="mt-1 empty:hidden"><FollowUpBadge project={project} /></div>
+          <div className="mt-1 flex flex-wrap items-center gap-2 empty:hidden"><FollowUpBadge project={project} /><FollowUpDone project={project} /></div>
         </div>
         {project.budget_total > 0 && (
           <div className="mt-3 pt-3 border-t border-border">
