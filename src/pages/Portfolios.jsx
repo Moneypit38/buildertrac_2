@@ -234,8 +234,8 @@ export default function Portfolios() {
     : projects;
 
   const deletePortfolio = useMutation({
-    mutationFn: (id) => base44.entities.Portfolio.delete(id),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["portfolios"] }); toast.success("Portfolio deleted"); },
+    mutationFn: (pf) => deletePortfolioCascade(pf),
+    onSuccess: () => { qc.invalidateQueries(); toast.success("Portfolio deleted"); },
   });
 
   if (isLoading) return (
@@ -321,11 +321,11 @@ export default function Portfolios() {
                       {!isClientOnly && (
                         <RowMenu
                           onEdit={() => setEditPortfolio(pf)}
-                          onDelete={() => deletePortfolio.mutate(pf.id)}
+                          onDelete={() => deletePortfolio.mutate(pf)}
                           editLabel="Edit portfolio"
                           deleteLabel="Delete portfolio"
                           deleteTitle="Delete portfolio?"
-                          deleteText="This only removes the portfolio label — projects won't be deleted."
+                          deleteText={portfolioWarning(pf.name, projects.filter(p => p.portfolio === pf.name).length)}
                         />
                       )}
                     </div>
