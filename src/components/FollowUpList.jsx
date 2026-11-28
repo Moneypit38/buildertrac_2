@@ -3,12 +3,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { PhoneCall, Clock, BellOff } from "lucide-react";
 import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
-import { useFollowUps } from "@/hooks/useFollowUps";
-import { encouragement, headline, snoozeDate } from "@/lib/followUp";
+import { useFollowUps, useUpcomingFollowUps } from "@/hooks/useFollowUps";
+import { encouragement, headline, snoozeDate, inDays } from "@/lib/followUp";
 
 // Home card: jobs that are due for a follow-up, with a friendly nudge.
 export default function FollowUpList() {
   const items = useFollowUps();
+  const upcoming = useUpcomingFollowUps();
   const qc = useQueryClient();
   const update = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Project.update(id, data),
@@ -16,7 +17,19 @@ export default function FollowUpList() {
     onError: () => toast.error("Couldn't save that. Please try again."),
   });
 
-  if (items.length === 0) return null;
+  if (items.length === 0) {
+    if (upcoming.length === 0) return null;
+    const next = upcoming[0];
+    return (
+      <Link to="/report" className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 min-h-[56px]">
+        <PhoneCall className="w-5 h-5 text-primary shrink-0" />
+        <span className="flex-1 min-w-0">
+          <span className="block text-sm font-semibold">Follow-ups: you're all caught up</span>
+          <span className="block text-[11px] text-muted-foreground truncate">Next reminder: {next.project.name}, {inDays(next.dueAt)}</span>
+        </span>
+      </Link>
+    );
+  }
   return (
     <section className="space-y-2">
       <h2 className="text-primary font-bold text-sm uppercase tracking-wider flex items-center gap-2">
