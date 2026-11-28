@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { base44 } from "@/api/base44Client";
 import { useFollowUps, useUpcomingFollowUps } from "@/hooks/useFollowUps";
 import { encouragement, headline, snoozeDate, inDays } from "@/lib/followUp";
+import FollowUpDone from "@/components/FollowUpDone";
 
 // Home card: jobs that are due for a follow-up, with a friendly nudge.
 export default function FollowUpList() {
@@ -42,6 +43,7 @@ export default function FollowUpList() {
             <p className="text-[11px] text-muted-foreground">{headline(f)}</p>
           </div>
           <p className="text-xs text-muted-foreground">{encouragement(f)}</p>
+          <FollowUpDone project={f.project} className="w-full" />
           <div className="flex gap-2">
             <Link to={`/project/${f.project.id}?tab=log`} className="flex-1 inline-flex items-center justify-center gap-1.5 h-11 rounded-xl bg-primary text-primary-foreground text-sm font-semibold active:scale-[0.98] transition-transform">
               <PhoneCall className="w-4 h-4" /> Open and log
