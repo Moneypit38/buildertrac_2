@@ -5,6 +5,7 @@ import { ChevronLeft, Users, Send, Flag, Loader2, Lock, ShieldAlert, Check } fro
 import { toast } from "sonner";
 import { callChat, markSeen, isUnread, playChime } from "@/lib/chat";
 import { base44 } from "@/api/base44Client";
+import { useQueryClient } from "@tanstack/react-query";
 
 const ROLE = { owner: "Owner", project_manager: "Project manager", team_member: "Team member" };
 
@@ -63,6 +64,7 @@ function FlagsPanel({ onChange }) {
 
 // ---- A single conversation ----
 function Thread({ token, me, target, onBack }) {
+  const qc = useQueryClient();
   const [messages, setMessages] = useState(null);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
@@ -80,6 +82,7 @@ function Thread({ token, me, target, onBack }) {
         if (last && lastIdRef.current && last.id !== lastIdRef.current && !last.mine) playChime();
         if (last) lastIdRef.current = last.id;
         markSeen(me.id, key, last?.created_date);
+        qc.invalidateQueries({ queryKey: ["chatBadge"] }); // clears the Home alert right away
       }
     } catch { /* keep what we have */ }
   }, [token, key]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -153,7 +156,7 @@ function Thread({ token, me, target, onBack }) {
 }
 
 // ---- Main chat screen: team chats + direct messages ----
-export default function ChatHub({ token = null, isOwner = false }) {
+export default function ChatHub({ token = null, isOwner = false, openDm = null }) {
   const [who, setWho] = useState(null);
   const [inbox, setInbox] = useState([]);
   const [target, setTarget] = useState(null);
@@ -173,6 +176,15 @@ export default function ChatHub({ token = null, isOwner = false }) {
     })();
     return () => { off = true; };
   }, [token]);
+
+  // Opened from the Home alert: go straight into that conversation (once).
+  const openedRef = useRef(false);
+  useEffect(() => {
+    if (!openDm || openedRef.current || !who?.allowed) return;
+    openedRef.current = true;
+    const p = (who.people || []).find((x) => x.id === openDm.withId);
+    if (p) setTarget({ kind: "dm", with: p.id, title: p.name });
+  }, [openDm, who]);
 
   const loadInbox = useCallback(async () => {
     try {
