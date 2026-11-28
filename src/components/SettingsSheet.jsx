@@ -12,6 +12,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
+import OrphanCleanup from "@/components/OrphanCleanup";
 
 export default function SettingsSheet({ user }) {
   const { theme, setTheme } = useTheme();
@@ -101,6 +102,10 @@ export default function SettingsSheet({ user }) {
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </button>
+
+              <div className="border-t border-border" />
+
+              <OrphanCleanup />
 
               <div className="border-t border-border" />
 
