@@ -11,7 +11,8 @@ const MIN_GAP_DAYS = 2; // never remind within 2 days of the last contact
 
 const when = (e) => new Date(e.occurred_at || e.created_date).getTime();
 
-export function followUpFor(project, entries, now = Date.now()) {
+// The follow-up plan for one job, due or not yet. null when reminders don't apply.
+export function planFor(project, entries, now = Date.now()) {
   if (!project || project.follow_up_off || project.__token) return null;
   if (project.follow_up_snoozed_until && new Date(`${project.follow_up_snoozed_until}T23:59:59`).getTime() > now) return null;
 
@@ -35,14 +36,27 @@ export function followUpFor(project, entries, now = Date.now()) {
     const baseline = last ?? new Date(project.updated_date || project.created_date).getTime();
     dueAt = baseline + gap * DAY;
   }
-  if (dueAt > now) return null;
-
   const since = last ?? created;
-  return { project, status, step, dueAt, hasContact: last !== null, daysSince: Math.max(0, Math.floor((now - since) / DAY)) };
+  return { project, status, step, dueAt, isDue: dueAt <= now, hasContact: last !== null, daysSince: Math.max(0, Math.floor((now - since) / DAY)) };
+}
+
+export function followUpFor(project, entries, now = Date.now()) {
+  const p = planFor(project, entries, now);
+  return p && p.isDue ? p : null;
 }
 
 export function computeFollowUps(projects, entries, now = Date.now()) {
   return projects.map((p) => followUpFor(p, entries, now)).filter(Boolean).sort((a, b) => a.dueAt - b.dueAt);
+}
+
+// Jobs with a reminder coming up, soonest first.
+export function computeUpcoming(projects, entries, now = Date.now()) {
+  return projects.map((p) => planFor(p, entries, now)).filter((x) => x && !x.isDue).sort((a, b) => a.dueAt - b.dueAt);
+}
+
+export function inDays(dueAt, now = Date.now()) {
+  const d = Math.max(1, Math.ceil((dueAt - now) / DAY));
+  return d === 1 ? "tomorrow" : `in ${d} days`;
 }
 
 const LINES = {
