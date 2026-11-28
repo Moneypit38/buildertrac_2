@@ -334,7 +334,7 @@ Deno.serve(async (req) => {
       if (action === 'deleteProject') {
         if (!projectIds.has(projectId)) return json({ error: 'not_allowed' }, 403);
         // Delete everything that belongs to the project, then the project itself.
-        for (const name of ['Task', 'Appointment', 'Note', 'Document', 'SitePhoto', 'ProjectMember']) {
+        for (const name of ['Task', 'Appointment', 'Note', 'Document', 'SitePhoto', 'ProjectMember', 'LogEntry']) {
           const rows = await db[name].filter({ project_id: projectId });
           for (const r of rows) await db[name].delete(r.id);
         }
