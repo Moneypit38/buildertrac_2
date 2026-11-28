@@ -233,7 +233,7 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
               ) : (
                 <>
                   {selectedAppts.map(a => (
-                    <Link key={a.id} to={projectLinks[a.project_id] || `/project/${a.project_id}?tab=appointments&appt=${a.id}`} className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors group">
+                    <Link key={a.id} to={projectLinks[a.project_id] || `/project/${a.project_id}?tab=log&appt=${a.id}`} className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors group">
                       <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: accentHsl }} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{a.title}</p>
