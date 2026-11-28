@@ -23,7 +23,7 @@ import SubtaskList from "../components/SubtaskList";
 import AITaskGenerator from "../components/AITaskGenerator";
 import LogTab, { useLogEntries } from "../components/LogTab";
 import LogEntryDialog from "../components/LogEntryDialog";
-import { logType, formatWhen } from "@/lib/logTypes";
+import { formatWhen } from "@/lib/logTypes";
 import ProjectPhotoStrip from "../components/ProjectPhotoStrip";
 
 export default function ProjectDetail() {
