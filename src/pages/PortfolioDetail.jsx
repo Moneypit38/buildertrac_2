@@ -9,6 +9,7 @@ import ContactInfoCard from "@/components/ContactInfoCard";
 import TeamMemberGate from "@/components/TeamMemberGate";
 import { useClientAccess } from "@/hooks/useClientAccess";
 import { toast } from "sonner";
+import { deletePortfolioCascade, portfolioWarning } from "@/lib/projectCleanup";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
