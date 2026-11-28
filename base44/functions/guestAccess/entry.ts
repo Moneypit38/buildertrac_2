@@ -106,13 +106,16 @@ Deno.serve(async (req) => {
 
     if (action === 'load') {
       const data = await Promise.all(projects.map(async (p: any) => {
-        const [tasks, photos, docs, notes, appts] = await Promise.all([
+        const [tasks, photos, docs, notes, appts, logRows] = await Promise.all([
           db.Task.filter({ project_id: p.id }),
           db.SitePhoto.filter({ project_id: p.id }),
           db.Document.filter({ project_id: p.id }),
           isTeam ? db.Note.filter({ project_id: p.id }) : Promise.resolve([]),
           isTeam ? db.Appointment.filter({ project_id: p.id }) : Promise.resolve([]),
+          db.LogEntry.filter({ project_id: p.id }),
         ]);
+        // The job log is for the team. Customers only see entries the owner chose to share.
+        const logs = logRows.filter((l: any) => isTeam || l.share_with_customer === true);
         return {
           id: p.id,
           name: p.name,
@@ -138,6 +141,10 @@ Deno.serve(async (req) => {
           notes: notes.map((n: any) => ({
             id: n.id, content: n.content, author_name: n.author_name,
             author_email: n.author_email, created_date: n.created_date,
+          })),
+          logs: logs.map((l: any) => ({
+            id: l.id, type: l.type, with_whom: l.with_whom || '', summary: l.summary, occurred_at: l.occurred_at || '',
+            author_name: l.author_name || '', share_with_customer: !!l.share_with_customer, created_date: l.created_date,
           })),
           appointments: appts.map((a: any) => ({
             id: a.id, title: a.title, date: a.date, start_time: a.start_time, end_time: a.end_time,
@@ -400,10 +407,11 @@ Deno.serve(async (req) => {
         return json({ ok: true, id: rec.id });
       }
 
-      if (['deletePhoto', 'deleteDoc', 'deleteNote', 'deleteAppointment'].includes(action)) {
+      if (['deletePhoto', 'deleteDoc', 'deleteNote', 'deleteAppointment', 'deleteLog'].includes(action)) {
         const entity = action === 'deletePhoto' ? db.SitePhoto
           : action === 'deleteDoc' ? db.Document
           : action === 'deleteNote' ? db.Note
+          : action === 'deleteLog' ? db.LogEntry
           : db.Appointment;
         const rec = await entity.get(clean(body.record_id, 64)).catch(() => null);
         if (!rec || !projectIds.has(rec.project_id)) return json({ error: 'not_allowed' }, 403);
@@ -421,6 +429,27 @@ Deno.serve(async (req) => {
       const rec = await db.Note.create({
         project_id: projectId,
         content,
+        author_name: guestLabel,
+        author_email: link.guest_email || '',
+        owner_id: ownerId,
+      });
+      return json({ ok: true, id: rec.id });
+    }
+
+    if (action === 'addLog') {
+      if (!isTeam) return json({ error: 'not_allowed' }, 403);
+      if (!projectIds.has(projectId)) return json({ error: 'not_allowed' }, 403);
+      const summary = clean(body.summary, 4000);
+      if (!summary) return json({ error: 'empty' }, 400);
+      const types = ['Call', 'Meeting', 'Site visit', 'Text/Email', 'Decision'];
+      const when = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?$/.test(String(body.occurred_at || '')) ? body.occurred_at : '';
+      const rec = await db.LogEntry.create({
+        project_id: projectId,
+        type: types.includes(body.type) ? body.type : 'Call',
+        with_whom: clean(body.with_whom, 160),
+        summary,
+        occurred_at: when,
+        share_with_customer: false,
         author_name: guestLabel,
         author_email: link.guest_email || '',
         owner_id: ownerId,
