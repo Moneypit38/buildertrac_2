@@ -13,6 +13,7 @@ import SubscriptionGate from "./SubscriptionGate";
 import SettingsSheet from "./SettingsSheet";
 import PartnerLogo from "./PartnerLogo";
 import SiteFooter from "./SiteFooter";
+import CelebrationHost from "./CelebrationHost";
 
 
 // Tab page components — rendered persistently to preserve state
@@ -207,7 +208,7 @@ export default function Layout() {
         </div>
       </nav>
 
-
+      <CelebrationHost />
     </div>
     </ViewedContext.Provider>
   );
