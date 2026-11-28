@@ -7,6 +7,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { getSeenPhotoIds } from "../lib/viewedContext";
+import { deleteWarning } from "@/lib/projectCleanup";
 
 const statusColors = {
   "Planning": "bg-blue-500/20 text-blue-400",
@@ -128,7 +129,7 @@ export default function ProjectCard({ project, onDelete, allTasks, allNotes, all
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete project?</AlertDialogTitle>
-                    <AlertDialogDescription>This will permanently delete "{project.name}" and cannot be undone.</AlertDialogDescription>
+                    <AlertDialogDescription>{deleteWarning(project.name, { tasks: projectTasks.length, notes: projectNotes.length, photos: projectPhotos.length })}</AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
