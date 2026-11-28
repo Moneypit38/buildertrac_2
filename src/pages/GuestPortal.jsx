@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   ClipboardList, Camera, FileText, MessageSquare, MapPin, ChevronLeft, Upload, Loader2,
-  CheckCircle2, X, ExternalLink, Send, Link2Off, ArrowRight, HardHat, Pencil, Plus, CalendarClock,
+  CheckCircle2, X, ExternalLink, Send, Link2Off, ArrowRight, HardHat, Pencil, Plus, NotebookPen,
   MessageCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import ChatHub from "@/components/ChatHub";
+import GuestLogPanel from "@/components/GuestLogPanel";
 import { safeFileUrl } from "@/lib/safeUrl";
 import { DeleteButton, AddTaskForm, TaskEditor, ProjectEditor, AddProjectForm, PortfolioEditor, AppointmentsPanel, ShareSection } from "@/components/GuestAdminParts";
 
@@ -344,7 +345,8 @@ function ProjectView({ project, role, token, reload, guestName, shareProps }) {
     { id: "tasks", label: "Tasks", icon: ClipboardList },
     { id: "photos", label: "Photos", icon: Camera },
     { id: "docs", label: "Docs", icon: FileText },
-    ...(isTeam ? [{ id: "appts", label: "Appts", icon: CalendarClock }, { id: "messages", label: "Messages", icon: MessageSquare }] : []),
+    ...(isTeam ? [{ id: "log", label: "Log", icon: NotebookPen }, { id: "messages", label: "Messages", icon: MessageSquare }]
+      : (project.logs || []).length > 0 ? [{ id: "log", label: "Updates", icon: NotebookPen }] : []),
   ];
   const [tab, setTab] = useState("tasks");
 
@@ -379,13 +381,27 @@ function ProjectView({ project, role, token, reload, guestName, shareProps }) {
       {tab === "tasks" && <TasksPanel project={project} canEdit={isTeam} isAdmin={isAdmin} token={token} reload={reload} />}
       {tab === "photos" && <PhotosPanel project={project} isAdmin={isAdmin} token={token} reload={reload} />}
       {tab === "docs" && <DocsPanel project={project} isAdmin={isAdmin} token={token} reload={reload} />}
-      {tab === "appts" && isTeam && (
-        <AppointmentsPanel
-          project={project}
-          canManage={isAdmin}
-          onAdd={(v) => adminDo(token, "addAppointment", { project_id: project.id, ...v }, "Appointment added", reload)}
-          onDelete={(id) => adminDo(token, "deleteAppointment", { record_id: id }, "Appointment deleted", reload)}
-        />
+      {tab === "log" && (
+        <div className="space-y-5">
+          <GuestLogPanel
+            project={project}
+            canAdd={isTeam}
+            canDelete={isAdmin}
+            onAdd={(v) => adminDo(token, "addLog", { project_id: project.id, ...v }, "Logged", reload)}
+            onDelete={(id) => adminDo(token, "deleteLog", { record_id: id }, "Entry deleted", reload)}
+          />
+          {isTeam && (
+            <div className="pt-2 border-t border-border">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Appointments</h3>
+              <AppointmentsPanel
+                project={project}
+                canManage={isAdmin}
+                onAdd={(v) => adminDo(token, "addAppointment", { project_id: project.id, ...v }, "Appointment added", reload)}
+                onDelete={(id) => adminDo(token, "deleteAppointment", { record_id: id }, "Appointment deleted", reload)}
+              />
+            </div>
+          )}
+        </div>
       )}
       {tab === "messages" && isTeam && <MessagesPanel project={project} isAdmin={isAdmin} token={token} reload={reload} guestName={guestName} />}
     </div>
