@@ -369,7 +369,7 @@ function ProjectView({ project, role, token, reload, guestName, shareProps }) {
         )}
       </div>
 
-      <div className="flex bg-card border border-border rounded-lg p-0.5">
+      <div className="flex bg-card border border-border rounded-xl p-0.5">
         {tabs.map((t) => (
           <button key={t.id} onClick={() => setTab(t.id)}
             className={`flex-1 flex items-center justify-center gap-1.5 text-[13px] font-medium min-h-[44px] rounded-xl transition-colors ${tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>

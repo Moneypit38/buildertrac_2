@@ -199,14 +199,14 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
               {onEdit && (
                 <div
                   onClick={(e) => { e.stopPropagation(); setShowActions(false); onEdit(); }}
-                  style={{ ...tapStyle, flex: 1, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 10, border: "1px solid hsl(var(--border))", fontSize: 13, fontWeight: 600, color: "hsl(var(--foreground))" }}
+                  style={{ ...tapStyle, flex: 1, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 12, border: "1px solid hsl(var(--border))", fontSize: 13, fontWeight: 600, color: "hsl(var(--foreground))" }}
                 >
                   <Pencil size={15} /> Edit
                 </div>
               )}
               <div
                 onClick={(e) => { e.stopPropagation(); setShowActions(false); setShowDelete(true); }}
-                style={{ ...tapStyle, flex: 1, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 10, border: "1px solid hsl(var(--border))", fontSize: 13, fontWeight: 600, color: "hsl(var(--destructive))" }}
+                style={{ ...tapStyle, flex: 1, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 12, border: "1px solid hsl(var(--border))", fontSize: 13, fontWeight: 600, color: "hsl(var(--destructive))" }}
               >
                 <Trash2 size={15} /> Delete
               </div>
@@ -216,13 +216,13 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
             <div style={{ display: "flex", gap: 8, marginTop: 8 }} onClick={(e) => e.stopPropagation()}>
               <div
                 onClick={(e) => { e.stopPropagation(); setShowActions(false); window.open(googleUrl(toEvent(task, "task")), "_blank"); }}
-                style={{ ...tapStyle, flex: 1, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 10, border: "1px solid hsl(var(--border))", fontSize: 13, fontWeight: 600, color: "hsl(var(--foreground))" }}
+                style={{ ...tapStyle, flex: 1, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 12, border: "1px solid hsl(var(--border))", fontSize: 13, fontWeight: 600, color: "hsl(var(--foreground))" }}
               >
                 <CalendarPlus size={15} /> Google Cal
               </div>
               <div
                 onClick={(e) => { e.stopPropagation(); setShowActions(false); shareIcs(toEvent(task, "task")); }}
-                style={{ ...tapStyle, flex: 1, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 10, border: "1px solid hsl(var(--border))", fontSize: 13, fontWeight: 600, color: "hsl(var(--foreground))" }}
+                style={{ ...tapStyle, flex: 1, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 12, border: "1px solid hsl(var(--border))", fontSize: 13, fontWeight: 600, color: "hsl(var(--foreground))" }}
               >
                 <CalendarPlus size={15} /> Apple Cal
               </div>
@@ -241,7 +241,7 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
               backgroundColor: pCfg.bg,
               color: pCfg.text,
               fontSize: 10, fontWeight: 700,
-              borderRadius: 6,
+              borderRadius: 12,
               minWidth: 52, minHeight: 36,
               display: "flex", alignItems: "center", justifyContent: "center",
               padding: "0 8px",
@@ -262,7 +262,7 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
             )}
             <div
               onClick={(e) => { e.stopPropagation(); setShowActions((v) => !v); }}
-              style={{ ...tapStyle, width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 10, background: showActions ? "hsl(var(--accent))" : "transparent" }}
+              style={{ ...tapStyle, width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 12, background: showActions ? "hsl(var(--accent))" : "transparent" }}
               aria-label="More actions"
             >
               <MoreHorizontal size={20} color="hsl(var(--muted-foreground))" />
