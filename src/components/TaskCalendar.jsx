@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, CalendarDays, CalendarClock } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarDays, CalendarClock, CalendarPlus } from "lucide-react";
+import CalendarSyncDialog from "@/components/CalendarSyncDialog";
 import { Link } from "react-router-dom";
 import CreateAppointmentDialog from "@/components/CreateAppointmentDialog";
 import { useColorTheme, COLOR_THEMES } from "@/lib/ThemeContext";
@@ -28,6 +29,7 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
   const [viewDate, setViewDate] = useState({ year: today.getFullYear(), month: today.getMonth() });
   const [selectedDate, setSelectedDate] = useState(null);
   const [showApptDialog, setShowApptDialog] = useState(false);
+  const [showSync, setShowSync] = useState(false);
   const { effectiveThemeId: themeId } = useColorTheme();
   const theme = COLOR_THEMES.find(t => t.id === themeId) || COLOR_THEMES[0];
   const accentHsl = theme.accent
@@ -113,6 +115,13 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
         </div>
         <div className="flex items-center gap-1">
           <button
+            onClick={() => setShowSync(true)}
+            aria-label="Add to Google or Apple Calendar"
+            className="inline-flex items-center justify-center h-11 w-11 -m-2 mr-0 rounded-xl hover:bg-accent active:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+          >
+            <CalendarPlus className="w-4 h-4" />
+          </button>
+          <button
             onClick={goToday}
             className="text-[11px] font-medium text-black dark:text-yellow-300 px-2 py-1 rounded-lg hover:bg-accent transition-colors"
           >
@@ -186,6 +195,8 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
       </div>
 
 
+
+      <CalendarSyncDialog open={showSync} onClose={() => setShowSync(false)} />
 
       <CreateAppointmentDialog
         open={showApptDialog}
