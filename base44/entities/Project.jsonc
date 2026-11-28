@@ -16,6 +16,15 @@
       "maxLength": 1000,
       "type": "string"
     },
+    "follow_up_off": {
+      "default": false,
+      "description": "Turn follow-up reminders off for this project",
+      "type": "boolean"
+    },
+    "follow_up_snoozed_until": {
+      "description": "Hide the follow-up reminder until this date (YYYY-MM-DD)",
+      "type": "string"
+    },
     "image": {
       "format": "uri",
       "type": "string"
@@ -44,6 +53,7 @@
   "required": [
     "name"
   ],
+  "type": "object",
   "rls": {
     "create": {
       "created_by_id": "{{user.id}}"
@@ -78,6 +88,5 @@
         }
       ]
     }
-  },
-  "type": "object"
+  }
 }
