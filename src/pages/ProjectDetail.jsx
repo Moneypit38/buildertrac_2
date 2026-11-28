@@ -12,7 +12,7 @@ import UploadPhotoDialog from "../components/UploadPhotoDialog";
 import CreateProjectDialog from "../components/CreateProjectDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, MapPin, ClipboardList, FileText, Camera, DollarSign, Users, MessageSquare, NotebookPen, UserPlus } from "lucide-react";
+import { Plus, MapPin, ClipboardList, FileText, Camera, DollarSign, Users, MessageSquare, NotebookPen, History, UserPlus } from "lucide-react";
 
 import { toast } from "sonner";
 import { deleteProjectCascade, deleteWarning } from "@/lib/projectCleanup";
@@ -112,9 +112,14 @@ export default function ProjectDetail() {
           </div>
         </div>
         <div className="mt-3">
-          <Button className="w-full h-12 gap-2 text-sm font-semibold" onClick={() => setShowLog(true)}>
-            <NotebookPen className="w-4 h-4" /> Log a call or meeting
-          </Button>
+          <div className="grid grid-cols-[1fr_auto] gap-2">
+            <Button className="h-12 gap-2 text-sm font-semibold" onClick={() => setShowLog(true)}>
+              <NotebookPen className="w-4 h-4" /> Log a call or meeting
+            </Button>
+            <Button variant={activeTab === "log" ? "default" : "outline"} className="h-12 gap-2 text-sm font-semibold px-4" onClick={() => setActiveTab("log")}>
+              <History className="w-4 h-4" /> History{logEntries.length > 0 ? ` (${logEntries.length})` : ""}
+            </Button>
+          </div>
           <button type="button" onClick={() => setActiveTab("log")} className="w-full text-left mt-1.5 min-h-[32px] text-xs text-muted-foreground truncate">
             {lastLog
               ? `Last: ${lastLog.type}${lastLog.with_whom ? ` with ${lastLog.with_whom}` : ""}, ${formatWhen(lastLog.occurred_at, lastLog.created_date)}`
@@ -143,7 +148,6 @@ export default function ProjectDetail() {
           <TabsTrigger value="tasks" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px]"><ClipboardList className="w-4 h-4" /><span>Tasks</span></TabsTrigger>
           <TabsTrigger value="docs" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px]"><FileText className="w-4 h-4" /><span>Docs</span></TabsTrigger>
           <TabsTrigger value="photos" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px]" onClick={() => { markViewed("photos"); window.dispatchEvent(new Event("photos-seen-updated")); }}><Camera className="w-4 h-4" /><span>Photos</span></TabsTrigger>
-          <TabsTrigger value="log" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px]"><NotebookPen className="w-4 h-4" /><span>Log</span></TabsTrigger>
           <TabsTrigger value="team" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px]"><Users className="w-4 h-4" /><span>Team</span></TabsTrigger>
           <TabsTrigger value="notes" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px] relative" onClick={markMsgsViewed}>
             <span className="relative">
