@@ -12,7 +12,7 @@ import UploadPhotoDialog from "../components/UploadPhotoDialog";
 import CreateProjectDialog from "../components/CreateProjectDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, MapPin, ClipboardList, FileText, Camera, DollarSign, Users, MessageSquare, CalendarClock, UserPlus } from "lucide-react";
+import { Plus, MapPin, ClipboardList, FileText, Camera, DollarSign, Users, MessageSquare, NotebookPen, UserPlus } from "lucide-react";
 
 import { toast } from "sonner";
 import { deleteProjectCascade, deleteWarning } from "@/lib/projectCleanup";
@@ -21,7 +21,9 @@ import ProjectMembersTab from "../components/ProjectMembersTab";
 import NotesTab from "../components/NotesTab";
 import SubtaskList from "../components/SubtaskList";
 import AITaskGenerator from "../components/AITaskGenerator";
-import AppointmentsTab from "../components/AppointmentsTab";
+import LogTab, { useLogEntries } from "../components/LogTab";
+import LogEntryDialog from "../components/LogEntryDialog";
+import { logType, formatWhen } from "@/lib/logTypes";
 import ProjectPhotoStrip from "../components/ProjectPhotoStrip";
 
 export default function ProjectDetail() {
@@ -59,7 +61,10 @@ export default function ProjectDetail() {
   const [showPhotoDialog, setShowPhotoDialog] = useState(false);
   const [editPhoto, setEditPhoto] = useState(null);
   const [showEditProject, setShowEditProject] = useState(false);
-  const [activeTab, setActiveTab] = useState(tabParam || "tasks");
+  const [activeTab, setActiveTab] = useState(tabParam === "appointments" ? "log" : (tabParam || "tasks"));
+  const [showLog, setShowLog] = useState(false);
+  const { data: logEntries = [] } = useLogEntries(projectId);
+  const lastLog = [...logEntries].sort((a, b) => (b.occurred_at || b.created_date || "").localeCompare(a.occurred_at || a.created_date || ""))[0];
   const [openInvite, setOpenInvite] = useState(false);
   const [expandedTasks, setExpandedTasks] = useState({});
   const navigate = useNavigate();
@@ -106,6 +111,16 @@ export default function ProjectDetail() {
             )}
           </div>
         </div>
+        <div className="mt-3">
+          <Button className="w-full h-12 gap-2 text-sm font-semibold" onClick={() => setShowLog(true)}>
+            <NotebookPen className="w-4 h-4" /> Log a call or meeting
+          </Button>
+          <button type="button" onClick={() => setActiveTab("log")} className="w-full text-left mt-1.5 min-h-[32px] text-xs text-muted-foreground truncate">
+            {lastLog
+              ? `Last: ${lastLog.type}${lastLog.with_whom ? ` with ${lastLog.with_whom}` : ""}, ${formatWhen(lastLog.occurred_at, lastLog.created_date)}`
+              : "Nothing logged yet"}
+          </button>
+        </div>
         {project.budget_total > 0 && (
           <div className="mt-3 pt-3 border-t border-border">
             <div className="flex items-center gap-2 text-sm mb-1.5">
@@ -128,7 +143,7 @@ export default function ProjectDetail() {
           <TabsTrigger value="tasks" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px]"><ClipboardList className="w-4 h-4" /><span>Tasks</span></TabsTrigger>
           <TabsTrigger value="docs" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px]"><FileText className="w-4 h-4" /><span>Docs</span></TabsTrigger>
           <TabsTrigger value="photos" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px]" onClick={() => { markViewed("photos"); window.dispatchEvent(new Event("photos-seen-updated")); }}><Camera className="w-4 h-4" /><span>Photos</span></TabsTrigger>
-          <TabsTrigger value="appointments" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px]"><CalendarClock className="w-4 h-4" /><span>Appts</span></TabsTrigger>
+          <TabsTrigger value="log" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px]"><NotebookPen className="w-4 h-4" /><span>Log</span></TabsTrigger>
           <TabsTrigger value="team" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px]"><Users className="w-4 h-4" /><span>Team</span></TabsTrigger>
           <TabsTrigger value="notes" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px] relative" onClick={markMsgsViewed}>
             <span className="relative">
@@ -176,8 +191,8 @@ export default function ProjectDetail() {
           )}
         </TabsContent>
 
-        <TabsContent value="appointments" className="mt-4">
-          <AppointmentsTab projectId={projectId} canDelete={true} highlightApptId={apptParam} />
+        <TabsContent value="log" className="mt-4">
+          <LogTab projectId={projectId} tasks={tasks} highlightApptId={apptParam} onLog={() => setShowLog(true)} />
         </TabsContent>
 
         <TabsContent value="team" className="mt-4">
@@ -189,6 +204,7 @@ export default function ProjectDetail() {
         </TabsContent>
       </Tabs>
 
+      {showLog && <LogEntryDialog open={showLog} onClose={() => setShowLog(false)} projectId={projectId} />}
       {showTaskDialog && <CreateTaskDialog open={showTaskDialog} onClose={() => setShowTaskDialog(false)} projectId={projectId} task={editTask} />}
       {showDocDialog && <UploadDocDialog open={showDocDialog} onClose={() => setShowDocDialog(false)} projectId={projectId} doc={editDoc} />}
       {showPhotoDialog && <UploadPhotoDialog open={showPhotoDialog} onClose={() => setShowPhotoDialog(false)} projectId={projectId} photo={editPhoto} />}
