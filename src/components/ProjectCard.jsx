@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { getSeenPhotoIds } from "../lib/viewedContext";
 import { deleteWarning } from "@/lib/projectCleanup";
+import FollowUpBadge from "@/components/FollowUpBadge";
 
 const statusColors = {
   "Planning": "bg-blue-500/20 text-blue-400",
@@ -114,6 +115,7 @@ export default function ProjectCard({ project, onDelete, allTasks, allNotes, all
           {project.portfolio && (
             <p className="text-[11px] text-muted-foreground mt-1.5 uppercase tracking-wider">{project.portfolio}</p>
           )}
+          <div className="mt-2 empty:hidden"><FollowUpBadge project={project} /></div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
           {onDelete && (
