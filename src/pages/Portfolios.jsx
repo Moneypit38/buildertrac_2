@@ -3,6 +3,7 @@ import { useSharedJobs } from "@/hooks/useSharedJobs";
 import { SharedPortfolioCards } from "@/components/SharedCards";
 import AddSharedJobDialog from "@/components/SharedWithMe";
 import RowMenu from "@/components/RowMenu";
+import { deletePortfolioCascade, portfolioWarning } from "@/lib/projectCleanup";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
