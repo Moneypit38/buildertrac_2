@@ -6,6 +6,7 @@ import ProjectCard from "../components/ProjectCard";
 import { HardHat, Layers, FolderPlus, Sparkles, UserPlus, Building2, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useUnreadDMs } from "@/hooks/useChatBadge";
+import FollowUpList from "@/components/FollowUpList";
 import { MessageCircle } from "lucide-react";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import { isUnseenRecent, useSeenIds } from "../lib/viewedContext";
@@ -130,6 +131,9 @@ export default function Dashboard() {
           )}
         </div>
       )}
+
+      {/* Jobs due for a follow-up (not shown to client-only users) */}
+      {!allowedProjectIds && !isNewUser && <FollowUpList />}
 
       {isNewUser && (
         <motion.div {...fadeUp(0.07)} className="bg-card border border-border rounded-2xl p-6">
