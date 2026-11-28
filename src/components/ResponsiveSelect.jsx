@@ -44,7 +44,7 @@ export default function ResponsiveSelect({ value, onValueChange, placeholder = "
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={`flex h-11 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm text-left ${className}`}
+        className={`flex h-11 w-full items-center justify-between rounded-xl border border-input bg-transparent px-3 py-2 text-sm shadow-sm text-left ${className}`}
       >
         <span className={selected ? "text-foreground" : "text-muted-foreground"}>
           {selected?.label || placeholder}

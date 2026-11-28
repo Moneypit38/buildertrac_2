@@ -158,7 +158,7 @@ export default function AppStoreMockups() {
               <button
                 onClick={() => saveAt69(m)}
                 disabled={busyId === m.id}
-                className="shrink-0 flex items-center gap-1.5 text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-60"
+                className="shrink-0 flex items-center gap-1.5 text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-60"
               >
                 {busyId === m.id ? (
                   <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />

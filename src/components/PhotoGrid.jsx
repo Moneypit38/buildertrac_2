@@ -77,7 +77,7 @@ export function PhotoExpanded({ photo, onClose, canDelete, projectName }) {
           ) : (
             <div className="w-full h-48 flex items-center justify-center bg-accent text-muted-foreground">No image</div>
           )}
-          <button onClick={onClose} className="absolute top-2 right-2 bg-black/50 backdrop-blur rounded-lg p-1.5 text-white hover:text-foreground transition-colors">
+          <button onClick={onClose} className="absolute top-2 right-2 bg-black/50 backdrop-blur rounded-xl p-1.5 text-white hover:text-foreground transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>

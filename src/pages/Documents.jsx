@@ -33,7 +33,7 @@ export default function Documents() {
       <div className="flex gap-2 overflow-x-auto pb-1">
         {categories.map(c => (
           <button key={c} onClick={() => setFilter(c)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${filter === c ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
+            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${filter === c ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
             {c}
           </button>
         ))}

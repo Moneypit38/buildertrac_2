@@ -24,7 +24,7 @@ export default function ProjectPhotoStrip({ photos = [], projectName }) {
             <button
               key={p.id}
               onClick={() => setSelected(p)}
-              className="relative shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-accent hover:ring-2 hover:ring-primary/50 transition-all active:scale-95"
+              className="relative shrink-0 w-16 h-16 rounded-xl overflow-hidden bg-accent hover:ring-2 hover:ring-primary/50 transition-all active:scale-95"
             >
               <img src={p.photo_url} alt={p.title} className="w-full h-full object-cover" />
             </button>

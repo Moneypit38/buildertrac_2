@@ -120,10 +120,10 @@ export default function PortfolioDetail() {
             <PortfolioIcon icon={portfolio.icon} color={portfolio.color} size="md" logoUrl={portfolio.logo_url} />
             {!isClientOnly && (
               <div className="flex gap-1">
-                <button onClick={() => setShowEdit(true)} className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
+                <button onClick={() => setShowEdit(true)} className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
                   <Pencil className="w-4 h-4" />
                 </button>
-                <button onClick={() => setShowDelete(true)} className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-accent transition-colors">
+                <button onClick={() => setShowDelete(true)} className="p-2 rounded-xl text-muted-foreground hover:text-destructive hover:bg-accent transition-colors">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>

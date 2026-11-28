@@ -87,7 +87,7 @@ export default function ManageContactsDialog({ open, onClose }) {
               {[["all", "All"], ["team_member", "Team"], ["client", "Clients"], ["admin", "Admins"]].map(([val, label]) => (
                 <button key={val} type="button"
                   onClick={() => setRoleFilter(val)}
-                  className={`text-xs px-3 py-1 rounded-md font-medium transition-colors ${roleFilter === val ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
+                  className={`text-xs px-3 py-1 rounded-xl font-medium transition-colors ${roleFilter === val ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
                   {label}
                 </button>
               ))}

@@ -27,11 +27,11 @@ export default function PartnerLogoSettings() {
           {logo ? <img src={logo} alt="Partner logo" className="w-full h-full object-contain p-1" /> : <ImagePlus className="w-5 h-5 text-muted-foreground" />}
         </div>
         <div className="flex flex-col gap-2">
-          <button onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-medium min-h-[40px] active:scale-95 transition-transform">
+          <button onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-medium min-h-[40px] active:scale-95 transition-transform">
             <ImagePlus className="w-3.5 h-3.5" /> {logo ? "Replace" : "Upload"}
           </button>
           {logo && (
-            <button onClick={() => { setPartnerLogo(""); toast.success("Partner logo removed"); }} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border text-xs font-medium text-destructive min-h-[40px] active:scale-95 transition-transform">
+            <button onClick={() => { setPartnerLogo(""); toast.success("Partner logo removed"); }} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border text-xs font-medium text-destructive min-h-[40px] active:scale-95 transition-transform">
               <Trash2 className="w-3.5 h-3.5" /> Remove
             </button>
           )}

@@ -50,7 +50,7 @@ export default function LogTab({ projectId, tasks = [], highlightApptId, onLog }
           <div className="flex gap-2 overflow-x-auto pb-1">
             {["All", ...LOG_TYPES.map((t) => t.id)].map((t) => (
               <button key={t} onClick={() => setFilter(t)}
-                className={`px-3 min-h-[36px] rounded-full text-xs font-medium whitespace-nowrap transition-all ${filter === t ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground"}`}>
+                className={`px-3 min-h-[36px] rounded-xl text-xs font-medium whitespace-nowrap transition-all ${filter === t ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground"}`}>
                 {t}
               </button>
             ))}

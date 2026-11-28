@@ -223,7 +223,7 @@ export default function GuestLinkDialog({ open, onClose, scope }) {
                 {availableContacts.map((c) => (
                   <button key={c.id} type="button"
                     onClick={() => setForm((f) => ({ ...f, guest_name: c.name || "", guest_email: c.email || "" }))}
-                    className={`shrink-0 text-xs px-2.5 py-1 rounded-full border transition-colors ${form.guest_email === c.email ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground"}`}>
+                    className={`shrink-0 text-xs px-2.5 py-1 rounded-xl border transition-colors ${form.guest_email === c.email ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground"}`}>
                     {c.name}
                   </button>
                 ))}
@@ -241,7 +241,7 @@ export default function GuestLinkDialog({ open, onClose, scope }) {
             <div className={`grid ${roleOptions.length === 3 ? "grid-cols-3" : "grid-cols-2"} gap-2 mt-1`}>
               {roleOptions.map((r) => (
                 <button key={r.value} type="button" onClick={() => setForm((f) => ({ ...f, role: r.value }))}
-                  className={`flex items-center justify-center gap-1.5 text-xs sm:text-sm font-medium rounded-lg border px-1 py-2 transition-colors ${form.role === r.value ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground"}`}>
+                  className={`flex items-center justify-center gap-1.5 text-xs sm:text-sm font-medium rounded-xl border px-1 py-2 transition-colors ${form.role === r.value ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground"}`}>
                   <r.icon className="w-3.5 h-3.5 shrink-0" /> <span className="leading-tight">{r.label}</span>
                 </button>
               ))}

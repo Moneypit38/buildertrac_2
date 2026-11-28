@@ -199,7 +199,7 @@ export function CopyKeyButton({ text, wide = false }) {
   }
   return (
     <button type="button" onClick={copy} title="Copy to clipboard" aria-label="Copy to clipboard"
-      className="inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:text-foreground hover:bg-muted">
+      className="inline-flex items-center justify-center rounded-xl p-2 text-muted-foreground hover:text-foreground hover:bg-muted">
       {copied ? <Check className="w-4 h-4" aria-hidden="true" /> : <Copy className="w-4 h-4" aria-hidden="true" />}
     </button>
   );

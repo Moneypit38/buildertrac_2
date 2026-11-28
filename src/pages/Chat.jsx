@@ -23,7 +23,7 @@ export default function Chat() {
         <div className="flex gap-2 overflow-x-auto pb-1">
           {sources.map((s) => (
             <button key={s.key} onClick={() => setSel(s.key)}
-              className={`px-4 min-h-[44px] rounded-full text-sm font-medium whitespace-nowrap transition-all ${src.key === s.key ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground"}`}>
+              className={`px-4 min-h-[44px] rounded-xl text-sm font-medium whitespace-nowrap transition-all ${src.key === s.key ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground"}`}>
               {s.label}
             </button>
           ))}

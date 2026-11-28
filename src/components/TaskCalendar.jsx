@@ -123,7 +123,7 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
           </button>
           <button
             onClick={goToday}
-            className="text-[11px] font-medium text-black dark:text-yellow-300 px-2 py-1 rounded-lg hover:bg-accent transition-colors"
+            className="text-[11px] font-medium text-black dark:text-yellow-300 px-2 py-1 rounded-xl hover:bg-accent transition-colors"
           >
             Today
           </button>
@@ -221,7 +221,7 @@ export default function TaskCalendar({ tasks = [], projects = [], appointments =
                 </p>
                 <button
                   onClick={() => setShowApptDialog(true)}
-                  className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg border transition-colors"
+                  className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-xl border transition-colors"
                   style={{ color: accentHsl, borderColor: `${accentHsl}60` }}
                 >
                   <CalendarClock className="w-3.5 h-3.5" />

@@ -82,7 +82,7 @@ function Lightbox({ photo, onClose, onDelete }) {
       <div className="bg-card border border-border rounded-2xl overflow-hidden max-w-lg w-full max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
         <div className="relative">
           <img src={photo.photo_url} alt={photo.title} className="w-full object-contain max-h-[60vh] bg-black" />
-          <button onClick={onClose} className="absolute top-2 right-2 bg-black/60 rounded-lg p-1.5 text-white"><X className="w-4 h-4" /></button>
+          <button onClick={onClose} className="absolute top-2 right-2 bg-black/60 rounded-xl p-1.5 text-white"><X className="w-4 h-4" /></button>
         </div>
         <div className="p-4 space-y-1 overflow-y-auto">
           <p className="font-semibold">{photo.title}</p>
@@ -215,7 +215,7 @@ function PhotosPanel({ project, isAdmin, token, reload }) {
       ) : (
         <div className="grid grid-cols-3 gap-2">
           {project.photos.map((p) => (
-            <button key={p.id} onClick={() => setOpen(p)} className="aspect-square rounded-lg overflow-hidden bg-accent">
+            <button key={p.id} onClick={() => setOpen(p)} className="aspect-square rounded-xl overflow-hidden bg-accent">
               {p.photo_url && <img src={p.photo_url} alt={p.title} className="w-full h-full object-cover" />}
             </button>
           ))}
@@ -372,7 +372,7 @@ function ProjectView({ project, role, token, reload, guestName, shareProps }) {
       <div className="flex bg-card border border-border rounded-lg p-0.5">
         {tabs.map((t) => (
           <button key={t.id} onClick={() => setTab(t.id)}
-            className={`flex-1 flex items-center justify-center gap-1.5 text-[13px] font-medium min-h-[44px] rounded-md transition-colors ${tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
+            className={`flex-1 flex items-center justify-center gap-1.5 text-[13px] font-medium min-h-[44px] rounded-xl transition-colors ${tab === t.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
             <t.icon className="w-4 h-4" /> {t.label}
           </button>
         ))}

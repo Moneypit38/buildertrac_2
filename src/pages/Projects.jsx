@@ -55,7 +55,7 @@ export default function Projects() {
         <div className="flex gap-2 overflow-x-auto pb-1">
           {portfolios.map(p => (
             <button key={p} onClick={() => setFilter(p)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${filter === p ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${filter === p ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"}`}>
               {p}
             </button>
           ))}
@@ -75,7 +75,7 @@ export default function Projects() {
               {!isClientOnly && !p.portfolio && (
                 <button
                   onClick={() => setAssignProject(p)}
-                  className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs text-muted-foreground hover:text-primary border border-dashed border-border hover:border-primary/40 rounded-lg transition-colors"
+                  className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs text-muted-foreground hover:text-primary border border-dashed border-border hover:border-primary/40 rounded-xl transition-colors"
                 >
                   <Layers className="w-3 h-3" /> Assign to Portfolio
                 </button>

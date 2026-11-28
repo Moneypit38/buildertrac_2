@@ -166,7 +166,7 @@ function PortfolioFormDialog({ open, onClose, portfolio }) {
             <div className="flex gap-2 flex-wrap mt-1">
               {PORTFOLIO_COLORS.map(c => (
                 <button key={c.name} type="button" onClick={() => setForm(f => ({ ...f, color: c.name }))}
-                  className={`w-7 h-7 rounded-full ${c.solid} transition-all ${form.color === c.name ? "ring-2 ring-offset-2 ring-offset-background ring-foreground scale-110" : "opacity-60 hover:opacity-100"}`} />
+                  className={`w-7 h-7 rounded-xl ${c.solid} transition-all ${form.color === c.name ? "ring-2 ring-offset-2 ring-offset-background ring-foreground scale-110" : "opacity-60 hover:opacity-100"}`} />
               ))}
             </div>
           </div>
@@ -177,7 +177,7 @@ function PortfolioFormDialog({ open, onClose, portfolio }) {
                 const colorDef = getColor(form.color);
                 return (
                   <button key={name} type="button" onClick={() => setForm(f => ({ ...f, icon: name }))}
-                    className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all border ${form.icon === name ? `${colorDef.bg} ${colorDef.text} border-current` : "border-border text-muted-foreground hover:text-foreground hover:bg-accent"}`}>
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all border ${form.icon === name ? `${colorDef.bg} ${colorDef.text} border-current` : "border-border text-muted-foreground hover:text-foreground hover:bg-accent"}`}>
                     <Icon className="w-4 h-4" />
                   </button>
                 );
@@ -384,7 +384,7 @@ export default function Portfolios() {
                     {!isClientOnly && (
                       <button
                         onClick={() => setAssignProject(p)}
-                        className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary border border-border hover:border-primary/40 px-2 py-1 rounded-md transition-colors shrink-0"
+                        className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary border border-border hover:border-primary/40 px-2 py-1 rounded-xl transition-colors shrink-0"
                       >
                         <Layers className="w-3 h-3" /> Assign
                       </button>
