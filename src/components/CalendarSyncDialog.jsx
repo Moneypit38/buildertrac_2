@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CalendarPlus, Copy, RefreshCw } from "lucide-react";
+import { Copy, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 const HOST = "mybuildertrac.base44.app";
@@ -31,10 +31,7 @@ export default function CalendarSyncDialog({ open, onClose }) {
     })();
   }, [open, feed]);
 
-  const path = feed ? `${HOST}/functions/calendarFeed?token=${feed.token}` : "";
-  const httpsUrl = `https://${path}`;
-  const webcalUrl = `webcal://${path}`;
-  const googleUrl = `https://calendar.google.com/calendar/u/0/r?cid=${encodeURIComponent(webcalUrl)}`;
+  const httpsUrl = feed ? `https://${HOST}/functions/calendarFeed?token=${feed.token}` : "";
 
   const copy = async () => {
     try { await navigator.clipboard.writeText(httpsUrl); toast.success("Link copied"); }
@@ -52,27 +49,32 @@ export default function CalendarSyncDialog({ open, onClose }) {
     setBusy(false);
   };
 
-  const go = (url) => { window.open(url, "_blank") || (window.location.href = url); };
-
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-sm w-[calc(100vw-2rem)] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add to your calendar</DialogTitle>
+          <DialogTitle>Subscribe your phone's calendar</DialogTitle>
           <DialogDescription>
-            Tasks with due dates and appointments appear in your phone's calendar and update on their own. It's one-way: changes made in BuilderTrac show up there.
+            Your tasks with due dates and your appointments show up in your phone's calendar as a calendar called "BuilderTrac" and update on their own. It's one-way: changes made in BuilderTrac show up there.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-2">
-          <Button className="w-full h-11 justify-start gap-2" disabled={!feed} onClick={() => go(webcalUrl)}>
-            <CalendarPlus className="w-4 h-4" /> Add to Apple Calendar
+        <div className="space-y-3">
+          <Button className="w-full h-11 justify-start gap-2" disabled={!feed} onClick={copy}>
+            <Copy className="w-4 h-4" /> 1. Copy your calendar link
           </Button>
-          <Button variant="outline" className="w-full h-11 justify-start gap-2" disabled={!feed} onClick={() => go(googleUrl)}>
-            <CalendarPlus className="w-4 h-4" /> Add to Google Calendar
-          </Button>
-          <Button variant="outline" className="w-full h-11 justify-start gap-2" disabled={!feed} onClick={copy}>
-            <Copy className="w-4 h-4" /> Copy link
-          </Button>
+          <div className="rounded-lg border border-border p-3 text-sm space-y-1">
+            <p className="font-semibold">2. iPhone (Apple Calendar)</p>
+            <ol className="list-decimal pl-5 text-muted-foreground space-y-0.5">
+              <li>Open Settings, then Calendar, then Accounts</li>
+              <li>Add Account, then Other, then Add Subscribed Calendar</li>
+              <li>Paste the link in the Server box</li>
+              <li>Tap Next, then Save</li>
+            </ol>
+          </div>
+          <div className="rounded-lg border border-border p-3 text-sm space-y-1">
+            <p className="font-semibold">Google Calendar</p>
+            <p className="text-muted-foreground">The Google app can't add a link, so use a computer: open calendar.google.com, click + next to "Other calendars", choose "From URL", and paste the link. It then shows in the Google Calendar app too.</p>
+          </div>
         </div>
         <p className="text-xs text-muted-foreground">
           Apple updates about hourly. Google can take several hours. Tasks with no due date, and finished tasks, are left out.
