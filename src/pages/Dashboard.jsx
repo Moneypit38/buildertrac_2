@@ -5,6 +5,8 @@ import StatCards from "../components/StatCards";
 import ProjectCard from "../components/ProjectCard";
 import { HardHat, Layers, FolderPlus, Sparkles, UserPlus, Building2, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useUnreadDMs } from "@/hooks/useChatBadge";
+import { MessageCircle } from "lucide-react";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import { isUnseenRecent, useSeenIds } from "../lib/viewedContext";
 import { motion } from "framer-motion";
@@ -19,6 +21,7 @@ export default function Dashboard() {
   const { allowedProjectIds, isLoading: accessLoading } = useClientAccess();
   const { seenPhotoIds, seenDocIds } = useSeenIds();
   const qc = useQueryClient();
+  const unreadDMs = useUnreadDMs();
 
   const { refreshing, touchHandlers } = usePullToRefresh(() => qc.invalidateQueries());
   const { data: projects = [] } = useQuery({ queryKey: ["projects"], queryFn: () => base44.entities.Project.list() });
@@ -101,6 +104,32 @@ export default function Dashboard() {
         <p className="text-xs text-muted-foreground font-medium">Your Site Overview /</p>
         <h1 className="text-2xl font-extrabold font-display mt-0.5">Everything at a glance</h1>
       </motion.div>
+
+      {/* New direct messages: one tap opens that conversation */}
+      {unreadDMs.length > 0 && (
+        <div className="space-y-2">
+          {unreadDMs.slice(0, 3).map((dm) => (
+            <Link
+              key={`${dm.token || "me"}|${dm.withId}`}
+              to="/chat"
+              state={{ openDm: { token: dm.token, withId: dm.withId, name: dm.name } }}
+              className="w-full flex items-center gap-3 rounded-xl border border-yellow-300/60 bg-yellow-300/10 px-4 min-h-[56px] active:scale-[0.99] transition-transform"
+            >
+              <span className="relative shrink-0">
+                <MessageCircle className="w-6 h-6 text-yellow-300" />
+                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-yellow-300 ring-2 ring-background animate-pulse" />
+              </span>
+              <span className="flex-1 min-w-0">
+                <span className="block text-sm font-semibold truncate">New message from {dm.name}</span>
+                <span className="block text-[11px] text-muted-foreground">Tap to open</span>
+              </span>
+            </Link>
+          ))}
+          {unreadDMs.length > 3 && (
+            <Link to="/chat" className="block text-center text-xs text-primary font-semibold py-1">+{unreadDMs.length - 3} more unread</Link>
+          )}
+        </div>
+      )}
 
       {isNewUser && (
         <motion.div {...fadeUp(0.07)} className="bg-card border border-border rounded-2xl p-6">
