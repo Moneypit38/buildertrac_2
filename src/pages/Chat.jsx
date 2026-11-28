@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import ChatHub from "@/components/ChatHub";
@@ -12,6 +13,11 @@ export default function Chat() {
   ];
   const [sel, setSel] = useState("mine");
   const src = sources.find((s) => s.key === sel) || sources[0];
+
+  // Arriving from the Home alert: jump to the right team, then straight into that direct message.
+  const openDm = useLocation().state?.openDm || null;
+  const target = openDm ? (openDm.token ? jobs.find((j) => j.token === openDm.token)?.id : "mine") : null;
+  useEffect(() => { if (target) setSel(target); }, [target]);
 
   return (
     <div className="p-4 max-w-2xl mx-auto space-y-4">
@@ -29,7 +35,7 @@ export default function Chat() {
           ))}
         </div>
       )}
-      <ChatHub key={src.key} token={src.token} isOwner={src.owner} />
+      <ChatHub key={src.key} token={src.token} isOwner={src.owner} openDm={openDm && (openDm.token || null) === src.token ? openDm : null} />
     </div>
   );
 }
