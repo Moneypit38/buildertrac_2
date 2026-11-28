@@ -1,0 +1,90 @@
+{
+  "name": "LogEntry",
+  "properties": {
+    "author_email": {
+      "type": "string"
+    },
+    "author_name": {
+      "type": "string"
+    },
+    "follow_up_task_id": {
+      "description": "Task created from this entry's follow-up, if any",
+      "type": "string"
+    },
+    "occurred_at": {
+      "description": "When it happened, local date and time like 2026-11-27T14:30",
+      "type": "string"
+    },
+    "owner_id": {
+      "description": "Account owner's user id; set when a guest adds an entry via a share link",
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "share_with_customer": {
+      "default": false,
+      "description": "Customers can only see entries with this on",
+      "type": "boolean"
+    },
+    "summary": {
+      "description": "What was discussed",
+      "type": "string"
+    },
+    "type": {
+      "default": "Call",
+      "enum": [
+        "Call",
+        "Meeting",
+        "Site visit",
+        "Text/Email",
+        "Decision"
+      ],
+      "type": "string"
+    },
+    "with_whom": {
+      "description": "Who the conversation was with",
+      "type": "string"
+    }
+  },
+  "required": [
+    "project_id",
+    "summary"
+  ],
+  "rls": {
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.owner_id": "{{user.id}}"
+        }
+      ]
+    }
+  },
+  "type": "object"
+}
