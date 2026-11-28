@@ -15,6 +15,26 @@ export async function deleteProjectCascade(projectId) {
   await e.Project.delete(projectId);
 }
 
+// Deleting a portfolio deletes every project in it (and everything under them), its team and its invite links.
+// Deleting a single project never touches its portfolio.
+export async function deletePortfolioCascade(portfolio) {
+  const e = base44.entities;
+  const projects = await e.Project.list("-created_date", 5000);
+  for (const p of projects.filter((p) => p.portfolio === portfolio.name)) await deleteProjectCascade(p.id);
+  const members = await e.PortfolioMember.filter({ portfolio_id: portfolio.id });
+  for (const m of members) await e.PortfolioMember.delete(m.id);
+  const links = await e.ShareLink.list("-created_date", 5000);
+  for (const l of links) {
+    if (l.portfolio_id === portfolio.id || (l.portfolio_name && l.portfolio_name === portfolio.name)) await e.ShareLink.delete(l.id);
+  }
+  await e.Portfolio.delete(portfolio.id);
+}
+
+export function portfolioWarning(name, projectCount = 0) {
+  const jobs = projectCount ? `${projectCount} project${projectCount === 1 ? "" : "s"} (with all their tasks, appointments, messages, documents and photos)` : "any projects in it";
+  return `This permanently deletes the portfolio "${name}" along with ${jobs}, its team and its invite links. This cannot be undone.`;
+}
+
 export function deleteWarning(name, counts = {}) {
   const bits = [
     counts.tasks && `${counts.tasks} task${counts.tasks === 1 ? "" : "s"}`,
