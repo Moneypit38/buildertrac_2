@@ -70,6 +70,7 @@ function Thread({ token, me, target, onBack }) {
   const [sending, setSending] = useState(false);
   const bottomRef = useRef(null);
   const lastIdRef = useRef(null);
+  const badgeRef = useRef(null);
   const key = target.kind === "team" ? `team|${target.room}` : `dm|${target.with}`;
   const params = target.kind === "team" ? { kind: "team", room: target.room } : { kind: "dm", with: target.with };
 
@@ -82,7 +83,7 @@ function Thread({ token, me, target, onBack }) {
         if (last && lastIdRef.current && last.id !== lastIdRef.current && !last.mine) playChime();
         if (last) lastIdRef.current = last.id;
         markSeen(me.id, key, last?.created_date);
-        qc.invalidateQueries({ queryKey: ["chatBadge"] }); // clears the Home alert right away
+        if (badgeRef.current !== last?.id) { badgeRef.current = last?.id; qc.invalidateQueries({ queryKey: ["chatBadge"] }); } // clears the Home alert right away
       }
     } catch { /* keep what we have */ }
   }, [token, key]); // eslint-disable-line react-hooks/exhaustive-deps
