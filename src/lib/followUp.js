@@ -9,6 +9,10 @@ export const ESTIMATE_STOP_DAYS = 21; // stop nagging after this
 export const QUIET_DAYS = { "In Progress": 7, "On Hold": 14, "Completed": 90 };
 const MIN_GAP_DAYS = 2; // never remind within 2 days of the last contact
 
+const dayStart = (t) => { const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); };
+// Whole calendar days from today until the due date (negative = overdue).
+export const dayDiff = (dueAt, now = Date.now()) => Math.round((dayStart(dueAt) - dayStart(now)) / DAY);
+
 const when = (e) => new Date(e.occurred_at || e.created_date).getTime();
 
 // The follow-up plan for one job, due or not yet. null when reminders don't apply.
@@ -37,7 +41,7 @@ export function planFor(project, entries, now = Date.now()) {
     dueAt = baseline + gap * DAY;
   }
   const since = last ?? created;
-  return { project, status, step, dueAt, isDue: dueAt <= now, hasContact: last !== null, daysSince: Math.max(0, Math.floor((now - since) / DAY)) };
+  return { project, status, step, dueAt, isDue: dayDiff(dueAt, now) <= 0, hasContact: last !== null, daysSince: Math.max(0, Math.floor((now - since) / DAY)) };
 }
 
 export function followUpFor(project, entries, now = Date.now()) {
@@ -55,8 +59,17 @@ export function computeUpcoming(projects, entries, now = Date.now()) {
 }
 
 export function inDays(dueAt, now = Date.now()) {
-  const d = Math.max(1, Math.ceil((dueAt - now) / DAY));
+  const d = Math.max(1, dayDiff(dueAt, now));
   return d === 1 ? "tomorrow" : `in ${d} days`;
+}
+
+// Countdown shown on each job: "Follow up in 3 days", "tomorrow", "today", or overdue.
+export function countdown(plan, now = Date.now()) {
+  const d = dayDiff(plan.dueAt, now);
+  if (d > 1) return { text: `Follow up in ${d} days`, tone: d <= 2 ? "soon" : "later" };
+  if (d === 1) return { text: "Follow up tomorrow", tone: "soon" };
+  if (d === 0) return { text: "Follow up today", tone: "due" };
+  return { text: `Follow up ${-d} day${d === -1 ? "" : "s"} overdue`, tone: "due" };
 }
 
 const LINES = {
