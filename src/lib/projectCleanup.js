@@ -1,7 +1,7 @@
 import { base44 } from "@/api/base44Client";
 
 // Everything that hangs off a project. Deleting a project deletes all of this too.
-const CHILDREN = ["Task", "Appointment", "Note", "Document", "SitePhoto", "ProjectMember"];
+const CHILDREN = ["Task", "Appointment", "Note", "Document", "SitePhoto", "ProjectMember", "LogEntry"];
 
 export async function deleteProjectCascade(projectId) {
   const e = base44.entities;
@@ -43,7 +43,7 @@ export function deleteWarning(name, counts = {}) {
     counts.docs && `${counts.docs} document${counts.docs === 1 ? "" : "s"}`,
   ].filter(Boolean);
   const list = bits.length ? `${bits.join(", ")}, plus ` : "";
-  return `This permanently deletes "${name}" along with ${list}its appointments, team members and invite links. This cannot be undone.`;
+  return `This permanently deletes "${name}" along with ${list}its appointments, call log, team members and invite links. This cannot be undone.`;
 }
 
 // Finds records whose project no longer exists (left behind by earlier deletions).
@@ -71,5 +71,6 @@ export const orphanLabel = (name, r) =>
   name === "Appointment" ? `Appointment: ${r.title}` :
   name === "Note" ? `Message: ${String(r.content || "").slice(0, 40)}` :
   name === "Document" ? `Document: ${r.name}` :
+  name === "LogEntry" ? `Log: ${r.type} ${r.with_whom || ""}` :
   name === "SitePhoto" ? `Photo: ${r.title}` :
   `Team member: ${r.user_name || r.user_email}`;
