@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import RowMenu from "@/components/RowMenu";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -63,6 +63,11 @@ export default function ProjectDetail() {
   const [showEditProject, setShowEditProject] = useState(false);
   const [activeTab, setActiveTab] = useState(tabParam === "appointments" ? "log" : (tabParam || "tasks"));
   const [showLog, setShowLog] = useState(false);
+  const tabsRef = useRef(null);
+  const openHistory = () => {
+    setActiveTab("log");
+    setTimeout(() => tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+  };
   const { data: logEntries = [] } = useLogEntries(projectId);
   const lastLog = [...logEntries].sort((a, b) => (b.occurred_at || b.created_date || "").localeCompare(a.occurred_at || a.created_date || ""))[0];
   const [openInvite, setOpenInvite] = useState(false);
@@ -116,11 +121,11 @@ export default function ProjectDetail() {
             <Button className="h-12 gap-2 text-sm font-semibold" onClick={() => setShowLog(true)}>
               <NotebookPen className="w-4 h-4" /> Log a call or meeting
             </Button>
-            <Button variant={activeTab === "log" ? "default" : "outline"} className="h-12 gap-2 text-sm font-semibold px-4" onClick={() => setActiveTab("log")}>
+            <Button variant={activeTab === "log" ? "default" : "outline"} className="h-12 gap-2 text-sm font-semibold px-4" onClick={openHistory}>
               <History className="w-4 h-4" /> History{logEntries.length > 0 ? ` (${logEntries.length})` : ""}
             </Button>
           </div>
-          <button type="button" onClick={() => setActiveTab("log")} className="w-full text-left mt-1.5 min-h-[32px] text-xs text-muted-foreground truncate">
+          <button type="button" onClick={openHistory} className="w-full text-left mt-1.5 min-h-[32px] text-xs text-muted-foreground truncate">
             {lastLog
               ? `Last: ${lastLog.type}${lastLog.with_whom ? ` with ${lastLog.with_whom}` : ""}, ${formatWhen(lastLog.occurred_at, lastLog.created_date)}`
               : "Nothing logged yet"}
@@ -143,7 +148,7 @@ export default function ProjectDetail() {
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs ref={tabsRef} value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full h-auto bg-card border border-border p-1 flex gap-0.5">
           <TabsTrigger value="tasks" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px]"><ClipboardList className="w-4 h-4" /><span>Tasks</span></TabsTrigger>
           <TabsTrigger value="docs" className="flex-1 flex-col gap-0.5 text-[11px] px-0.5 py-1.5 min-h-[48px]"><FileText className="w-4 h-4" /><span>Docs</span></TabsTrigger>
