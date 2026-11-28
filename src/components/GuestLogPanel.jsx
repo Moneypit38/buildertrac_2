@@ -29,11 +29,12 @@ export default function GuestLogPanel({ project, canAdd, canDelete, onAdd, onDel
     <div className="space-y-3">
       {canAdd && (open ? (
         <div className="bg-accent/40 border border-border rounded-xl p-3 space-y-2">
-          <div className="flex flex-wrap gap-2">
-            {LOG_TYPES.map((t) => (
+          <div className="grid grid-cols-6 gap-2">
+            {LOG_TYPES.map((t, i) => (
               <button key={t.id} type="button" onClick={() => setType(t.id)}
-                className={`inline-flex items-center gap-1.5 min-h-[44px] px-3 rounded-xl border text-sm font-medium ${type === t.id ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-muted-foreground"}`}>
-                <t.icon className="w-4 h-4" /> {t.id}
+                className={`${i < 3 ? "col-span-2" : "col-span-3"} flex flex-col items-center justify-center gap-1 min-h-[60px] px-1 rounded-xl border text-[13px] font-medium text-center ${type === t.id ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-muted-foreground"}`}>
+                <t.icon className="w-5 h-5" />
+                <span className="leading-tight">{t.id}</span>
               </button>
             ))}
           </div>
