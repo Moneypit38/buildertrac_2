@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, MapPin, ClipboardList, FileText, Camera, DollarSign, Users, MessageSquare, CalendarClock, UserPlus } from "lucide-react";
 
 import { toast } from "sonner";
+import { deleteProjectCascade, deleteWarning } from "@/lib/projectCleanup";
 import { markViewed } from "../hooks/useLastViewed";
 import ProjectMembersTab from "../components/ProjectMembersTab";
 import NotesTab from "../components/NotesTab";
@@ -64,8 +65,8 @@ export default function ProjectDetail() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const deleteProject = useMutation({
-    mutationFn: () => base44.entities.Project.delete(projectId),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["projects"] }); toast.success("Project deleted"); navigate("/"); },
+    mutationFn: () => deleteProjectCascade(projectId),
+    onSuccess: () => { qc.invalidateQueries(); toast.success("Project deleted"); navigate("/"); },
   });
 
 
@@ -99,7 +100,7 @@ export default function ProjectDetail() {
                   editLabel="Edit project"
                   deleteLabel="Delete project"
                   deleteTitle="Delete project?"
-                  deleteText={`This will permanently delete "${project.name}" and cannot be undone.`}
+                  deleteText={deleteWarning(project.name, { tasks: tasks.length, notes: notes.length, photos: photos.length, docs: docs.length })}
                 />
               </div>
             )}
