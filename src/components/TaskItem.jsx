@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Calendar, ChevronDown, Pencil, Trash2, MoreHorizontal } from "lucide-react";
+import { Calendar, CalendarPlus, ChevronDown, Pencil, Trash2, MoreHorizontal } from "lucide-react";
+import { toEvent, googleUrl, shareIcs } from "@/lib/calendarExport";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { isNew } from "../hooks/useLastViewed";
@@ -208,6 +209,22 @@ export default function TaskItem({ task, onExpand, expanded, onEdit }) {
                 style={{ ...tapStyle, flex: 1, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 10, border: "1px solid hsl(var(--border))", fontSize: 13, fontWeight: 600, color: "hsl(var(--destructive))" }}
               >
                 <Trash2 size={15} /> Delete
+              </div>
+            </div>
+          )}
+          {showActions && task.due_date && (
+            <div style={{ display: "flex", gap: 8, marginTop: 8 }} onClick={(e) => e.stopPropagation()}>
+              <div
+                onClick={(e) => { e.stopPropagation(); setShowActions(false); window.open(googleUrl(toEvent(task, "task")), "_blank"); }}
+                style={{ ...tapStyle, flex: 1, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 10, border: "1px solid hsl(var(--border))", fontSize: 13, fontWeight: 600, color: "hsl(var(--foreground))" }}
+              >
+                <CalendarPlus size={15} /> Google Cal
+              </div>
+              <div
+                onClick={(e) => { e.stopPropagation(); setShowActions(false); shareIcs(toEvent(task, "task")); }}
+                style={{ ...tapStyle, flex: 1, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 10, border: "1px solid hsl(var(--border))", fontSize: 13, fontWeight: 600, color: "hsl(var(--foreground))" }}
+              >
+                <CalendarPlus size={15} /> Apple Cal
               </div>
             </div>
           )}
