@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Plus, CalendarClock, Clock, MapPin, Users } from "lucide-react";
+import { Plus, CalendarClock, CalendarPlus, Clock, MapPin, Users } from "lucide-react";
+import { toEvent, googleUrl, shareIcs } from "@/lib/calendarExport";
 import CreateAppointmentDialog from "./CreateAppointmentDialog";
 import { toast } from "sonner";
 import RowMenu from "@/components/RowMenu";
@@ -87,6 +88,10 @@ export default function AppointmentsTab({ projectId, canDelete, highlightApptId 
           </div>
           <div className="flex items-center flex-shrink-0 pr-1">
             <RowMenu
+              extraItems={[
+                { label: "Add to Google Calendar", icon: <CalendarPlus className="w-4 h-4" />, onSelect: () => window.open(googleUrl(toEvent(appt, "appt")), "_blank") },
+                { label: "Add to Apple Calendar", icon: <CalendarPlus className="w-4 h-4" />, onSelect: () => shareIcs(toEvent(appt, "appt")) },
+              ]}
               onEdit={() => { setEditAppt(appt); setShowDialog(true); }}
               onDelete={canDelete ? () => deleteAppt.mutate(appt.id) : undefined}
               editLabel="Edit appointment"
