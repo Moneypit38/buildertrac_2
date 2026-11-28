@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Lock, PhoneCall, AlertTriangle } from "lucide-react";
 import { useClientAccess } from "@/hooks/useClientAccess";
 import { useAllLogEntries } from "@/hooks/useFollowUps";
-import { computeFollowUps } from "@/lib/followUp";
+import { planFor, countdown } from "@/lib/followUp";
 
 const STATUSES = ["Planning", "In Progress", "On Hold", "Completed"];
 const LABEL = { Planning: "Estimates", "In Progress": "In progress", "On Hold": "On hold", Completed: "Completed" };
@@ -38,7 +38,6 @@ export default function OwnerReport() {
   const data = useMemo(() => {
     const now = Date.now();
     const today = new Date().toLocaleDateString("en-CA");
-    const due = new Map(computeFollowUps(projects, entries, now).map((f) => [f.project.id, f]));
     const lastContact = {};
     for (const e of entries) {
       const t = new Date(e.occurred_at || e.created_date).getTime();
@@ -49,7 +48,7 @@ export default function OwnerReport() {
       if (!t.completed && t.status !== "Done" && t.due_date && t.due_date < today) overdue[t.project_id] = (overdue[t.project_id] || 0) + 1;
     }
     const rows = projects.map((p) => ({
-      p, status: p.status || "Planning", followUp: due.get(p.id),
+      p, status: p.status || "Planning", plan: planFor(p, entries, now),
       daysAgo: lastContact[p.id] ? Math.floor((now - lastContact[p.id]) / DAY) : null,
       overdue: overdue[p.id] || 0,
     }));
@@ -58,7 +57,7 @@ export default function OwnerReport() {
     const loose = rows.filter((r) => !names.includes(r.p.portfolio));
     if (loose.length) groups.push({ name: "No portfolio", rows: loose });
     const count = (s) => rows.filter((r) => r.status === s).length;
-    return { groups, count, total: rows.length, needFollowUp: due.size, overdueJobs: rows.filter((r) => r.overdue > 0).length };
+    return { groups, count, total: rows.length, needFollowUp: rows.filter((r) => r.plan?.isDue).length, overdueJobs: rows.filter((r) => r.overdue > 0).length };
   }, [portfolios, projects, tasks, entries]);
 
   if (isLoading) return <div className="flex justify-center py-16"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
@@ -100,7 +99,7 @@ export default function OwnerReport() {
               <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5 text-[11px] text-muted-foreground">
                 <span>{r.daysAgo === null ? "No contact logged" : r.daysAgo === 0 ? "Contacted today" : `Last contact ${r.daysAgo}d ago`}</span>
                 {r.overdue > 0 && <span className="text-orange-400 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> {r.overdue} overdue task{r.overdue === 1 ? "" : "s"}</span>}
-                {r.followUp && <span className="text-primary font-semibold flex items-center gap-1"><PhoneCall className="w-3 h-3" /> Follow up</span>}
+                {r.plan && <span className={`font-semibold flex items-center gap-1 ${r.plan.isDue ? "text-primary" : ""}`}><PhoneCall className="w-3 h-3" /> {countdown(r.plan).text}</span>}
               </div>
             </Link>
           ))}
