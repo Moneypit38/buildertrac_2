@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { LogOut, Trash2, Sun, Moon, Database, AlertTriangle, ChevronRight } from "lucide-react";
+import { LogOut, Trash2, Sun, Moon, Database, AlertTriangle, ChevronRight, BarChart3 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useClientAccess } from "@/hooks/useClientAccess";
 import ColorThemePicker from "@/components/ColorThemePicker";
 import PartnerLogoSettings from "@/components/PartnerLogoSettings";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -17,6 +19,8 @@ import OrphanCleanup from "@/components/OrphanCleanup";
 export default function SettingsSheet({ user }) {
   const { theme, setTheme } = useTheme();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const { isClientOnly } = useClientAccess();
   const [open, setOpen] = useState(false);
   const [showClearDataDialog, setShowClearDataDialog] = useState(false);
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
@@ -89,6 +93,25 @@ export default function SettingsSheet({ user }) {
             <div className="border-t border-border" />
 
             <div className="space-y-2">
+              {!isClientOnly && (
+                <>
+                  <button
+                    onClick={() => { setOpen(false); navigate("/report"); }}
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-accent transition-colors min-h-[52px]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <BarChart3 className="w-4 h-4 text-primary" />
+                      <div className="text-left">
+                        <p className="text-sm font-medium">Business report</p>
+                        <p className="text-xs text-muted-foreground">Portfolios, jobs and status</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                  <div className="border-t border-border" />
+                </>
+              )}
+
               {/* Theme toggle */}
               <button
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
