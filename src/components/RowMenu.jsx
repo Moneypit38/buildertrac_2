@@ -6,7 +6,7 @@ import IconButton from "./IconButton";
 
 // One "⋯" button that opens a menu with Edit and Delete (delete asks for confirmation).
 // Replaces rows of tiny pencil / trash icons that were hard to hit on a phone.
-export default function RowMenu({ onEdit, onDelete, deleteTitle = "Delete this?", deleteText = "This cannot be undone.", editLabel = "Edit", deleteLabel = "Delete" }) {
+export default function RowMenu({ extraItems = [], onEdit, onDelete, deleteTitle = "Delete this?", deleteText = "This cannot be undone.", editLabel = "Edit", deleteLabel = "Delete" }) {
   const [confirming, setConfirming] = useState(false);
   return (
     <div onClick={(e) => e.stopPropagation()}>
@@ -15,6 +15,11 @@ export default function RowMenu({ onEdit, onDelete, deleteTitle = "Delete this?"
           <IconButton aria-label="More actions"><MoreHorizontal className="w-5 h-5" /></IconButton>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-[10rem]">
+          {extraItems.map((it) => (
+            <DropdownMenuItem key={it.label} className="min-h-[44px] text-sm gap-2" onSelect={() => it.onSelect()}>
+              {it.icon} {it.label}
+            </DropdownMenuItem>
+          ))}
           {onEdit && (
             <DropdownMenuItem className="min-h-[44px] text-sm gap-2" onSelect={() => onEdit()}>
               <Pencil className="w-4 h-4" /> {editLabel}
