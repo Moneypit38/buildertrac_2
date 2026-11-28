@@ -11,6 +11,7 @@ import { Plus, FolderKanban, Layers } from "lucide-react";
 import TeamMemberGate from "@/components/TeamMemberGate";
 import { useSharedJobs } from "@/hooks/useSharedJobs";
 import { SharedProjectCards } from "@/components/SharedCards";
+import { deleteProjectCascade } from "@/lib/projectCleanup";
 
 
 export default function Projects() {
@@ -25,8 +26,8 @@ export default function Projects() {
   const [filter, setFilter] = useState("All");
   const [assignProject, setAssignProject] = useState(null);
   const deleteProject = useMutation({
-    mutationFn: (id) => base44.entities.Project.delete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["projects"] }),
+    mutationFn: (id) => deleteProjectCascade(id),
+    onSuccess: () => qc.invalidateQueries(),
   });
 
   const visibleProjects = allowedProjectIds
