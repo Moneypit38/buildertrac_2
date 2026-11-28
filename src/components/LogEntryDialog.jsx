@@ -76,14 +76,15 @@ export default function LogEntryDialog({ open, onClose, projectId, entry, defaul
           <DialogTitle>{entry ? "Edit entry" : "Log a call or meeting"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
-          <div className="flex flex-wrap gap-2">
-            {LOG_TYPES.map((t) => {
+          <div className="grid grid-cols-6 gap-2">
+            {LOG_TYPES.map((t, i) => {
               const Icon = t.icon;
               const on = type === t.id;
               return (
                 <button key={t.id} type="button" onClick={() => setType(t.id)}
-                  className={`inline-flex items-center gap-1.5 min-h-[44px] px-3 rounded-xl border text-sm font-medium transition-colors ${on ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-muted-foreground"}`}>
-                  <Icon className="w-4 h-4" /> {t.id}
+                  className={`${i < 3 ? "col-span-2" : "col-span-3"} flex flex-col items-center justify-center gap-1 min-h-[60px] px-1 rounded-xl border text-[13px] font-medium text-center transition-colors ${on ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-muted-foreground"}`}>
+                  <Icon className="w-5 h-5" />
+                  <span className="leading-tight">{t.id}</span>
                 </button>
               );
             })}
