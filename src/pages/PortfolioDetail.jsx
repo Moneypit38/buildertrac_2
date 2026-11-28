@@ -84,8 +84,8 @@ export default function PortfolioDetail() {
   const [inviteOpen, setInviteOpen] = useState(false);
 
   const deletePortfolio = useMutation({
-    mutationFn: () => base44.entities.Portfolio.delete(portfolioId),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["portfolios"] }); toast.success("Portfolio deleted"); navigate("/portfolios"); },
+    mutationFn: () => deletePortfolioCascade(portfolio),
+    onSuccess: () => { qc.invalidateQueries(); toast.success("Portfolio deleted"); navigate("/portfolios"); },
   });
 
   if (pfLoading) return (
@@ -225,7 +225,7 @@ export default function PortfolioDetail() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete portfolio?</AlertDialogTitle>
-            <AlertDialogDescription>This only removes the portfolio label — projects won't be deleted.</AlertDialogDescription>
+            <AlertDialogDescription>{portfolioWarning(portfolio.name, pfProjects.length)}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
